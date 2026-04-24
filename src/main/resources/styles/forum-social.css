@@ -1,0 +1,162 @@
+/* Forum / social feed look — inspired by modern social apps, green brand accent */
+
+.root-dialog {
+    -fx-background-color: linear-gradient(to bottom, #f8fafc 0%, #f0fdf4 55%, #ecfdf5 100%);
+}
+
+.social-feed-root {
+    -fx-background-color: #f0f2f5;
+}
+
+.social-hero {
+    /* JavaFX: pas de “135deg” — utiliser to bottom / to right */
+    -fx-background-color: linear-gradient(to bottom right, #166534, #15803d, #0f766e);
+    -fx-background-radius: 14;
+    -fx-padding: 18 22;
+    -fx-effect: dropshadow(gaussian, #064e3b, 16, 0.25, 0, 4);
+}
+
+.social-hero-emoji {
+    -fx-font-size: 28px;
+    -fx-padding: 0 12 0 0;
+}
+
+.social-hero-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.social-hero-sub {
+    -fx-text-fill: #ecfdf5;
+    -fx-font-size: 13px;
+    -fx-wrap-text: true;
+}
+
+.social-hero-meta {
+    -fx-text-fill: #a7f3d0;
+    -fx-font-size: 11px;
+}
+
+/* Feed-style tables (topics + replies) */
+.table-feed {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.table-feed .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, #14532d, #0f3d24);
+    -fx-background-radius: 10 10 0 0;
+}
+
+.table-feed .column-header,
+.table-feed .filler {
+    -fx-size: 44px;
+}
+
+.table-feed .column-header .label {
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.table-feed .table-row-cell {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10;
+    -fx-border-color: #e4e6eb;
+    -fx-border-radius: 10;
+    -fx-background-insets: 2;
+    -fx-border-width: 1;
+    -fx-padding: 4 2;
+}
+
+.table-feed .table-row-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.table-feed .table-row-cell:hover {
+    -fx-background-color: #f0fdf4;
+}
+
+.table-feed .table-row-cell:selected {
+    -fx-background-color: #dcfce7;
+    -fx-border-color: #86efac;
+}
+
+.table-feed .table-cell {
+    -fx-padding: 12 14;
+    -fx-border-color: transparent;
+}
+
+.table-feed .table-view:focused .table-row-cell:selected {
+    -fx-background-color: #bbf7d0;
+}
+
+/* Avatar chip in “From” column */
+.avatar-chip {
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-alignment: center;
+    -fx-background-color: linear-gradient(to bottom right, #22c55e, #15803d);
+    -fx-background-radius: 20;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.member-block {
+    -fx-spacing: 2;
+}
+
+.member-name {
+    -fx-text-fill: #14532d;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.member-hint {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 11px;
+}
+
+.col-message {
+    -fx-text-fill: #1e293b;
+    -fx-font-size: 13px;
+}
+
+.col-date {
+    -fx-text-fill: #475569;
+    -fx-font-size: 12px;
+}
+
+.col-date-muted {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+    -fx-font-style: italic;
+}
+
+.btn-feed-action {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #cbd5e1;
+    -fx-text-fill: #334155;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-padding: 5 12;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-cursor: hand;
+}
+
+.btn-feed-action:hover {
+    -fx-background-color: #e2e8f0;
+    -fx-border-color: #94a3b8;
+}
+
+/* Fond liste sujets / formulaire : définitions dans afficher-topic.css et ajouter-topic.css */
+
+.root-form.social-skin {
+    -fx-background-color: linear-gradient(to bottom, #ecfdf5 0%, #f0f2f5 50%, #e8f5e9 100%);
+}

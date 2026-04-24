@@ -1,0 +1,239 @@
+/*
+ * Thème unifié « vrai réseau social » — cartes publication, barres, badges.
+ * À charger après les autres feuilles (app.css).
+ */
+
+/* ——— Fenêtre publication / message (détail) ——— */
+.social-post-root {
+    -fx-background-color: #e8ecf1;
+}
+
+.social-post-topbar {
+    -fx-background-color: linear-gradient(to right, #064e3b, #0f766e);
+    -fx-padding: 12 18;
+    -fx-alignment: center-left;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 8, 0.2, 0, 2);
+}
+
+.social-post-topbar-title {
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-letter-spacing: 0.5px;
+}
+
+.sm-topbar-close {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 700;
+    -fx-font-size: 12px;
+    -fx-padding: 8 18;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-border-color: rgba(255, 255, 255, 0.35);
+    -fx-cursor: hand;
+}
+
+.sm-topbar-close:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.28);
+}
+
+.social-post-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 16 18 20 18;
+}
+
+.social-post-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.sm-post-outer {
+    -fx-max-width: 640;
+    -fx-padding: 0 0 8 0;
+}
+
+.sm-post-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 16;
+    -fx-padding: 20 22 18 22;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.12), 24, 0.2, 0, 4);
+    -fx-border-color: rgba(226, 232, 240, 0.95);
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+}
+
+.sm-post-author-row {
+    -fx-spacing: 14;
+    -fx-alignment: top-left;
+    -fx-padding: 0 0 4 0;
+}
+
+.sm-avatar {
+    -fx-min-width: 48px;
+    -fx-min-height: 48px;
+    -fx-max-width: 48px;
+    -fx-max-height: 48px;
+    -fx-alignment: center;
+    -fx-background-color: linear-gradient(to bottom right, #10b981, #059669);
+    -fx-background-radius: 24;
+    -fx-effect: dropshadow(gaussian, rgba(5, 150, 105, 0.35), 6, 0.3, 0, 1);
+}
+
+.sm-avatar-label {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.sm-kicker {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-letter-spacing: 0.8px;
+}
+
+.sm-post-headline {
+    -fx-text-fill: #0f172a;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+    -fx-padding: 2 0 0 0;
+}
+
+.sm-badges-row {
+    -fx-spacing: 8;
+    -fx-padding: 12 0 4 0;
+    -fx-alignment: center-left;
+    -fx-wrap-text: true;
+}
+
+.sm-badge {
+    -fx-background-radius: 20;
+    -fx-padding: 6 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
+.sm-badge-pending {
+    -fx-background-color: #fef3c7;
+    -fx-text-fill: #b45309;
+}
+
+.sm-badge-accepted {
+    -fx-background-color: #d1fae5;
+    -fx-text-fill: #047857;
+}
+
+.sm-badge-refused {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #b91c1c;
+}
+
+.sm-badge-neutral {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
+}
+
+.sm-badge-muted {
+    -fx-background-color: #f8fafc;
+    -fx-text-fill: #94a3b8;
+    -fx-font-style: italic;
+    -fx-font-weight: 600;
+}
+
+.sm-post-divider {
+    -fx-padding: 12 0 8 0;
+}
+
+.sm-post-body-label {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 0 0 6 2;
+}
+
+.sm-post-textarea {
+    -fx-background-color: #f8fafc;
+    -fx-control-inner-background: #f8fafc;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 14 16;
+    -fx-font-size: 15px;
+    -fx-text-fill: #1e293b;
+    -fx-line-spacing: 4px;
+}
+
+.sm-post-textarea .content {
+    -fx-background-color: #f8fafc;
+}
+
+.sm-post-footer {
+    -fx-padding: 16 0 0 0;
+    -fx-alignment: center-right;
+}
+
+.sm-btn-foot-primary {
+    -fx-background-color: linear-gradient(to bottom, #059669, #047857);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 700;
+    -fx-font-size: 13px;
+    -fx-padding: 10 28;
+    -fx-background-radius: 24;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(4, 120, 87, 0.25), 8, 0.25, 0, 2);
+}
+
+.sm-btn-foot-primary:hover {
+    -fx-background-color: linear-gradient(to bottom, #10b981, #059669);
+}
+
+/* ——— Alertes suppression type « modal » pro ——— */
+.sm-modal-shell {
+    -fx-background-color: linear-gradient(to bottom, #f1f5f9, #ecfdf5);
+}
+
+.sm-alert-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 18;
+    -fx-padding: 22 26;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.1), 20, 0.2, 0, 4);
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 18;
+    -fx-border-width: 1;
+}
+
+.sm-alert-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+/* ——— Fil réponses (page principale) ——— */
+.social-feed-root {
+    -fx-background-color: linear-gradient(to bottom, #ecfdf5 0%, #f1f5f9 45%, #f8fafc 100%);
+}
+
+.social-hero-v2 {
+    -fx-background-color: linear-gradient(to bottom right, #064e3b 0%, #0f766e 50%, #0d9488 100%);
+    -fx-background-radius: 18;
+    -fx-padding: 22 26;
+    -fx-effect: dropshadow(gaussian, rgba(6, 78, 59, 0.38), 22, 0.28, 0, 5);
+}
+
+.card-reponse-feed-v2 {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 18;
+    -fx-padding: 18 22 22 22;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 18, 0.2, 0, 3);
+    -fx-border-color: rgba(226, 232, 240, 0.9);
+    -fx-border-radius: 18;
+    -fx-border-width: 1;
+}
+
+.feed-section-title-v2 {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f3d2e;
+}

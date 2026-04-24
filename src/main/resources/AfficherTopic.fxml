@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="640.0" prefWidth="1024.0" styleClass="root-afficher social-skin" stylesheets="@app.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.AfficherTopic">
+    <children>
+        <VBox spacing="14.0" AnchorPane.bottomAnchor="18.0" AnchorPane.leftAnchor="18.0" AnchorPane.rightAnchor="18.0" AnchorPane.topAnchor="18.0">
+            <padding>
+                <Insets bottom="6.0" left="6.0" right="6.0" top="6.0" />
+            </padding>
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="topics-hero">
+                    <children>
+                        <Label styleClass="topics-hero-emoji" text="💬" />
+                        <Label styleClass="topics-hero-title" text="Topics" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#goToAdd" styleClass="btn-nav-accent" text="New topic" />
+                        <Button mnemonicParsing="false" onAction="#refresh" styleClass="btn-refresh" text="Refresh" />
+                    </children>
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="search-panel">
+                    <children>
+                        <TextField fx:id="searchField" HBox.hgrow="ALWAYS" promptText="Search by title/content/category..." styleClass="search-input" />
+                        <ComboBox fx:id="statusFilter" prefWidth="180.0" styleClass="filter-combo" />
+                        <Button mnemonicParsing="false" onAction="#resetFilters" styleClass="btn-filter-reset" text="Reset" />
+                    </children>
+                </HBox>
+
+                <Label fx:id="lblResultCount" styleClass="search-count-badge" text="0 shown · 0 total" />
+
+                <ScrollPane fx:id="feedScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="topic-feed-scroll" VBox.vgrow="ALWAYS">
+                    <content>
+                        <VBox fx:id="topicsFeedBox" spacing="14.0" styleClass="topics-feed-list" />
+                    </content>
+                </ScrollPane>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controller.AjouterReponseController"
+            minHeight="480.0" minWidth="520.0" prefWidth="560.0" prefHeight="520.0"
+            styleClass="root-dialog social-dialog sm-modal-shell"
+            stylesheets="@app.css">
+    <children>
+        <VBox spacing="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="social-post-topbar" maxWidth="Infinity">
+                    <children>
+                        <Label styleClass="social-post-topbar-title" text="REPLY · NEW MESSAGE"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button mnemonicParsing="false" onAction="#cancel" styleClass="sm-topbar-close" text="Close"/>
+                    </children>
+                </HBox>
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="dialog-scroll"
+                            vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS">
+                    <content>
+                        <VBox spacing="16.0" styleClass="dialog-card dialog-card-body" maxWidth="Infinity">
+                            <padding>
+                                <Insets bottom="8.0" left="8.0" right="8.0" top="4.0"/>
+                            </padding>
+                            <children>
+                                <Label styleClass="heading-dialog heading-dialog-hero" text="Write a reply"/>
+                                <Label fx:id="labTopic" styleClass="label-muted" wrapText="true" maxWidth="Infinity"/>
+                                <Label styleClass="label-muted" wrapText="true" maxWidth="Infinity"
+                                       text="Your message will show under this topic."/>
+
+                                <VBox spacing="8.0" maxWidth="Infinity" styleClass="social-field-group" VBox.vgrow="ALWAYS">
+                                    <children>
+                                        <Label styleClass="field-label" text="Message"/>
+                                        <TextArea fx:id="areaContent" maxWidth="Infinity" minHeight="140.0"
+                                                  prefRowCount="6" styleClass="text-area-social" wrapText="true"/>
+                                        <Label fx:id="errContent" managed="false" maxWidth="Infinity"
+                                               styleClass="field-error" visible="false" wrapText="true"/>
+                                    </children>
+                                </VBox>
+
+                                <HBox alignment="CENTER_RIGHT" spacing="12.0" maxWidth="Infinity">
+                                    <children>
+                                        <Button mnemonicParsing="false" onAction="#cancel" styleClass="btn-secondary"
+                                                text="Cancel"/>
+                                        <Button defaultButton="true" mnemonicParsing="false" onAction="#save"
+                                                styleClass="btn-primary" text="Post"/>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>
