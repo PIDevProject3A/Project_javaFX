@@ -1,0 +1,15 @@
+target/
+.idea/
+*.class
+*.log
+uploads/
+.DS_Store
+*.swp
+out/
+bin/
+.settings/
+.classpath
+.project
+.nb-gradle/
+build/
+.gradle/
