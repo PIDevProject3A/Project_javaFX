@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.esprit.controllers.EventCatalogController" prefWidth="1150" prefHeight="760" styleClass="root">
+    <children>
+        <VBox layoutX="16" layoutY="12" spacing="10" prefWidth="1118">
+            <children>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <children>
+                        <Label text="🌿 bledna — Catalogue" styleClass="label-title"/>
+                        <Button text="🏠 Accueil" onAction="#handleHome" styleClass="btn-outline"/>
+                        <Button text="📋 Mes inscriptions" onAction="#handleOpenRegistrations" styleClass="btn-secondary"/>
+                    </children>
+                </HBox>
+                <Label text="Inscription : prénom, nom, date/heure d'inscription. Le montant et le mode de paiement sont fixés par l'organisateur (événement). Utilisez « Mes inscriptions » pour filtrer par nom si besoin."
+                       styleClass="label-subtitle" wrapText="true" maxWidth="980"/>
+                <ListView fx:id="eventList" prefWidth="1118" prefHeight="620" styleClass="list-view-registration"/>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

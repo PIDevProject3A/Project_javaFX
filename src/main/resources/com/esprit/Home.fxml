@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.esprit.controllers.HomeController" spacing="0" alignment="TOP_CENTER"
+      styleClass="root">
+    <children>
+        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="12" prefWidth="1120">
+            <padding>
+                <Insets top="14" right="24" bottom="14" left="24"/>
+            </padding>
+            <children>
+                <Label text="🌿 bledna"/>
+                <Label text="Événements &amp; inscriptions" style="-fx-font-size: 14; -fx-font-weight: normal; -fx-opacity: 0.95;"/>
+            </children>
+        </HBox>
+        <VBox spacing="28" alignment="CENTER" style="-fx-padding: 56 48 48 48;">
+            <children>
+                <Label text="Bienvenue" styleClass="label-title"/>
+                <Label text="Choisissez un espace :" styleClass="label-subtitle"/>
+                <HBox spacing="24" alignment="CENTER">
+                    <children>
+                        <Button text="⚙ Administration (CRUD)" onAction="#openAdmin" prefWidth="280" prefHeight="80"
+                                wrapText="true" styleClass="btn-dark"/>
+                        <Button text="📋 Catalogue &amp; inscriptions" onAction="#openCatalog" prefWidth="280" prefHeight="80"
+                                wrapText="true" styleClass="btn-primary"/>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</VBox>
