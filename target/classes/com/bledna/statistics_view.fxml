@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="30" styleClass="view-root" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bledna.controller.StatisticsController">
+
+    <padding>
+        <Insets bottom="30" left="30" right="30" top="30" />
+    </padding>
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="15" styleClass="toolbar">
+        <Button onAction="#handleBack" styleClass="btn-secondary" text="← Back" />
+        <Label styleClass="page-title" text="📊  Waste Collection Statistics" />
+    </HBox>
+
+    <HBox spacing="30" VBox.vgrow="ALWAYS">
+        <!-- Pie Chart -->
+        <VBox alignment="TOP_CENTER" spacing="10" styleClass="card" HBox.hgrow="ALWAYS">
+            <Label style="-fx-font-size: 16; -fx-font-weight: bold;" text="Waste Type Distribution (by Quantity)" textFill="WHITE" />
+            <PieChart fx:id="pieChart" VBox.vgrow="ALWAYS" />
+        </VBox>
+
+        <!-- Bar Chart -->
+        <VBox alignment="TOP_CENTER" spacing="10" styleClass="card" HBox.hgrow="ALWAYS">
+            <Label style="-fx-font-size: 16; -fx-font-weight: bold;" text="Collection Frequency (by Date)" textFill="WHITE" />
+            <BarChart fx:id="barChart" VBox.vgrow="ALWAYS">
+                <xAxis>
+                    <CategoryAxis label="Date" side="BOTTOM" />
+                </xAxis>
+                <yAxis>
+                    <NumberAxis label="Quantity" side="LEFT" tickLabelFill="WHITE" />
+                </yAxis>
+            </BarChart>
+        </VBox>
+    </HBox>
+
+</VBox>

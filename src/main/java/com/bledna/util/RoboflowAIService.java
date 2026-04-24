@@ -18,7 +18,7 @@ import java.util.Base64;
 public class RoboflowAIService implements AIService {
 
     // You can get your API key from Roboflow dashboard
-    private static final String API_KEY = "u6qj8ChNPWi8sTQh6qbs"; 
+    private static final String API_KEY = "";
     private static final String MODEL_ID = "garbage-classification-3";
     private static final String VERSION = "2";
     private static final String API_URL = "https://detect.roboflow.com/" + MODEL_ID + "/" + VERSION + "?api_key=" + API_KEY;
