@@ -3,11 +3,14 @@ package com.esprit.controllers;
 import com.esprit.entities.Event;
 import com.esprit.entities.Registration;
 import com.esprit.Services.RegistrationService;
+import com.esprit.Services.StripePaymentService;
 import com.esprit.utils.AppSession;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
+import java.awt.Desktop;
+import java.net.URI;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,6 +32,8 @@ public class RegisterEventFormController {
     private TextField firstNameField;
     @FXML
     private TextField lastNameField;
+    @FXML
+    private TextField emailField;
     @FXML
     private DatePicker registrationDatePicker;
     @FXML
@@ -64,12 +69,11 @@ public class RegisterEventFormController {
 
         if (paidEvent) {
             fixedAmountLabel.setText(String.format(Locale.FRANCE,
-                    "Montant à régler : %.2f TND (fixe, défini avec l'événement)", event.getPrice()));
+                    "Montant à payer : %.2f TND ", event.getPrice()));
         } else {
             fixedAmountLabel.setText("Événement gratuit — montant : 0,00 TND");
         }
-        fixedPaymentLabel.setText("Mode de paiement : " + labelPaymentFr(paymentMethodFromEvent(event))
-                + " (imposé par l'organisateur, non modifiable ici)");
+
 
         registrationDatePicker.setValue(LocalDate.now());
         registrationTimeField.setText(LocalTime.now().truncatedTo(ChronoUnit.MINUTES).format(HM));
@@ -92,17 +96,30 @@ public class RegisterEventFormController {
         if (event == null) {
             return;
         }
+
         String fn = firstNameField.getText() != null ? firstNameField.getText().trim() : "";
         String ln = lastNameField.getText() != null ? lastNameField.getText().trim() : "";
-        if (fn.isEmpty() || ln.isEmpty()) {
-            showError("Le prénom et le nom sont obligatoires.");
+        String email = emailField.getText() != null ? emailField.getText().trim() : "";
+        if (fn.isEmpty() || ln.isEmpty() || email.isEmpty()) {
+            showError("Le prénom, le nom et l'email sont obligatoires.");
             return;
         }
-        int max = event.getMaxPlaces();
-        if (max > 0 && event.getCurrentParticipants() >= max) {
-            showError("Cet événement est complet.");
+        if (!isValidEmail(email)) {
+            showError("Email invalide. Exemple attendu : utilisateur@email.com");
             return;
         }
+
+        // ===== VÉRIFIER SI PEUT S'INSCRIRE (PLACES) =====
+        try {
+            if (!registrationService.peutSInscrire(event.getId())) {
+                showError("Cet événement est complet.");
+                return;
+            }
+        } catch (SQLException e) {
+            showError("Erreur vérification places: " + e.getMessage());
+            return;
+        }
+
         LocalDateTime registrationDt;
         try {
             registrationDt = parseRegistrationDateTime();
@@ -110,29 +127,63 @@ public class RegisterEventFormController {
             showError(ex.getMessage());
             return;
         }
+
         try {
+            Registration existing = null;
             if (registrationService.existeInscriptionMemePersonne(
                     event.getId(), AppSession.getCurrentUserId(), fn, ln)) {
+                existing = registrationService.trouverParIdUtilisateur(
+                        AppSession.getCurrentUserId(), event.getId(), fn, ln);
+                if (existing != null && event.getPrice() > 0 && !existing.isPaid()) {
+                    // Déjà inscrit mais paiement non confirmé : on relance Stripe.
+                    handleStripePayment(existing);
+                    close();
+                    return;
+                }
                 showError("Vous êtes déjà inscrit à cet événement avec ce prénom et ce nom.");
                 return;
             }
+
+            // ===== CRÉER L'ENREGISTREMENT =====
             Registration r = new Registration();
             r.setUserId(AppSession.getCurrentUserId());
             r.setEventId(event.getId());
             r.setFirstName(fn);
             r.setLastName(ln);
+            r.setEmail(email);
             r.setRegistrationDate(registrationDt);
-            r.setAmount(paidEvent ? event.getPrice() : 0);
+            r.setAmount(event.getPrice());          // Prix de l'événement
+            r.setBudget(event.getPrice());          // Budget à payer
             r.setPaymentMethod(paymentMethodFromEvent(event));
+            r.setPaid(false);                        // Pas encore payé
             r.setStatus("REGISTERED");
+
+            // ===== AJOUTER L'ENREGISTREMENT =====
             registrationService.ajouter(r);
-            AppSession.setRegistrant(fn, ln);
-            showInfo(paidEvent ? "Inscription enregistrée (bledna)." : "Inscription enregistrée (bledna).");
+            Registration fresh = registrationService.trouverParIdUtilisateur(
+                    AppSession.getCurrentUserId(), event.getId(), fn, ln);
+            if (fresh == null) {
+                AppSession.setRegistrant(fn, ln);
+                showInfo("✅ Inscription confirmée.");
+                close();
+                return;
+            }
+
+            // Événement payant => Stripe systématiquement.
+            if (event.getPrice() > 0) {
+                handleStripePayment(fresh);
+            } else {
+                AppSession.setRegistrant(fn, ln);
+                showInfo("✅ Inscription confirmée.");
+            }
+
             close();
         } catch (SQLException e) {
-            showError(e.getMessage());
+            showError("Erreur: " + e.getMessage());
         }
     }
+
+
 
     private LocalDateTime parseRegistrationDateTime() {
         LocalDate date = registrationDatePicker.getValue();
@@ -162,12 +213,8 @@ public class RegisterEventFormController {
     }
 
     private static String paymentMethodFromEvent(Event e) {
-        String p = e.getPaymentType();
-        if (p == null || p.isBlank()) {
-            return "CASH";
-        }
-        String u = p.toUpperCase(Locale.ROOT).trim();
-        if (u.contains("CARD")) {
+        // Dans ce projet : événement payant => Stripe (carte), gratuit => espèces par défaut.
+        if (e != null && e.getEventType() != null && e.getEventType().equalsIgnoreCase("PAID")) {
             return "CARD";
         }
         return "CASH";
@@ -179,6 +226,51 @@ public class RegisterEventFormController {
             case "CARD" -> "Carte bancaire";
             default -> code;
         };
+    }
+
+    private static boolean isValidEmail(String email) {
+        if (email == null) {
+            return false;
+        }
+        return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+    }
+
+    private void handleStripePayment(Registration registration) {
+        try {
+            StripePaymentService stripe = new StripePaymentService();
+            StripePaymentService.CheckoutSessionInfo session = stripe.createCheckoutSession(registration, event);
+            registrationService.saveStripeSession(registration.getId(), session.sessionId(), "PENDING");
+            openInBrowser(session.checkoutUrl());
+
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setHeaderText("Paiement Stripe");
+            confirm.setContentText("La page Stripe est ouverte dans votre navigateur.\n"
+                    + "Cliquez sur OK après avoir terminé le paiement.");
+            if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                boolean paid = stripe.waitForCheckoutSessionPaid(session.sessionId(), 10, 1500);
+                if (paid) {
+                    registrationService.effectuerPaiement(registration.getId());
+                    registrationService.saveStripeSession(registration.getId(), session.sessionId(), "PAID");
+                    AppSession.setRegistrant(registration.getFirstName(), registration.getLastName());
+                    showInfo("✅ Inscription et paiement Stripe confirmés.");
+                } else {
+                    showError("Le paiement n'est pas encore confirmé par Stripe.\n"
+                            + "Attendez quelques secondes puis réessayez \"Payer et confirmer\".");
+                }
+            }
+        } catch (Exception ex) {
+            showError("Paiement Stripe impossible: " + ex.getMessage());
+        }
+    }
+
+    private void openInBrowser(String url) throws Exception {
+        if (url == null || url.isBlank()) {
+            throw new IllegalArgumentException("URL Stripe vide.");
+        }
+        if (!Desktop.isDesktopSupported()) {
+            throw new IllegalStateException("Ouverture navigateur non supportée.");
+        }
+        Desktop.getDesktop().browse(new URI(url));
     }
 
     @FXML

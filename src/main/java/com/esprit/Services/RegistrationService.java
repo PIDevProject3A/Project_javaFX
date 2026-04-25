@@ -91,11 +91,27 @@ public class RegistrationService implements ICrud<Registration> {
                     r.getRegistrationDate() != null ? r.getRegistrationDate() : java.time.LocalDateTime.now()));
         }
 
+        if (s.has("email")) {
+            cols.add("email");
+            vals.add(r.getEmail());
+        }
+
         cols.add(s.paymentColumn());
         vals.add(r.getPaymentMethod());
 
         cols.add("amount");
         vals.add(r.getAmount());
+
+        // ===== NOUVEAUX CHAMPS POUR LE PAIEMENT =====
+        if (s.has("budget")) {
+            cols.add("budget");
+            vals.add(r.getBudget());
+        }
+
+        if (s.has("is_paid")) {
+            cols.add("is_paid");
+            vals.add(r.isPaid() ? 1 : 0);
+        }
 
         if (s.hasStatus()) {
             cols.add("status");
@@ -113,7 +129,7 @@ public class RegistrationService implements ICrud<Registration> {
                 else if (v instanceof Timestamp t) ps.setTimestamp(i + 1, t);
                 else ps.setString(i + 1, v != null ? v.toString() : null);
             }
-            ps.executeUpdate();
+        ps.executeUpdate();
         }
     }
 
@@ -121,12 +137,12 @@ public class RegistrationService implements ICrud<Registration> {
     @Override
     public void supprimer(int id) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement("DELETE FROM registrations WHERE id=?")) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
+        ps.setInt(1, id);
+        ps.executeUpdate();
         }
     }
 
-    // ========================= AFFICHER (NÉCESSAIRE POUR ICrud) =========================
+    // ========================= AFFICHER =========================
     @Override
     public List<Registration> afficher() throws SQLException {
         RegistrationTableSchema s = schema();
@@ -341,10 +357,30 @@ public class RegistrationService implements ICrud<Registration> {
             vals.add(Timestamp.valueOf(r.getRegistrationDate()));
         }
 
+        if (s.has("email")) {
+            sets.add("email = ?");
+            vals.add(r.getEmail());
+        }
+
         sets.add("amount = ?");
         vals.add(r.getAmount());
         sets.add(s.paymentColumn() + " = ?");
         vals.add(r.getPaymentMethod());
+
+        if (s.has("budget")) {
+            sets.add("budget = ?");
+            vals.add(r.getBudget());
+        }
+
+        if (s.has("is_paid")) {
+            sets.add("is_paid = ?");
+            vals.add(r.isPaid() ? 1 : 0);
+        }
+
+        if (s.has("payment_date") && r.getPaymentDate() != null) {
+            sets.add("payment_date = ?");
+            vals.add(Timestamp.valueOf(r.getPaymentDate()));
+        }
 
         if (s.hasStatus()) {
             sets.add("status = ?");
@@ -374,12 +410,109 @@ public class RegistrationService implements ICrud<Registration> {
         }
     }
 
+    // ========================= VÉRIFIER SI LE BUDGET EST PAYÉ =========================
+    public boolean isBudgetPaid(int registrationId) throws SQLException {
+        String sql = "SELECT is_paid FROM registrations WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, registrationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBoolean("is_paid");
+                }
+            }
+        }
+        return false;
+    }
+
+    // ========================= EFFECTUER PAIEMENT =========================
+    public void effectuerPaiement(int registrationId) throws SQLException {
+        RegistrationTableSchema s = schema();
+        List<String> sets = new ArrayList<>();
+        if (s.has("is_paid")) {
+            sets.add("is_paid = TRUE");
+        }
+        if (s.has("payment_date")) {
+            sets.add("payment_date = NOW()");
+        }
+        if (s.has("payment_status")) {
+            sets.add("payment_status = 'PAID'");
+        }
+        if (s.hasStatus()) {
+            sets.add("status = 'PAID'");
+        }
+        if (sets.isEmpty()) {
+            return;
+        }
+        String sql = "UPDATE registrations SET " + String.join(", ", sets) + " WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, registrationId);
+            ps.executeUpdate();
+        }
+    }
+
+    public void saveStripeSession(int registrationId, String sessionId, String paymentStatus) throws SQLException {
+        RegistrationTableSchema s = schema();
+        List<String> sets = new ArrayList<>();
+        List<Object> vals = new ArrayList<>();
+        String normalizedStatus = (paymentStatus == null || paymentStatus.isBlank()) ? "PENDING" : paymentStatus;
+        if (s.has("stripe_session_id")) {
+            sets.add("stripe_session_id = ?");
+            vals.add(sessionId);
+        }
+        if (s.has("payment_status")) {
+            sets.add("payment_status = ?");
+            vals.add(normalizedStatus);
+        }
+        if (s.hasStatus()) {
+            sets.add("status = ?");
+            vals.add("PAID".equalsIgnoreCase(normalizedStatus) ? "PAID" : "PENDING_PAYMENT");
+        }
+        if (sets.isEmpty()) {
+            return;
+        }
+        String sql = "UPDATE registrations SET " + String.join(", ", sets) + " WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            int i = 1;
+            for (Object v : vals) {
+                ps.setString(i++, v != null ? v.toString() : null);
+            }
+            ps.setInt(i, registrationId);
+            ps.executeUpdate();
+        }
+    }
+
+    // ========================= VÉRIFIER SI PEUT S'INSCRIRE (PLACES DISPOS) =========================
+    public boolean peutSInscrire(int eventId) throws SQLException {
+        String sql = "SELECT maxPlaces FROM events WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, eventId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int maxPlaces = rs.getInt("maxPlaces");
+                    if (maxPlaces <= 0) return true; // Places illimitées
+
+                    // Compter les inscrits payés
+                    String countSql = "SELECT COUNT(*) FROM registrations WHERE event_id = ? AND is_paid = TRUE";
+                    try (PreparedStatement ps2 = conn.prepareStatement(countSql)) {
+                        ps2.setInt(1, eventId);
+                        try (ResultSet rs2 = ps2.executeQuery()) {
+                            if (rs2.next()) {
+                                return rs2.getInt(1) < maxPlaces;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     // ========================= HELPERS PRIVÉS =========================
     private String selectFromRegistrationsJoinEvents(RegistrationTableSchema s) {
         StringBuilder sb = new StringBuilder("SELECT r.*, e.name AS event_name FROM registrations r ");
         sb.append("INNER JOIN events e ON r.event_id = e.id ");
         if (s.hasStatus()) {
-            sb.append("WHERE r.status = 'REGISTERED' ");
+            sb.append("WHERE r.status IN ('REGISTERED', 'PAID', 'PENDING_PAYMENT') ");
         }
         return sb.toString();
     }
@@ -435,7 +568,16 @@ public class RegistrationService implements ICrud<Registration> {
                         r.setRegistrationDate(ts.toLocalDateTime());
                     }
                 }
+                case "email", "mail" -> r.setEmail(rs.getString(i));
                 case "amount" -> r.setAmount(rs.getDouble(i));
+                case "budget" -> r.setBudget(rs.getDouble(i));
+                case "is_paid" -> r.setPaid(rs.getBoolean(i));
+                case "payment_date" -> {
+                    Timestamp ts = rs.getTimestamp(i);
+                    if (ts != null) {
+                        r.setPaymentDate(ts.toLocalDateTime());
+                    }
+                }
                 case "payment_method", "paymentmethod" -> r.setPaymentMethod(rs.getString(i));
                 case "status" -> r.setStatus(rs.getString(i));
                 case "event_name" -> r.setEventName(rs.getString(i));
@@ -443,4 +585,63 @@ public class RegistrationService implements ICrud<Registration> {
         }
         return r;
     }
+
+    // ========================= TROUVER PAR USER + EVENT + NOM =========================
+    public Registration trouverParIdUtilisateur(int userId, int eventId, String firstName, String lastName)
+            throws SQLException {
+        RegistrationTableSchema s = schema();
+        String fCol = s.firstNameColumn();
+        String lCol = s.lastNameColumn();
+        String pCol = s.participantNameColumn();
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT r.*, e.name AS event_name
+        FROM registrations r
+        INNER JOIN events e ON r.event_id = e.id
+        WHERE r.user_id = ? AND r.event_id = ?
+        """);
+
+        List<Object> params = new ArrayList<>();
+        params.add(userId);
+        params.add(eventId);
+
+        String fn = firstName != null ? firstName.trim() : "";
+        String ln = lastName != null ? lastName.trim() : "";
+        String full = (fn + " " + ln).trim();
+
+        if (fCol != null && lCol != null) {
+            sql.append(" AND LOWER(TRIM(r.").append(fCol).append(")) = LOWER(TRIM(?))");
+            sql.append(" AND LOWER(TRIM(r.").append(lCol).append(")) = LOWER(TRIM(?))");
+            params.add(fn);
+            params.add(ln);
+        } else if (fCol != null || lCol != null) {
+            String one = fCol != null ? fCol : lCol;
+            sql.append(" AND LOWER(TRIM(r.").append(one).append(")) = LOWER(TRIM(?))");
+            params.add(full);
+        } else if (pCol != null) {
+            sql.append(" AND LOWER(TRIM(r.").append(pCol).append(")) = LOWER(TRIM(?))");
+            params.add(full);
+        }
+
+        sql.append(" ORDER BY r.id DESC LIMIT 1");
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                Object p = params.get(i);
+                if (p instanceof Integer n) {
+                    ps.setInt(i + 1, n);
+                } else {
+                    ps.setString(i + 1, p != null ? p.toString() : "");
+                }
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+            }
+        }
+        return null;
+    }
+
 }

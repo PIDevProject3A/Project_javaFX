@@ -31,6 +31,12 @@
                         <TextField fx:id="lastNameField" promptText="Nom" prefWidth="300"/>
                     </children>
                 </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <children>
+                        <Label text="Email *" prefWidth="100"/>
+                        <TextField fx:id="emailField" promptText="ex. utilisateur@email.com" prefWidth="300"/>
+                    </children>
+                </HBox>
                 <Separator/>
                 <Label text="Date et heure d'inscription" style="-fx-font-weight: bold; -fx-text-fill: #1b5e20;"/>
                 <HBox spacing="10" alignment="CENTER_LEFT">

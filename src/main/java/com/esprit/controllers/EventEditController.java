@@ -2,6 +2,7 @@ package com.esprit.controllers;
 
 import com.esprit.entities.Event;
 import com.esprit.Services.EventService;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -11,9 +12,11 @@ import java.sql.SQLException;
 @SuppressWarnings("unused")
 public class EventEditController {
     @FXML
-    private TextField nameField, locationField, priceField, typeField, maxPlacesField;
+    private TextField nameField, locationField, priceField, maxPlacesField;
     @FXML
     private TextArea descriptionField;
+    @FXML
+    private ComboBox<String> typeCombo;  // ===== CHANGÉ: ComboBox au lieu de TextField =====
     @FXML
     private Button saveBtn, cancelBtn;
 
@@ -28,6 +31,10 @@ public class EventEditController {
     @FXML
     public void initialize() {
         eventService = new EventService();
+
+        // ===== INITIALISER LA COMBOBOX =====
+        typeCombo.setItems(FXCollections.observableArrayList("FREE", "PAID"));
+        typeCombo.getSelectionModel().selectFirst();
     }
 
     private void loadEventData() {
@@ -36,7 +43,17 @@ public class EventEditController {
             descriptionField.setText(eventToEdit.getDescription());
             locationField.setText(eventToEdit.getLocation());
             priceField.setText(String.valueOf(eventToEdit.getPrice()));
-            typeField.setText(eventToEdit.getEventType());
+
+            // ===== SÉLECTIONNER LA VALEUR DANS LA COMBOBOX =====
+            String type = eventToEdit.getEventType();
+            if (type != null) {
+                if (typeCombo.getItems().contains(type)) {
+                    typeCombo.getSelectionModel().select(type);
+                } else {
+                    typeCombo.getSelectionModel().selectFirst();
+                }
+            }
+
             maxPlacesField.setText(String.valueOf(eventToEdit.getMaxPlaces()));
         }
     }
@@ -49,7 +66,10 @@ public class EventEditController {
                 eventToEdit.setDescription(descriptionField.getText());
                 eventToEdit.setLocation(locationField.getText());
                 eventToEdit.setPrice(Double.parseDouble(priceField.getText()));
-                eventToEdit.setEventType(typeField.getText());
+
+                // ===== RÉCUPÉRER LA VALEUR DE LA COMBOBOX =====
+                eventToEdit.setEventType(typeCombo.getSelectionModel().getSelectedItem());
+
                 eventToEdit.setMaxPlaces(Integer.parseInt(maxPlacesField.getText()));
 
                 eventService.modifier(eventToEdit);
@@ -73,8 +93,8 @@ public class EventEditController {
 
     private boolean validateFields() {
         if (nameField.getText().isEmpty() || descriptionField.getText().isEmpty() ||
-            locationField.getText().isEmpty() || priceField.getText().isEmpty() ||
-            typeField.getText().isEmpty() || maxPlacesField.getText().isEmpty()) {
+                locationField.getText().isEmpty() || priceField.getText().isEmpty() ||
+                typeCombo.getSelectionModel().getSelectedItem() == null || maxPlacesField.getText().isEmpty()) {
             showError("Tous les champs sont obligatoires !");
             return false;
         }
@@ -87,7 +107,6 @@ public class EventEditController {
         }
         return true;
     }
-
 
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -103,4 +122,3 @@ public class EventEditController {
         alert.showAndWait();
     }
 }
-

@@ -1,6 +1,10 @@
 package com.esprit.controllers;
 
 import com.esprit.entities.Registration;
+import com.esprit.entities.Event;
+import com.esprit.Services.EventService;
+import com.esprit.Services.PaymentReceiptService;
+import com.esprit.Services.ReceiptMailService;
 import com.esprit.Services.RegistrationService;
 import com.esprit.utils.AppSession;
 import com.esprit.utils.NavigationManager;
@@ -16,7 +20,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import javafx.stage.Modality;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -29,7 +35,8 @@ public class RegistrationListController {
 
 
     private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-    private static final String MESSAGE_RED_STYLE = "-fx-text-fill: #c62828; -fx-font-size: 12px; -fx-font-weight: bold;";
+    private static final String MESSAGE_INFO_STYLE = "-fx-text-fill: #546e7a; -fx-font-size: 12px;";
+    private static final String MESSAGE_SUCCESS_STYLE = "-fx-text-fill: #2e7d32; -fx-font-size: 12px; -fx-font-weight: bold;";
 
     @FXML
     private Label participantBanner;
@@ -43,6 +50,9 @@ public class RegistrationListController {
     private ListView<Registration> registrationList;
 
     private final RegistrationService registrationService = new RegistrationService();
+    private final EventService eventService = new EventService();
+    private final PaymentReceiptService receiptService = new PaymentReceiptService();
+    private final ReceiptMailService receiptMailService = new ReceiptMailService();
 
     @FXML
     public void initialize() {
@@ -56,11 +66,11 @@ public class RegistrationListController {
     }
 
     private void refreshBanner() {
-        participantBanner.setText("Affichage des inscriptions (filtres : événement et paiement).");
-        participantBanner.setStyle("-fx-text-fill: #c62828; -fx-font-size: 12px; -fx-font-weight: bold;");
+
+        participantBanner.setStyle(MESSAGE_INFO_STYLE);
         if (searchMessageLabel != null) {
             searchMessageLabel.setText("Saisissez un critère puis cliquez sur Rechercher.");
-            searchMessageLabel.setStyle(MESSAGE_RED_STYLE);
+            searchMessageLabel.setStyle(MESSAGE_INFO_STYLE);
         }
     }
 
@@ -70,13 +80,13 @@ public class RegistrationListController {
             private final Label badgeDate = new Label();
             private final Label badgeAmount = new Label();
             private final Label badgePay = new Label();
-            private final Label lineInscrit = new Label();
             private final HBox badgeRow = new HBox(8, badgeDate, badgeAmount, badgePay);
-            private final VBox left = new VBox(8, title, badgeRow, lineInscrit);
+            private final VBox left = new VBox(8, title, badgeRow);
             private final Button viewB = new Button("👁  Voir");
             private final Button editB = new Button("✏  Modifier");
             private final Button delB = new Button("🗑  Supprimer");
-            private final VBox actions = new VBox(8, viewB, editB, delB);
+            private final Button pdfB = new Button("📄  Reçu de paiement");
+            private final VBox actions = new VBox(8, viewB, editB, delB, pdfB);
             private final Region spacer = new Region();
             private final HBox inner = new HBox(14, left, spacer, actions);
             private final VBox card = new VBox(inner);
@@ -90,7 +100,6 @@ public class RegistrationListController {
                 badgeRow.getStyleClass().add("badge-row");
                 badgeDate.getStyleClass().addAll("badge", "badge-date");
                 badgeAmount.getStyleClass().addAll("badge", "badge-amount");
-                lineInscrit.getStyleClass().add("reg-meta-line");
                 card.getStyleClass().add("bledna-card");
                 inner.setAlignment(Pos.TOP_LEFT);
                 inner.setPadding(new Insets(0));
@@ -99,9 +108,11 @@ public class RegistrationListController {
                 viewB.getStyleClass().add("btn-action-view");
                 editB.getStyleClass().add("btn-action-edit");
                 delB.getStyleClass().add("btn-action-delete");
+                pdfB.getStyleClass().add("btn-action-view");
                 viewB.setMaxWidth(Double.MAX_VALUE);
                 editB.setMaxWidth(Double.MAX_VALUE);
                 delB.setMaxWidth(Double.MAX_VALUE);
+                pdfB.setMaxWidth(Double.MAX_VALUE);
 
                 viewB.setOnAction(e -> {
                     Registration r = getItem();
@@ -117,6 +128,10 @@ public class RegistrationListController {
                     Registration r = getItem();
                     if (r != null) confirmDelete(r);
                 });
+                pdfB.setOnAction(e -> {
+                    Registration r = getItem();
+                    if (r != null) exportPdfPlaceholder(r);
+                });
             }
 
             @Override
@@ -127,7 +142,10 @@ public class RegistrationListController {
                     setGraphic(null);
                 } else {
                     title.setText("📍 " + (item.getEventName() != null ? item.getEventName() : "Événement"));
-                    badgeDate.setText("🗓 " + (item.getRegistrationDate() != null ? item.getRegistrationDate().format(DT) : "—"));
+                    String regDate = item.getRegistrationDate() != null
+                            ? item.getRegistrationDate().format(DT)
+                            : (item.getPaymentDate() != null ? item.getPaymentDate().format(DT) : "Date non renseignée");
+                    badgeDate.setText("🗓 " + regDate);
                     badgeAmount.setText("💰 " + String.format(Locale.FRANCE, "%.2f TND", item.getAmount()));
 
                     String payCode = item.getPaymentMethod() != null ? item.getPaymentMethod() : "";
@@ -140,16 +158,6 @@ public class RegistrationListController {
                         badgePay.getStyleClass().add("badge-pay-cash");
                         badgePay.setText("💵 " + labelPayment(payCode));
                     }
-
-                    String who = item.getFullName();
-                    if (who == null || who.isBlank()) {
-                        if (AppSession.hasRegistrant()) {
-                            who = AppSession.getRegistrantFirstName() + " " + AppSession.getRegistrantLastName();
-                        } else {
-                            who = "—";
-                        }
-                    }
-                    lineInscrit.setText("👤 Inscrit : " + who);
 
                     setText(null);
                     setGraphic(card);
@@ -185,7 +193,7 @@ public class RegistrationListController {
                                 ? "Aucun résultat. Modifiez votre saisie puis relancez la recherche."
                                 : list.size() + " inscription(s) trouvée(s)."
                 );
-                searchMessageLabel.setStyle(MESSAGE_RED_STYLE);
+                searchMessageLabel.setStyle(list.isEmpty() ? MESSAGE_INFO_STYLE : MESSAGE_SUCCESS_STYLE);
             }
         } catch (SQLException e) {
             showError("Erreur de chargement : " + e.getMessage());
@@ -199,7 +207,7 @@ public class RegistrationListController {
 
         if (eventText.isEmpty() && (pay == null || "TOUTES".equalsIgnoreCase(pay))) {
             searchMessageLabel.setText("Astuce : saisissez un événement ou choisissez un paiement pour filtrer.");
-            searchMessageLabel.setStyle(MESSAGE_RED_STYLE);
+            searchMessageLabel.setStyle(MESSAGE_INFO_STYLE);
         }
 
         loadData();
@@ -213,8 +221,8 @@ public class RegistrationListController {
     private void showView(Registration r) {
         String body = String.join("\n",
                 "Événement : " + nullToDash(r.getEventName()),
-                "Inscrit : " + nullToDash(r.getFullName()),
-                "Date : " + (r.getRegistrationDate() != null ? r.getRegistrationDate().format(DT) : "—"),
+                "Date : " + (r.getRegistrationDate() != null ? r.getRegistrationDate().format(DT)
+                        : (r.getPaymentDate() != null ? r.getPaymentDate().format(DT) : "Date non renseignée")),
                 String.format(Locale.FRANCE, "Montant : %.2f TND", r.getAmount()),
                 "Paiement : " + labelPayment(r.getPaymentMethod()),
                 "Statut : " + nullToDash(r.getStatus())
@@ -278,6 +286,103 @@ public class RegistrationListController {
                 showError("Erreur suppression : " + e.getMessage());
             }
         }
+    }
+
+    private void exportPdfPlaceholder(Registration r) {
+        try {
+            Registration full = registrationService.trouverParId(r.getId());
+            if (full == null) {
+                showError("Inscription introuvable.");
+                return;
+            }
+            Event ev = eventService.trouverParId(full.getEventId());
+            PaymentReceiptService.ReceiptData data = receiptService.buildReceiptData(full, ev);
+            openReceiptDialog(data);
+        } catch (Exception ex) {
+            showError("Impossible d'ouvrir le reçu : " + ex.getMessage());
+        }
+    }
+
+    private void openReceiptDialog(PaymentReceiptService.ReceiptData data) throws Exception {
+        Label appTag = new Label("BLEDNA");
+        appTag.setStyle("-fx-text-fill: #607d8b; -fx-font-size: 11px; -fx-font-weight: bold;");
+        Label title = new Label("Reçu de paiement");
+        title.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1b5e20;");
+
+        Button downloadBtn = new Button("⬇ Télécharger PDF");
+        downloadBtn.getStyleClass().add("btn-primary");
+        downloadBtn.setOnAction(e -> {
+            try {
+                var file = receiptService.exportPdfReceipt(downloadBtn.getScene().getWindow(), data);
+                if (file == null) {
+                    return;
+                }
+                boolean mailed = false;
+                if (data.email() != null && !data.email().isBlank() && !"—".equals(data.email())) {
+                    byte[] pdfBytes = receiptService.generatePdfBytes(data);
+                    receiptMailService.sendReceiptEmail(data.email(), data.eventName(), data.receiptCode(), pdfBytes);
+                    mailed = true;
+                }
+                Alert ok = new Alert(Alert.AlertType.INFORMATION);
+                ok.setTitle("bledna");
+                ok.setHeaderText("PDF généré");
+                ok.setContentText(mailed
+                        ? "Le fichier PDF a été téléchargé sur votre PC.\nLe reçu a aussi été envoyé par email."
+                        : "Le fichier PDF a été téléchargé sur votre PC.\nEmail non envoyé (adresse manquante).");
+                ok.showAndWait();
+            } catch (Exception ex) {
+                showError("Erreur export PDF : " + ex.getMessage());
+            }
+        });
+
+        Label code = new Label("Code reçu : " + data.receiptCode());
+        code.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+
+        Label eventTitle = new Label(data.eventName());
+        eventTitle.setStyle("-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #0d1b2a;");
+        Label eventMeta = new Label("📅 " + (data.eventDate() != null ? data.eventDate().format(DT) : "—")
+                + "    📍 " + data.location());
+        eventMeta.setStyle("-fx-text-fill:#455a64; -fx-font-size: 14px;");
+
+        Label participant = new Label("Participant : " + data.participantName());
+        Label email = new Label("Email : " + data.email());
+        Label regDate = new Label("Date d'inscription : " + (data.registrationDate() != null ? data.registrationDate().format(DT) : "—"));
+        participant.setStyle("-fx-font-size: 14px;");
+        email.setStyle("-fx-font-size: 14px;");
+        regDate.setStyle("-fx-font-size: 14px;");
+
+        Label paymentMethod = new Label("Méthode de paiement : " + data.paymentMethod());
+        paymentMethod.setStyle("-fx-font-size: 14px;");
+        Label amount = new Label(String.format(Locale.FRANCE, "Montant payé : %.2f TND", data.amount()));
+        amount.setStyle("-fx-font-size: 34px; -fx-font-weight: bold; -fx-text-fill:#0d1b2a;");
+
+        ImageView qr = new ImageView(receiptService.createQrFxImage(data.qrPayload(), 180));
+        qr.setFitWidth(180);
+        qr.setFitHeight(180);
+        Label qrInfo = new Label("Présentez ce reçu à l'entrée\nScannez le QR code pour vérifier l'authenticité.");
+        qrInfo.setStyle("-fx-text-fill:#607d8b; -fx-font-size:12px;");
+
+        HBox top = new HBox(12, appTag, title);
+        top.setAlignment(Pos.CENTER_LEFT);
+
+        VBox contentCard = new VBox(10, code, new Separator(), eventTitle, eventMeta, new Separator(),
+                participant, email, regDate, new Separator(), paymentMethod, amount);
+        contentCard.setStyle("-fx-background-color:#f8fafc; -fx-background-radius:12; -fx-padding:16; -fx-border-color:#dbe5ef; -fx-border-radius:12;");
+
+        HBox qrRow = new HBox(14, qr, qrInfo);
+        qrRow.setAlignment(Pos.CENTER_LEFT);
+
+        VBox root = new VBox(14, top, downloadBtn, contentCard, qrRow);
+        root.setStyle("-fx-padding: 20; -fx-background-color: white;");
+        root.setAlignment(Pos.TOP_LEFT);
+
+        Stage st = new Stage();
+        st.initModality(Modality.APPLICATION_MODAL);
+        st.setTitle("bledna — reçu de paiement");
+        Scene sc = new Scene(root, 760, 760);
+        StyleHelper.apply(sc);
+        st.setScene(sc);
+        st.showAndWait();
     }
 
     private static String nullToDash(String s) {

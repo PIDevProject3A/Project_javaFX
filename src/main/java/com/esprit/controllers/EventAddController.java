@@ -2,6 +2,7 @@ package com.esprit.controllers;
 
 import com.esprit.entities.Event;
 import com.esprit.Services.EventService;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -14,9 +15,11 @@ public class EventAddController {
     private static final String MSG_RED = "-fx-text-fill: #c62828; -fx-font-size: 12px; -fx-font-weight: bold;";
 
     @FXML
-    private TextField nameField, locationField, priceField, typeField, maxPlacesField;
+    private TextField nameField, locationField, priceField, maxPlacesField;
     @FXML
     private TextArea descriptionField;
+    @FXML
+    private ComboBox<String> typeCombo;
     @FXML
     private Label inputMessageLabel;
     @FXML
@@ -27,11 +30,27 @@ public class EventAddController {
     @FXML
     public void initialize() {
         eventService = new EventService();
+
+        // ===== INITIALISER LA COMBOBOX =====
+        typeCombo.setItems(FXCollections.observableArrayList("FREE", "PAID"));
+        typeCombo.getSelectionModel().selectFirst();
+
+        // 🔸 AJOUTER LE LISTENER POUR DÉSACTIVER/ACTIVER LE PRIX
+        typeCombo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if ("FREE".equals(newVal)) {
+                priceField.setDisable(true);
+                priceField.setText("0");  // Mettre 0 si c'est gratuit
+            } else {
+                priceField.setDisable(false);
+                priceField.setText("");   // Vider le champ
+            }
+        });
+
         nameField.setTooltip(new Tooltip("Exemple : Beach Cleanup"));
         descriptionField.setTooltip(new Tooltip("Décrivez brièvement l'événement."));
         locationField.setTooltip(new Tooltip("Exemple : La Marsa, Tunis..."));
         priceField.setTooltip(new Tooltip("Nombre décimal : 0, 10, 49.99..."));
-        typeField.setTooltip(new Tooltip("Valeurs autorisées : FREE ou PAID"));
+        typeCombo.setTooltip(new Tooltip("Choisir : FREE ou PAID"));
         maxPlacesField.setTooltip(new Tooltip("Nombre entier positif : 10, 100..."));
     }
 
@@ -40,8 +59,9 @@ public class EventAddController {
         if (validateFields()) {
             try {
                 String priceRaw = priceField.getText().trim().replace(',', '.');
-                String typeRaw = typeField.getText().trim().toUpperCase();
+                String typeRaw = typeCombo.getSelectionModel().getSelectedItem();
                 String maxRaw = maxPlacesField.getText().trim();
+
                 Event event = new Event();
                 event.setName(nameField.getText().trim());
                 event.setDescription(descriptionField.getText().trim());
@@ -76,24 +96,26 @@ public class EventAddController {
         String name = nameField.getText() != null ? nameField.getText().trim() : "";
         String desc = descriptionField.getText() != null ? descriptionField.getText().trim() : "";
         String location = locationField.getText() != null ? locationField.getText().trim() : "";
-        String priceRaw = priceField.getText() != null ? priceField.getText().trim().replace(',', '.') : "";
-        String typeRaw = typeField.getText() != null ? typeField.getText().trim().toUpperCase() : "";
+        String typeRaw = typeCombo.getSelectionModel().getSelectedItem();
         String maxRaw = maxPlacesField.getText() != null ? maxPlacesField.getText().trim() : "";
+        String priceRaw = priceField.getText() != null ? priceField.getText().trim().replace(',', '.') : "";
 
-        if (name.isEmpty() || desc.isEmpty() || location.isEmpty() || priceRaw.isEmpty()
-                || typeRaw.isEmpty() || maxRaw.isEmpty()) {
+        if (name.isEmpty() || desc.isEmpty() || location.isEmpty()
+                || typeRaw == null || typeRaw.isEmpty() || maxRaw.isEmpty()) {
             setInputMessage("Tous les champs sont obligatoires.");
             return false;
         }
 
-        if (!typeRaw.equals("FREE") && !typeRaw.equals("PAID")) {
-            setInputMessage("Type invalide : utilisez uniquement FREE ou PAID.");
+        // Validation du prix : optionnel si FREE, obligatoire si PAID
+        if ("PAID".equals(typeRaw) && priceRaw.isEmpty()) {
+            setInputMessage("Le prix est obligatoire pour un événement payant.");
             return false;
         }
 
         try {
-            double price = Double.parseDouble(priceRaw);
+            double price = priceRaw.isEmpty() ? 0 : Double.parseDouble(priceRaw);
             int maxPlaces = Integer.parseInt(maxRaw);
+
             if (price < 0) {
                 setInputMessage("Le prix ne peut pas être négatif.");
                 return false;
@@ -131,4 +153,3 @@ public class EventAddController {
         alert.showAndWait();
     }
 }
-

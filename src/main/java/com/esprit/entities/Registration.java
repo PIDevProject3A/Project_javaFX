@@ -11,14 +11,21 @@ public class Registration {
 
     private String firstName;
     private String lastName;
+    private String email;
     private LocalDateTime registrationDate;
     private double amount;
     private String paymentMethod;
     private String status;
 
+    // ===== NOUVEAUX CHAMPS POUR LE PAIEMENT =====
+    private double budget;                    // Montant à payer
+    private boolean isPaid;                   // Vrai si payé
+    private LocalDateTime paymentDate;        // Date du paiement
+
     public Registration() {
     }
 
+    // ===== GETTERS / SETTERS ORIGINAUX =====
     public int getId() {
         return id;
     }
@@ -75,6 +82,14 @@ public class Registration {
         this.registrationDate = registrationDate;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public double getAmount() {
         return amount;
     }
@@ -99,6 +114,32 @@ public class Registration {
         this.status = status;
     }
 
+    // ===== NOUVEAUX GETTERS / SETTERS POUR BUDGET =====
+    public double getBudget() {
+        return budget;
+    }
+
+    public void setBudget(double budget) {
+        this.budget = budget;
+    }
+
+    public boolean isPaid() {
+        return isPaid;
+    }
+
+    public void setPaid(boolean paid) {
+        isPaid = paid;
+    }
+
+    public LocalDateTime getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(LocalDateTime paymentDate) {
+        this.paymentDate = paymentDate;
+    }
+
+    // ===== MÉTHODE UTILE =====
     public String getFullName() {
         String f = firstName != null ? firstName.trim() : "";
         String l = lastName != null ? lastName.trim() : "";

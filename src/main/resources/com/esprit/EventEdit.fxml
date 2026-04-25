@@ -6,6 +6,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.geometry.Insets?>
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.esprit.controllers.EventEditController" prefWidth="1000" prefHeight="600">
@@ -58,7 +59,7 @@
                                 <VBox spacing="5" prefWidth="350">
                                     <children>
                                         <Label text="Type d'événement *" style="-fx-font-weight: bold;" />
-                                        <TextField fx:id="typeField" promptText="PAID ou FREE" style="-fx-padding: 10; -fx-font-size: 12;" />
+                                        <ComboBox fx:id="typeCombo" promptText="Choisir..." style="-fx-padding: 10; -fx-font-size: 12;" />
                                     </children>
                                 </VBox>
                                 <VBox spacing="5" prefWidth="300">
@@ -83,4 +84,3 @@
         </VBox>
     </children>
 </AnchorPane>
-

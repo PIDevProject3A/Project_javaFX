@@ -129,4 +129,34 @@ public class EventService implements ICrud<Event> {
         }
         System.out.println("✅ Event modifié !");
     }
+
+    public Event trouverParId(int id) throws SQLException {
+        String sql = """
+                SELECT id, name, description, eventDate, location, price, payment_type, event_type, maxPlaces
+                FROM events
+                WHERE id = ?
+                """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Event e = new Event();
+                    e.setId(rs.getInt("id"));
+                    e.setName(rs.getString("name"));
+                    e.setDescription(rs.getString("description"));
+                    Timestamp ts = rs.getTimestamp("eventDate");
+                    if (ts != null) {
+                        e.setEventDate(ts.toLocalDateTime());
+                    }
+                    e.setLocation(rs.getString("location"));
+                    e.setPrice(rs.getDouble("price"));
+                    e.setPaymentType(rs.getString("payment_type"));
+                    e.setEventType(rs.getString("event_type"));
+                    e.setMaxPlaces(rs.getInt("maxPlaces"));
+                    return e;
+                }
+            }
+        }
+        return null;
+    }
 }
