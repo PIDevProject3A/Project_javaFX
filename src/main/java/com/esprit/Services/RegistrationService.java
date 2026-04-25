@@ -6,12 +6,7 @@ import com.esprit.utils.MyDataBase;
 import com.esprit.utils.RegistrationTableSchema;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public class RegistrationService implements ICrud<Registration> {
 
@@ -21,7 +16,6 @@ public class RegistrationService implements ICrud<Registration> {
         this(MyDataBase.getInstance().getConnection());
     }
 
-    /** Connexion explicite (tests H2, etc.). */
     public RegistrationService(Connection connection) {
         this.conn = connection;
     }
@@ -35,6 +29,24 @@ public class RegistrationService implements ICrud<Registration> {
         return schema;
     }
 
+    // ========================= HELPER =========================
+    private boolean existsByQuery(String sql, Object... params) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            for (int i = 0; i < params.length; i++) {
+                Object p = params[i];
+                if (p instanceof Integer n) {
+                    ps.setInt(i + 1, n);
+                } else {
+                    ps.setString(i + 1, p != null ? p.toString() : "");
+                }
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
+
+    // ========================= AJOUTER =========================
     @Override
     public void ajouter(Registration r) throws SQLException {
         RegistrationTableSchema s = schema();
@@ -45,16 +57,18 @@ public class RegistrationService implements ICrud<Registration> {
             cols.add("user_id");
             vals.add(r.getUserId() > 0 ? r.getUserId() : AppSession.getCurrentUserId());
         }
+
         cols.add("event_id");
         vals.add(r.getEventId());
 
         String fn = r.getFirstName() != null ? r.getFirstName().trim() : "";
         String ln = r.getLastName() != null ? r.getLastName().trim() : "";
+        String full = (fn + " " + ln).trim();
+
         String fCol = s.firstNameColumn();
         String lCol = s.lastNameColumn();
         String pCol = s.participantNameColumn();
 
-        String full = (fn + " " + ln).trim();
         if (fCol != null && lCol != null) {
             cols.add(fCol);
             vals.add(fn);
@@ -89,61 +103,41 @@ public class RegistrationService implements ICrud<Registration> {
         }
 
         String placeholders = String.join(", ", Collections.nCopies(cols.size(), "?"));
-        StringBuilder sql = new StringBuilder("INSERT INTO registrations (");
-        sql.append(String.join(", ", cols));
-        sql.append(") VALUES (").append(placeholders).append(")");
+        String sql = "INSERT INTO registrations (" + String.join(", ", cols) + ") VALUES (" + placeholders + ")";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             for (int i = 0; i < vals.size(); i++) {
                 Object v = vals.get(i);
-                if (v instanceof Integer n) {
-                    ps.setInt(i + 1, n);
-                } else if (v instanceof Double d) {
-                    ps.setDouble(i + 1, d);
-                } else if (v instanceof Timestamp t) {
-                    ps.setTimestamp(i + 1, t);
-                } else {
-                    ps.setString(i + 1, v != null ? v.toString() : null);
-                }
+                if (v instanceof Integer n) ps.setInt(i + 1, n);
+                else if (v instanceof Double d) ps.setDouble(i + 1, d);
+                else if (v instanceof Timestamp t) ps.setTimestamp(i + 1, t);
+                else ps.setString(i + 1, v != null ? v.toString() : null);
             }
             ps.executeUpdate();
         }
     }
 
+    // ========================= SUPPRIMER =========================
     @Override
     public void supprimer(int id) throws SQLException {
-        String sql = "DELETE FROM registrations WHERE id=?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM registrations WHERE id=?")) {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
     }
 
-    private String selectFromRegistrationsJoinEvents(RegistrationTableSchema s) {
-        StringBuilder sb = new StringBuilder("SELECT r.*, e.name AS event_name FROM registrations r ");
-        sb.append("INNER JOIN events e ON r.event_id = e.id ");
-        if (s.hasStatus()) {
-            sb.append("WHERE r.status = 'REGISTERED' ");
-        }
-        return sb.toString();
-    }
-
-    private String orderByRegistration(RegistrationTableSchema s) {
-        if (s.hasRegistrationDate()) {
-            return " ORDER BY r.registration_date DESC ";
-        }
-        return " ORDER BY r.id DESC ";
-    }
-
+    // ========================= AFFICHER (NÉCESSAIRE POUR ICrud) =========================
     @Override
     public List<Registration> afficher() throws SQLException {
         RegistrationTableSchema s = schema();
         String sql = selectFromRegistrationsJoinEvents(s) + orderByRegistration(s);
+
         try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             return mapResultSet(rs);
         }
     }
 
+    // ========================= LISTER FILTRÉ =========================
     public List<Registration> listerFiltre(int userId, String firstName, String lastName,
                                            String eventNameContains, String paymentMethodOrNull)
             throws SQLException {
@@ -162,6 +156,7 @@ public class RegistrationService implements ICrud<Registration> {
         String fCol = s.firstNameColumn();
         String lCol = s.lastNameColumn();
         String pCol = s.participantNameColumn();
+
         if (firstName != null && !firstName.isBlank() && lastName != null && !lastName.isBlank()) {
             String combined = (firstName.trim() + " " + lastName.trim()).trim();
             if (fCol != null && lCol != null) {
@@ -190,6 +185,7 @@ public class RegistrationService implements ICrud<Registration> {
             sql.append(" e.name LIKE ? ");
             params.add("%" + eventNameContains.trim() + "%");
         }
+
         if (paymentMethodOrNull != null && !paymentMethodOrNull.isBlank()
                 && !"TOUTES".equalsIgnoreCase(paymentMethodOrNull)) {
             sql.append(and ? " AND " : " WHERE ");
@@ -212,13 +208,16 @@ public class RegistrationService implements ICrud<Registration> {
         }
     }
 
+    // ========================= CHARGER RÉSUMÉS INSCRITS =========================
     public Map<Integer, String> loadRegistrantSummariesByEvent() throws SQLException {
         RegistrationTableSchema s = schema();
         Map<Integer, String> map = new HashMap<>();
-        String expr;
+
         String fCol = s.firstNameColumn();
         String lCol = s.lastNameColumn();
         String pCol = s.participantNameColumn();
+
+        String expr;
         if (fCol != null && lCol != null) {
             expr = "GROUP_CONCAT(CONCAT(TRIM(r." + fCol + "), ' ', TRIM(r." + lCol + ")) ORDER BY r.id SEPARATOR ' · ')";
         } else if (fCol != null) {
@@ -230,8 +229,10 @@ public class RegistrationService implements ICrud<Registration> {
         } else {
             expr = "CONCAT(COUNT(*), ' inscription(s)')";
         }
+
         String where = s.hasStatus() ? " WHERE r.status = 'REGISTERED' " : "";
         String sql = "SELECT r.event_id, " + expr + " AS names FROM registrations r " + where + " GROUP BY r.event_id";
+
         try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 int eid = rs.getInt("event_id");
@@ -242,66 +243,15 @@ public class RegistrationService implements ICrud<Registration> {
         return map;
     }
 
-    private static List<Registration> mapResultSet(ResultSet rs) throws SQLException {
-        List<Registration> list = new ArrayList<>();
-        while (rs.next()) {
-            list.add(mapRow(rs));
-        }
-        return list;
-    }
-
-    private static void applyParticipantFull(String value, Registration r) {
-        if (value == null || value.isBlank()) {
-            return;
-        }
-        String t = value.trim();
-        int sp = t.indexOf(' ');
-        if (sp < 0) {
-            r.setFirstName(t);
-            r.setLastName("");
-        } else {
-            r.setFirstName(t.substring(0, sp).trim());
-            r.setLastName(t.substring(sp + 1).trim());
-        }
-    }
-
-    private static Registration mapRow(ResultSet rs) throws SQLException {
-        Registration r = new Registration();
-        ResultSetMetaData md = rs.getMetaData();
-        for (int i = 1; i <= md.getColumnCount(); i++) {
-            String lab = md.getColumnLabel(i).toLowerCase(Locale.ROOT);
-            switch (lab) {
-                case "id" -> r.setId(rs.getInt(i));
-                case "user_id" -> r.setUserId(rs.getInt(i));
-                case "event_id" -> r.setEventId(rs.getInt(i));
-                case "first_name", "prenom", "firstname" -> r.setFirstName(rs.getString(i));
-                case "last_name", "nom", "lastname" -> r.setLastName(rs.getString(i));
-                case "participant_name", "full_name", "nom_complet", "participant" ->
-                        applyParticipantFull(rs.getString(i), r);
-                case "registration_date" -> {
-                    Timestamp ts = rs.getTimestamp(i);
-                    if (ts != null) {
-                        r.setRegistrationDate(ts.toLocalDateTime());
-                    }
-                }
-                case "amount" -> r.setAmount(rs.getDouble(i));
-                case "payment_method", "paymentmethod" -> r.setPaymentMethod(rs.getString(i));
-                case "status" -> r.setStatus(rs.getString(i));
-                case "event_name" -> r.setEventName(rs.getString(i));
-                default -> {
-                }
-            }
-        }
-        return r;
-    }
-
+    // ========================= TROUVER PAR ID =========================
     public Registration trouverParId(int id) throws SQLException {
         String sql = """
-                SELECT r.*, e.name AS event_name
-                FROM registrations r
-                INNER JOIN events e ON r.event_id = e.id
-                WHERE r.id = ?
-                """;
+            SELECT r.*, e.name AS event_name
+            FROM registrations r
+            INNER JOIN events e ON r.event_id = e.id
+            WHERE r.id = ?
+            """;
+
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -313,87 +263,50 @@ public class RegistrationService implements ICrud<Registration> {
         return null;
     }
 
-    /**
-     * Doublon : même événement + même utilisateur démo (si pas de colonnes noms en BDD).
-     */
+    // ========================= EXISTE INSCRIPTION SAME USER+EVENT =========================
     public boolean existeInscriptionUserEtEvent(int userId, int eventId) throws SQLException {
-        if (!schema().has("user_id")) {
-            return false;
-        }
+        if (!schema().has("user_id")) return false;
+
         String w = schema().hasStatus() ? " AND status = 'REGISTERED' " : "";
         String sql = "SELECT COUNT(*) FROM registrations WHERE user_id = ? AND event_id = ? " + w;
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, userId);
-            ps.setInt(2, eventId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0;
-                }
-            }
-        }
-        return false;
+
+        return existsByQuery(sql, userId, eventId);
     }
 
+    // ========================= EXISTE INSCRIPTION MÊME PERSONNE =========================
     public boolean existeInscriptionMemePersonne(int eventId, int userId, String firstName, String lastName)
             throws SQLException {
         RegistrationTableSchema s = schema();
         String fCol = s.firstNameColumn();
         String lCol = s.lastNameColumn();
         String pCol = s.participantNameColumn();
+        String status = s.hasStatus() ? " AND status = 'REGISTERED' " : "";
+        String fullName = ((firstName != null ? firstName : "").trim() + " "
+                + (lastName != null ? lastName : "").trim()).trim();
 
         if (fCol != null && lCol != null) {
-            String w = s.hasStatus() ? " AND status = 'REGISTERED' " : "";
-            String sql = "SELECT COUNT(*) FROM registrations WHERE event_id = ? " + w
-                    + " AND LOWER(TRIM(" + fCol + ")) = LOWER(TRIM(?)) AND LOWER(TRIM(" + lCol + ")) = LOWER(TRIM(?))";
-            try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setInt(1, eventId);
-                ps.setString(2, firstName != null ? firstName : "");
-                ps.setString(3, lastName != null ? lastName : "");
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        return rs.getInt(1) > 0;
-                    }
-                }
-            }
-            return false;
+            String sql = "SELECT COUNT(*) FROM registrations WHERE event_id = ? " + status +
+                    " AND LOWER(TRIM(" + fCol + ")) = LOWER(TRIM(?)) AND LOWER(TRIM(" + lCol + ")) = LOWER(TRIM(?))";
+            return existsByQuery(sql, eventId, firstName, lastName);
         }
+
         if (fCol != null || lCol != null) {
-            String one = fCol != null ? fCol : lCol;
-            String w = s.hasStatus() ? " AND status = 'REGISTERED' " : "";
-            String combined = ((firstName != null ? firstName : "").trim() + " "
-                    + (lastName != null ? lastName : "").trim()).trim();
-            String sql = "SELECT COUNT(*) FROM registrations WHERE event_id = ? " + w
-                    + " AND LOWER(TRIM(" + one + ")) = LOWER(TRIM(?))";
-            try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setInt(1, eventId);
-                ps.setString(2, combined);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        return rs.getInt(1) > 0;
-                    }
-                }
-            }
-            return false;
+            String col = fCol != null ? fCol : lCol;
+            String sql = "SELECT COUNT(*) FROM registrations WHERE event_id = ? " + status +
+                    " AND LOWER(TRIM(" + col + ")) = LOWER(TRIM(?))";
+            return existsByQuery(sql, eventId, fullName);
         }
+
         if (pCol != null) {
-            String w = s.hasStatus() ? " AND status = 'REGISTERED' " : "";
-            String sql = "SELECT COUNT(*) FROM registrations WHERE event_id = ? " + w
-                    + " AND LOWER(TRIM(" + pCol + ")) = LOWER(TRIM(?))";
-            try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setInt(1, eventId);
-                ps.setString(2, ((firstName != null ? firstName : "").trim() + " "
-                        + (lastName != null ? lastName : "").trim()).trim());
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        return rs.getInt(1) > 0;
-                    }
-                }
-            }
-            return false;
+            String sql = "SELECT COUNT(*) FROM registrations WHERE event_id = ? " + status +
+                    " AND LOWER(TRIM(" + pCol + ")) = LOWER(TRIM(?))";
+            return existsByQuery(sql, eventId, fullName);
         }
+
         return existeInscriptionUserEtEvent(userId, eventId);
     }
 
+    // ========================= MODIFIER =========================
     @Override
     public void modifier(Registration r) throws SQLException {
         RegistrationTableSchema s = schema();
@@ -432,6 +345,7 @@ public class RegistrationService implements ICrud<Registration> {
         vals.add(r.getAmount());
         sets.add(s.paymentColumn() + " = ?");
         vals.add(r.getPaymentMethod());
+
         if (s.hasStatus()) {
             sets.add("status = ?");
             vals.add(r.getStatus() != null ? r.getStatus() : "REGISTERED");
@@ -458,5 +372,75 @@ public class RegistrationService implements ICrud<Registration> {
             }
             ps.executeUpdate();
         }
+    }
+
+    // ========================= HELPERS PRIVÉS =========================
+    private String selectFromRegistrationsJoinEvents(RegistrationTableSchema s) {
+        StringBuilder sb = new StringBuilder("SELECT r.*, e.name AS event_name FROM registrations r ");
+        sb.append("INNER JOIN events e ON r.event_id = e.id ");
+        if (s.hasStatus()) {
+            sb.append("WHERE r.status = 'REGISTERED' ");
+        }
+        return sb.toString();
+    }
+
+    private String orderByRegistration(RegistrationTableSchema s) {
+        if (s.hasRegistrationDate()) {
+            return " ORDER BY r.registration_date DESC ";
+        }
+        return " ORDER BY r.id DESC ";
+    }
+
+    private static List<Registration> mapResultSet(ResultSet rs) throws SQLException {
+        List<Registration> list = new ArrayList<>();
+        while (rs.next()) {
+            list.add(mapRow(rs));
+        }
+        return list;
+    }
+
+    private static void applyParticipantFull(String value, Registration r) {
+        if (value == null || value.isBlank()) {
+            return;
+        }
+        String t = value.trim();
+        int sp = t.indexOf(' ');
+        if (sp < 0) {
+            r.setFirstName(t);
+            r.setLastName("");
+        } else {
+            r.setFirstName(t.substring(0, sp).trim());
+            r.setLastName(t.substring(sp + 1).trim());
+        }
+    }
+
+    private static Registration mapRow(ResultSet rs) throws SQLException {
+        Registration r = new Registration();
+        ResultSetMetaData md = rs.getMetaData();
+
+        for (int i = 1; i <= md.getColumnCount(); i++) {
+            String lab = md.getColumnLabel(i).toLowerCase(Locale.ROOT);
+
+            switch (lab) {
+                case "id" -> r.setId(rs.getInt(i));
+                case "user_id" -> r.setUserId(rs.getInt(i));
+                case "event_id" -> r.setEventId(rs.getInt(i));
+                case "first_name", "prenom", "firstname" -> r.setFirstName(rs.getString(i));
+                case "last_name", "nom", "lastname" -> r.setLastName(rs.getString(i));
+                case "participant_name", "full_name", "nom_complet", "participant" ->
+                        applyParticipantFull(rs.getString(i), r);
+                case "registration_date" -> {
+                    Timestamp ts = rs.getTimestamp(i);
+                    if (ts != null) {
+                        r.setRegistrationDate(ts.toLocalDateTime());
+                    }
+                }
+                case "amount" -> r.setAmount(rs.getDouble(i));
+                case "payment_method", "paymentmethod" -> r.setPaymentMethod(rs.getString(i));
+                case "status" -> r.setStatus(rs.getString(i));
+                case "event_name" -> r.setEventName(rs.getString(i));
+            }
+        }
+        return r;
     }
 }

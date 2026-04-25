@@ -27,6 +27,7 @@ import java.util.Optional;
 
 public class RegistrationListController {
 
+
     private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final String MESSAGE_RED_STYLE = "-fx-text-fill: #c62828; -fx-font-size: 12px; -fx-font-weight: bold;";
 
@@ -101,23 +102,20 @@ public class RegistrationListController {
                 viewB.setMaxWidth(Double.MAX_VALUE);
                 editB.setMaxWidth(Double.MAX_VALUE);
                 delB.setMaxWidth(Double.MAX_VALUE);
+
                 viewB.setOnAction(e -> {
                     Registration r = getItem();
-                    if (r != null) {
-                        showView(r);
-                    }
+                    if (r != null) showView(r);
                 });
+
                 editB.setOnAction(e -> {
                     Registration r = getItem();
-                    if (r != null) {
-                        openEdit(r);
-                    }
+                    if (r != null) openEdit(r);
                 });
+
                 delB.setOnAction(e -> {
                     Registration r = getItem();
-                    if (r != null) {
-                        confirmDelete(r);
-                    }
+                    if (r != null) confirmDelete(r);
                 });
             }
 
@@ -129,12 +127,12 @@ public class RegistrationListController {
                     setGraphic(null);
                 } else {
                     title.setText("📍 " + (item.getEventName() != null ? item.getEventName() : "Événement"));
-
                     badgeDate.setText("🗓 " + (item.getRegistrationDate() != null ? item.getRegistrationDate().format(DT) : "—"));
                     badgeAmount.setText("💰 " + String.format(Locale.FRANCE, "%.2f TND", item.getAmount()));
 
                     String payCode = item.getPaymentMethod() != null ? item.getPaymentMethod() : "";
                     badgePay.getStyleClass().removeAll("badge-pay-cash", "badge-pay-card");
+
                     if ("CARD".equalsIgnoreCase(payCode)) {
                         badgePay.getStyleClass().add("badge-pay-card");
                         badgePay.setText("💳 " + labelPayment(payCode));
@@ -161,9 +159,7 @@ public class RegistrationListController {
     }
 
     private static String labelPayment(String code) {
-        if (code == null || code.isBlank()) {
-            return "—";
-        }
+        if (code == null || code.isBlank()) return "—";
         return switch (code.toUpperCase(Locale.ROOT)) {
             case "CASH" -> "Espèces";
             case "CARD" -> "Carte";
@@ -182,14 +178,14 @@ public class RegistrationListController {
                     pay
             );
             registrationList.setItems(FXCollections.observableArrayList(list));
+
             if (searchMessageLabel != null) {
-                if (list.isEmpty()) {
-                    searchMessageLabel.setText("Aucun résultat. Modifiez votre saisie puis relancez la recherche.");
-                    searchMessageLabel.setStyle(MESSAGE_RED_STYLE);
-                } else {
-                    searchMessageLabel.setText(list.size() + " inscription(s) trouvée(s).");
-                    searchMessageLabel.setStyle(MESSAGE_RED_STYLE);
-                }
+                searchMessageLabel.setText(
+                        list.isEmpty()
+                                ? "Aucun résultat. Modifiez votre saisie puis relancez la recherche."
+                                : list.size() + " inscription(s) trouvée(s)."
+                );
+                searchMessageLabel.setStyle(MESSAGE_RED_STYLE);
             }
         } catch (SQLException e) {
             showError("Erreur de chargement : " + e.getMessage());
@@ -200,10 +196,12 @@ public class RegistrationListController {
     private void handleSearch() {
         String eventText = filterEventField.getText() != null ? filterEventField.getText().trim() : "";
         String pay = filterPaymentCombo.getSelectionModel().getSelectedItem();
+
         if (eventText.isEmpty() && (pay == null || "TOUTES".equalsIgnoreCase(pay))) {
             searchMessageLabel.setText("Astuce : saisissez un événement ou choisissez un paiement pour filtrer.");
             searchMessageLabel.setStyle(MESSAGE_RED_STYLE);
         }
+
         loadData();
     }
 
@@ -213,18 +211,15 @@ public class RegistrationListController {
     }
 
     private void showView(Registration r) {
-        String who = r.getFullName();
-        if (who == null || who.isBlank()) {
-            who = "—";
-        }
         String body = String.join("\n",
                 "Événement : " + nullToDash(r.getEventName()),
-                "Inscrit : " + who,
+                "Inscrit : " + nullToDash(r.getFullName()),
                 "Date : " + (r.getRegistrationDate() != null ? r.getRegistrationDate().format(DT) : "—"),
                 String.format(Locale.FRANCE, "Montant : %.2f TND", r.getAmount()),
                 "Paiement : " + labelPayment(r.getPaymentMethod()),
                 "Statut : " + nullToDash(r.getStatus())
         );
+
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         a.setHeaderText("bledna — détail");
         a.setTitle("bledna");
@@ -233,94 +228,55 @@ public class RegistrationListController {
     }
 
     private void openEdit(Registration r) {
-        System.out.println("🔧 DEBUG: openEdit() appelé avec Registration ID=" + (r != null ? r.getId() : "null"));
         try {
-            System.out.println("🔧 DEBUG: Récupération de l'inscription depuis la base...");
             Registration fresh = registrationService.trouverParId(r.getId());
             if (fresh == null) {
-                System.out.println("❌ DEBUG: Inscription introuvable dans la base !");
                 showError("Inscription introuvable.");
                 return;
             }
-            System.out.println("✅ DEBUG: Inscription trouvée : " + fresh.getEventName());
-            
-            System.out.println("🔧 DEBUG: Chargement du FXML RegistrationEdit.fxml...");
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/esprit/RegistrationEdit.fxml"));
-            if (loader.getLocation() == null) {
-                System.out.println("❌ DEBUG: FXML NOT FOUND!");
-                throw new IOException("Fichier RegistrationEdit.fxml introuvable dans les ressources");
-            }
-            
-            System.out.println("✅ DEBUG: FXML chargé, création de la scène...");
             Stage stage = new Stage();
             stage.setTitle("bledna — modifier l'inscription");
             Scene sc = new Scene(loader.load(), 540, 460);
-            
-            System.out.println("🔧 DEBUG: Application du style CSS...");
+
             StyleHelper.apply(sc);
             stage.setScene(sc);
-            
-            System.out.println("🔧 DEBUG: Récupération du contrôleur RegistrationEditController...");
+
             RegistrationEditController c = loader.getController();
-            if (c == null) {
-                System.out.println("❌ DEBUG: Contrôleur est NULL!");
-                throw new NullPointerException("Le contrôleur RegistrationEditController n'a pas pu être instancié");
-            }
-            
-            System.out.println("🔧 DEBUG: Définition de l'inscription dans le contrôleur...");
             c.setRegistration(fresh);
-            
-            System.out.println("✅ DEBUG: Affichage de la fenêtre...");
+
             stage.showAndWait();
-            
-            System.out.println("🔧 DEBUG: Rechargement des données...");
             loadData();
-            System.out.println("✅ DEBUG: Fenêtre fermée, données rechargées");
+
         } catch (IOException e) {
-            System.out.println("❌ IOException: " + e.getMessage());
-            e.printStackTrace();
-            showError("Erreur de chargement de l'interface : " + e.getMessage());
+            showError("Erreur de chargement : " + e.getMessage());
         } catch (SQLException e) {
-            System.out.println("❌ SQLException: " + e.getMessage());
-            e.printStackTrace();
-            showError("Erreur de base de données : " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("❌ Exception générale: " + e.getClass().getName() + " - " + e.getMessage());
-            e.printStackTrace();
-            showError("Erreur inattendue : " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            showError("Erreur DB : " + e.getMessage());
         }
     }
 
     private void confirmDelete(Registration r) {
-        System.out.println("🗑  DEBUG: confirmDelete() appelé avec Registration ID=" + (r != null ? r.getId() : "null"));
         Alert c = new Alert(Alert.AlertType.CONFIRMATION);
         c.setTitle("bledna");
         c.setHeaderText("Confirmer la suppression");
         c.setContentText("Supprimer l'inscription à « " + r.getEventName() + " » ?");
+
         Optional<ButtonType> res = c.showAndWait();
         if (res.isPresent() && res.get() == ButtonType.OK) {
-            System.out.println("🔧 DEBUG: Suppression confirmée pour ID=" + r.getId());
             try {
                 registrationService.supprimer(r.getId());
-                System.out.println("✅ DEBUG: Inscription supprimée");
                 loadData();
+
                 Alert success = new Alert(Alert.AlertType.INFORMATION);
                 success.setTitle("bledna");
                 success.setHeaderText("Succès");
                 success.setContentText("Inscription supprimée avec succès.");
                 success.showAndWait();
-                System.out.println("✅ DEBUG: Message de succès affiché");
+
             } catch (SQLException e) {
-                System.out.println("❌ SQLException: " + e.getMessage());
-                e.printStackTrace();
-                showError("Erreur lors de la suppression : " + e.getMessage());
-            } catch (Exception e) {
-                System.out.println("❌ Exception générale: " + e.getClass().getName() + " - " + e.getMessage());
-                e.printStackTrace();
-                showError("Erreur inattendue : " + e.getClass().getSimpleName() + " - " + e.getMessage());
+                showError("Erreur suppression : " + e.getMessage());
             }
-        } else {
-            System.out.println("🔧 DEBUG: Suppression annulée par l'utilisateur");
         }
     }
 
@@ -335,4 +291,5 @@ public class RegistrationListController {
         a.setContentText(m);
         a.showAndWait();
     }
+
 }
