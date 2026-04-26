@@ -7,9 +7,10 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.geometry.Insets?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.esprit.controllers.EventAddController" prefWidth="1000" prefHeight="600">
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.esprit.controllers.EventAddController" prefWidth="1000" prefHeight="700">
     <children>
         <VBox layoutX="150" layoutY="50" prefWidth="700" spacing="20" style="-fx-padding: 30;">
             <children>
@@ -35,41 +36,49 @@
                             </children>
                         </VBox>
 
-                        <!-- Lieu et Prix en ligne -->
+                        <!-- Date et Lieu en ligne -->
                         <HBox spacing="15">
                             <children>
                                 <VBox spacing="5" prefWidth="350">
+                                    <children>
+                                        <Label text="Date de l'événement *" style="-fx-font-weight: bold;" />
+                                        <DatePicker fx:id="eventDatePicker" style="-fx-padding: 10; -fx-font-size: 12;" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="5" prefWidth="300">
                                     <children>
                                         <Label text="Lieu *" style="-fx-font-weight: bold;" />
                                         <TextField fx:id="locationField" promptText="Entrez le lieu" style="-fx-padding: 10; -fx-font-size: 12;" />
                                     </children>
                                 </VBox>
-                                <VBox spacing="5" prefWidth="300">
+                            </children>
+                        </HBox>
+
+                        <!-- Prix et Type en ligne -->
+                        <HBox spacing="15">
+                            <children>
+                                <VBox spacing="5" prefWidth="350">
                                     <children>
                                         <Label text="Prix *" style="-fx-font-weight: bold;" />
                                         <TextField fx:id="priceField" promptText="Entrez le prix" style="-fx-padding: 10; -fx-font-size: 12;" />
                                     </children>
                                 </VBox>
-                            </children>
-                        </HBox>
-
-                        <!-- Type et Places en ligne -->
-                        <HBox spacing="15">
-                            <children>
-                                <VBox spacing="5" prefWidth="350">
+                                <VBox spacing="5" prefWidth="300">
                                     <children>
                                         <Label text="Type d'événement *" style="-fx-font-weight: bold;" />
                                         <ComboBox fx:id="typeCombo" promptText="Choisir..." style="-fx-padding: 10; -fx-font-size: 12;" />
                                     </children>
                                 </VBox>
-                                <VBox spacing="5" prefWidth="300">
-                                    <children>
-                                        <Label text="Max de places *" style="-fx-font-weight: bold;" />
-                                        <TextField fx:id="maxPlacesField" promptText="100" style="-fx-padding: 10; -fx-font-size: 12;" />
-                                    </children>
-                                </VBox>
                             </children>
                         </HBox>
+
+                        <!-- Places -->
+                        <VBox spacing="5">
+                            <children>
+                                <Label text="Max de places *" style="-fx-font-weight: bold;" />
+                                <TextField fx:id="maxPlacesField" promptText="100" style="-fx-padding: 10; -fx-font-size: 12;" />
+                            </children>
+                        </VBox>
 
                         <!-- Message d'erreur/validation -->
                         <Label fx:id="inputMessageLabel" text="" style="-fx-text-alignment: CENTER;" />

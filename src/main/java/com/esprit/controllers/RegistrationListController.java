@@ -80,8 +80,10 @@ public class RegistrationListController {
             private final Label badgeDate = new Label();
             private final Label badgeAmount = new Label();
             private final Label badgePay = new Label();
+            private final Label participantInfo = new Label();
+            private final Label emailInfo = new Label();
             private final HBox badgeRow = new HBox(8, badgeDate, badgeAmount, badgePay);
-            private final VBox left = new VBox(8, title, badgeRow);
+            private final VBox left = new VBox(8, title, badgeRow, participantInfo, emailInfo);
             private final Button viewB = new Button("👁  Voir");
             private final Button editB = new Button("✏  Modifier");
             private final Button delB = new Button("🗑  Supprimer");
@@ -100,6 +102,8 @@ public class RegistrationListController {
                 badgeRow.getStyleClass().add("badge-row");
                 badgeDate.getStyleClass().addAll("badge", "badge-date");
                 badgeAmount.getStyleClass().addAll("badge", "badge-amount");
+                participantInfo.setStyle("-fx-font-size: 13px; -fx-text-fill:#1f2937;");
+                emailInfo.setStyle("-fx-font-size: 12px; -fx-text-fill:#455a64;");
                 card.getStyleClass().add("bledna-card");
                 inner.setAlignment(Pos.TOP_LEFT);
                 inner.setPadding(new Insets(0));
@@ -147,6 +151,8 @@ public class RegistrationListController {
                             : (item.getPaymentDate() != null ? item.getPaymentDate().format(DT) : "Date non renseignée");
                     badgeDate.setText("🗓 " + regDate);
                     badgeAmount.setText("💰 " + String.format(Locale.FRANCE, "%.2f TND", item.getAmount()));
+                    participantInfo.setText("👤 " + resolveParticipantForReceipt(item.getFullName()));
+                    emailInfo.setText("✉ " + resolveEmailForReceipt(item.getEmail()));
 
                     String payCode = item.getPaymentMethod() != null ? item.getPaymentMethod() : "";
                     badgePay.getStyleClass().removeAll("badge-pay-cash", "badge-pay-card");
@@ -304,6 +310,10 @@ public class RegistrationListController {
     }
 
     private void openReceiptDialog(PaymentReceiptService.ReceiptData data) throws Exception {
+        String resolvedParticipant = resolveParticipantForReceipt(data.participantName());
+        String resolvedEmail = resolveEmailForReceipt(data.email());
+        PaymentReceiptService.ReceiptData displayData = withResolvedIdentity(data, resolvedParticipant, resolvedEmail);
+
         Label appTag = new Label("BLEDNA");
         appTag.setStyle("-fx-text-fill: #607d8b; -fx-font-size: 11px; -fx-font-weight: bold;");
         Label title = new Label("Reçu de paiement");
@@ -313,25 +323,40 @@ public class RegistrationListController {
         downloadBtn.getStyleClass().add("btn-primary");
         downloadBtn.setOnAction(e -> {
             try {
-                var file = receiptService.exportPdfReceipt(downloadBtn.getScene().getWindow(), data);
+                var file = receiptService.exportPdfReceipt(downloadBtn.getScene().getWindow(), displayData);
                 if (file == null) {
                     return;
-                }
-                boolean mailed = false;
-                if (data.email() != null && !data.email().isBlank() && !"—".equals(data.email())) {
-                    byte[] pdfBytes = receiptService.generatePdfBytes(data);
-                    receiptMailService.sendReceiptEmail(data.email(), data.eventName(), data.receiptCode(), pdfBytes);
-                    mailed = true;
                 }
                 Alert ok = new Alert(Alert.AlertType.INFORMATION);
                 ok.setTitle("bledna");
                 ok.setHeaderText("PDF généré");
-                ok.setContentText(mailed
-                        ? "Le fichier PDF a été téléchargé sur votre PC.\nLe reçu a aussi été envoyé par email."
-                        : "Le fichier PDF a été téléchargé sur votre PC.\nEmail non envoyé (adresse manquante).");
+                ok.setContentText("Le fichier PDF a été téléchargé sur votre PC.");
                 ok.showAndWait();
             } catch (Exception ex) {
                 showError("Erreur export PDF : " + ex.getMessage());
+            }
+        });
+
+        Button mailBtn = new Button("✉ Envoyer mail");
+        mailBtn.getStyleClass().add("btn-action-view");
+        mailBtn.setOnAction(e -> {
+            try {
+                String targetEmail = resolveEmailForSending(data, resolvedEmail);
+                if (targetEmail == null || targetEmail.isBlank() || "—".equals(targetEmail)) {
+                    showError("Email introuvable. Ajoutez un email dans le formulaire d'inscription.");
+                    return;
+                }
+                PaymentReceiptService.ReceiptData mailData = withResolvedIdentity(data, resolvedParticipant, targetEmail);
+                byte[] pdfBytes = receiptService.generatePdfBytes(mailData);
+                receiptMailService.sendReceiptEmail(targetEmail, mailData.eventName(), mailData.receiptCode(), pdfBytes);
+                registrationService.updateEmailById(data.registrationId(), targetEmail);
+                Alert ok = new Alert(Alert.AlertType.INFORMATION);
+                ok.setTitle("bledna");
+                ok.setHeaderText("Email envoyé");
+                ok.setContentText("Le reçu a été envoyé à : " + targetEmail);
+                ok.showAndWait();
+            } catch (Exception ex) {
+                showError("Erreur envoi mail : " + ex.getMessage());
             }
         });
 
@@ -344,8 +369,8 @@ public class RegistrationListController {
                 + "    📍 " + data.location());
         eventMeta.setStyle("-fx-text-fill:#455a64; -fx-font-size: 14px;");
 
-        Label participant = new Label("Participant : " + data.participantName());
-        Label email = new Label("Email : " + data.email());
+        Label participant = new Label("Participant : " + resolvedParticipant);
+        Label email = new Label("Email : " + resolvedEmail);
         Label regDate = new Label("Date d'inscription : " + (data.registrationDate() != null ? data.registrationDate().format(DT) : "—"));
         participant.setStyle("-fx-font-size: 14px;");
         email.setStyle("-fx-font-size: 14px;");
@@ -372,7 +397,10 @@ public class RegistrationListController {
         HBox qrRow = new HBox(14, qr, qrInfo);
         qrRow.setAlignment(Pos.CENTER_LEFT);
 
-        VBox root = new VBox(14, top, downloadBtn, contentCard, qrRow);
+        HBox actionButtons = new HBox(10, downloadBtn, mailBtn);
+        actionButtons.setAlignment(Pos.CENTER_LEFT);
+
+        VBox root = new VBox(14, top, actionButtons, contentCard, qrRow);
         root.setStyle("-fx-padding: 20; -fx-background-color: white;");
         root.setAlignment(Pos.TOP_LEFT);
 
@@ -383,6 +411,76 @@ public class RegistrationListController {
         StyleHelper.apply(sc);
         st.setScene(sc);
         st.showAndWait();
+    }
+
+    private String resolveEmailForReceipt(String currentEmail) {
+        if (currentEmail != null && !currentEmail.isBlank() && !"—".equals(currentEmail)) {
+            return currentEmail.trim();
+        }
+        String sessionMail = AppSession.getRegistrantEmail();
+        if (sessionMail != null && !sessionMail.isBlank()) {
+            return sessionMail.trim();
+        }
+        return "—";
+    }
+
+    private String resolveParticipantForReceipt(String participantName) {
+        if (participantName != null && !participantName.isBlank() && !"—".equals(participantName)) {
+            return participantName.trim();
+        }
+        String first = AppSession.getRegistrantFirstName() != null ? AppSession.getRegistrantFirstName().trim() : "";
+        String last = AppSession.getRegistrantLastName() != null ? AppSession.getRegistrantLastName().trim() : "";
+        String combined = (first + " " + last).trim();
+        return combined.isBlank() ? "—" : combined;
+    }
+
+    private String resolveEmailForSending(PaymentReceiptService.ReceiptData data, String displayEmail) {
+        if (displayEmail != null && !displayEmail.isBlank() && !"—".equals(displayEmail)) {
+            return displayEmail.trim();
+        }
+        if (data.email() != null && !data.email().isBlank() && !"—".equals(data.email())) {
+            return data.email().trim();
+        }
+        String sessionMail = AppSession.getRegistrantEmail();
+        if (sessionMail != null && !sessionMail.isBlank()) {
+            return sessionMail.trim();
+        }
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Email requis");
+        dialog.setHeaderText("Entrez l'email pour envoyer le reçu");
+        dialog.setContentText("Email :");
+        Optional<String> res = dialog.showAndWait();
+        if (res.isEmpty()) {
+            return "—";
+        }
+        String email = res.get().trim();
+        if (!isValidEmail(email)) {
+            showError("Email invalide. Le reçu sera disponible seulement en PDF local.");
+            return "—";
+        }
+        return email;
+    }
+
+    private static boolean isValidEmail(String email) {
+        return email != null && email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+    }
+
+    private static PaymentReceiptService.ReceiptData withResolvedIdentity(
+            PaymentReceiptService.ReceiptData d, String participant, String email) {
+        return new PaymentReceiptService.ReceiptData(
+                d.registrationId(),
+                d.receiptCode(),
+                d.eventName(),
+                d.eventDate(),
+                d.location(),
+                participant,
+                email,
+                d.registrationDate(),
+                d.amount(),
+                d.paymentMethod(),
+                d.status(),
+                d.qrPayload()
+        );
     }
 
     private static String nullToDash(String s) {

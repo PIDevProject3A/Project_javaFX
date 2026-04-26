@@ -9,6 +9,7 @@ public final class AppSession {
 
     private static String registrantFirstName = "";
     private static String registrantLastName = "";
+    private static String registrantEmail = "";
 
     private AppSession() {
     }
@@ -18,8 +19,13 @@ public final class AppSession {
     }
 
     public static void setRegistrant(String firstName, String lastName) {
+        setRegistrant(firstName, lastName, registrantEmail);
+    }
+
+    public static void setRegistrant(String firstName, String lastName, String email) {
         registrantFirstName = firstName == null ? "" : firstName.trim();
         registrantLastName = lastName == null ? "" : lastName.trim();
+        registrantEmail = email == null ? "" : email.trim();
     }
 
     public static String getRegistrantFirstName() {
@@ -34,8 +40,13 @@ public final class AppSession {
         return !registrantFirstName.isEmpty() && !registrantLastName.isEmpty();
     }
 
+    public static String getRegistrantEmail() {
+        return registrantEmail;
+    }
+
     public static void clearRegistrant() {
         registrantFirstName = "";
         registrantLastName = "";
+        registrantEmail = "";
     }
 }

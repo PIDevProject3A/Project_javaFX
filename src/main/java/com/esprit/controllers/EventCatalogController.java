@@ -2,8 +2,13 @@ package com.esprit.controllers;
 
 import com.esprit.entities.Event;
 import com.esprit.Services.EventService;
+import com.esprit.Services.RegistrationService;
+import com.esprit.utils.AppSession;
 import com.esprit.utils.NavigationManager;
 import com.esprit.utils.StyleHelper;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -23,6 +28,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
+import javafx.util.Duration;
 
 /**
  * Vue « public » : inscription via page dédiée (prénom / nom + paiement si payant).
@@ -33,12 +40,17 @@ public class EventCatalogController {
 
     @FXML
     private ListView<Event> eventList;
+    @FXML
+    private Label tomorrowReminderLabel;
 
     private final EventService eventService = new EventService();
+    private final RegistrationService registrationService = new RegistrationService();
+    private Timeline reminderPulse;
 
     @FXML
     public void initialize() {
         configureListCells();
+        loadTomorrowReminder();
         loadEvents();
     }
 
@@ -159,6 +171,61 @@ public class EventCatalogController {
             eventList.setItems(FXCollections.observableArrayList(events));
         } catch (SQLException e) {
             showError("Erreur : " + e.getMessage());
+        }
+    }
+
+    private void loadTomorrowReminder() {
+        if (tomorrowReminderLabel == null) {
+            return;
+        }
+        try {
+            List<String> reminders = registrationService.remindersForTomorrow(AppSession.getCurrentUserId());
+            if (reminders.isEmpty()) {
+                stopReminderAnimation();
+                tomorrowReminderLabel.setManaged(false);
+                tomorrowReminderLabel.setVisible(false);
+                tomorrowReminderLabel.setText("");
+                return;
+            }
+            String message = reminders.size() == 1
+                    ? "Rappel : votre événement aura lieu demain : " + reminders.get(0)
+                    : "Rappel : vos événements de demain : " + reminders.stream().collect(Collectors.joining("  |  "));
+            tomorrowReminderLabel.setText("🔔 " + message);
+            tomorrowReminderLabel.setManaged(true);
+            tomorrowReminderLabel.setVisible(true);
+            tomorrowReminderLabel.setStyle("-fx-background-color:#ffebee; -fx-text-fill:#b71c1c; -fx-font-weight:bold; -fx-padding:10 12; -fx-background-radius:8; -fx-border-color:#ef9a9a; -fx-border-radius:8;");
+            startReminderAnimation();
+        } catch (SQLException e) {
+            stopReminderAnimation();
+            tomorrowReminderLabel.setManaged(false);
+            tomorrowReminderLabel.setVisible(false);
+        }
+    }
+
+    private void startReminderAnimation() {
+        stopReminderAnimation();
+        reminderPulse = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                        new KeyValue(tomorrowReminderLabel.opacityProperty(), 1.0),
+                        new KeyValue(tomorrowReminderLabel.scaleXProperty(), 1.0),
+                        new KeyValue(tomorrowReminderLabel.scaleYProperty(), 1.0)),
+                new KeyFrame(Duration.millis(650),
+                        new KeyValue(tomorrowReminderLabel.opacityProperty(), 0.55),
+                        new KeyValue(tomorrowReminderLabel.scaleXProperty(), 1.015),
+                        new KeyValue(tomorrowReminderLabel.scaleYProperty(), 1.015)),
+                new KeyFrame(Duration.millis(1300),
+                        new KeyValue(tomorrowReminderLabel.opacityProperty(), 1.0),
+                        new KeyValue(tomorrowReminderLabel.scaleXProperty(), 1.0),
+                        new KeyValue(tomorrowReminderLabel.scaleYProperty(), 1.0))
+        );
+        reminderPulse.setCycleCount(Timeline.INDEFINITE);
+        reminderPulse.play();
+    }
+
+    private void stopReminderAnimation() {
+        if (reminderPulse != null) {
+            reminderPulse.stop();
+            reminderPulse = null;
         }
     }
 

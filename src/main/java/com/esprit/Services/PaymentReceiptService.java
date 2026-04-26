@@ -15,10 +15,6 @@ import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
@@ -29,7 +25,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.nio.file.Files;
+import java.io.FileOutputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -66,6 +62,7 @@ public class PaymentReceiptService {
                 "payment=" + payment);
 
         return new ReceiptData(
+                r.getId(),
                 receiptCode,
                 eventName,
                 eventDate,
@@ -89,22 +86,8 @@ public class PaymentReceiptService {
     }
 
     /**
-     * Exporte le reçu PDF avec QR code, en utilisant un FileChooser JavaFX.
+     * Génère les bytes du PDF du reçu.
      */
-    public File exportPdfReceipt(Window owner, ReceiptData d) throws Exception {
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle("Enregistrer le reçu PDF");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
-        chooser.setInitialFileName("recu_paiement_" + d.receiptCode() + ".pdf");
-        File target = chooser.showSaveDialog(owner);
-        if (target == null) {
-            return null;
-        }
-        byte[] pdfBytes = generatePdfBytes(d);
-        Files.write(target.toPath(), pdfBytes);
-        return target;
-    }
-
     public byte[] generatePdfBytes(ReceiptData d) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Document doc = new Document(PageSize.A4, 36, 36, 42, 36);
@@ -112,46 +95,32 @@ public class PaymentReceiptService {
             PdfWriter.getInstance(doc, baos);
             doc.open();
 
-            Font titleFont = new Font(Font.FontFamily.HELVETICA, 24, Font.BOLD, new BaseColor(27, 94, 32));
-            Font section = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD, new BaseColor(69, 90, 100));
+            Font titleFont = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD, BaseColor.DARK_GRAY);
             Font normal = new Font(Font.FontFamily.HELVETICA, 11, Font.NORMAL, BaseColor.DARK_GRAY);
-            Font strong = new Font(Font.FontFamily.HELVETICA, 13, Font.BOLD, new BaseColor(13, 27, 42));
+            Font strong = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD, new BaseColor(27, 94, 32));
 
             Paragraph title = new Paragraph("Bledna - Reçu de paiement", titleFont);
             title.setAlignment(Element.ALIGN_CENTER);
-            title.setSpacingAfter(8f);
+            title.setSpacingAfter(14f);
             doc.add(title);
-            Paragraph code = new Paragraph("Code reçu : " + d.receiptCode(), strong);
-            code.setAlignment(Element.ALIGN_CENTER);
-            code.setSpacingAfter(12f);
-            doc.add(code);
 
-            PdfPTable table = new PdfPTable(2);
-            table.setWidthPercentage(100);
-            table.setSpacingBefore(6f);
-            table.setSpacingAfter(10f);
-            table.setWidths(new float[]{1.2f, 2.4f});
-
-            addRow(table, "Événement", d.eventName(), section, normal);
-            addRow(table, "Date événement", formatDate(d.eventDate()), section, normal);
-            addRow(table, "Lieu", d.location(), section, normal);
-            addRow(table, "Participant", d.participantName(), section, normal);
-            addRow(table, "Email", d.email(), section, normal);
-            addRow(table, "Date inscription", formatDate(d.registrationDate()), section, normal);
-            addRow(table, "Paiement", d.paymentMethod(), section, normal);
-            addRow(table, "Statut", d.status(), section, normal);
-            addRow(table, "Montant payé", String.format(Locale.FRANCE, "%.2f TND", d.amount()), section, strong);
-            doc.add(table);
-
-            Paragraph qrTitle = new Paragraph("QR code de vérification", section);
-            qrTitle.setAlignment(Element.ALIGN_CENTER);
-            qrTitle.setSpacingBefore(8f);
-            doc.add(qrTitle);
+            doc.add(new Paragraph("Code reçu : " + d.receiptCode(), strong));
+            doc.add(new Paragraph("Événement : " + d.eventName(), normal));
+            doc.add(new Paragraph("Date événement : " + formatDate(d.eventDate()), normal));
+            doc.add(new Paragraph("Lieu : " + d.location(), normal));
+            doc.add(new Paragraph("Participant : " + d.participantName(), normal));
+            doc.add(new Paragraph("Email : " + d.email(), normal));
+            doc.add(new Paragraph("Date inscription : " + formatDate(d.registrationDate()), normal));
+            doc.add(new Paragraph(String.format(Locale.FRANCE, "Montant payé : %.2f TND", d.amount()), strong));
+            doc.add(new Paragraph("Méthode paiement : " + d.paymentMethod(), normal));
+            doc.add(new Paragraph("Statut : " + d.status(), normal));
+            doc.add(Chunk.NEWLINE);
 
             byte[] qrPng = createQrPng(d.qrPayload(), 260);
             com.itextpdf.text.Image qr = com.itextpdf.text.Image.getInstance(qrPng);
             qr.setAlignment(Element.ALIGN_CENTER);
             doc.add(qr);
+
 
             Paragraph note = new Paragraph("QR code de vérification du reçu", normal);
             note.setAlignment(Element.ALIGN_CENTER);
@@ -166,26 +135,32 @@ public class PaymentReceiptService {
         return baos.toByteArray();
     }
 
+    /**
+     * Exporte le reçu PDF avec QR code, en utilisant un FileChooser JavaFX.
+     */
+    public File exportPdfReceipt(Window owner, ReceiptData d) throws Exception {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Enregistrer le reçu PDF");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
+        chooser.setInitialFileName("recu_paiement_" + d.receiptCode() + ".pdf");
+        File target = chooser.showSaveDialog(owner);
+        if (target == null) {
+            return null;
+        }
+
+        byte[] pdfBytes = generatePdfBytes(d);
+        try (FileOutputStream fos = new FileOutputStream(target)) {
+            fos.write(pdfBytes);
+        }
+        return target;
+    }
+
     private static String formatDate(LocalDateTime d) {
         return d != null ? d.format(DT) : "—";
     }
 
     private static String nullSafe(String s) {
         return s == null ? "" : s;
-    }
-
-    private static void addRow(PdfPTable table, String key, String value, Font keyFont, Font valFont) {
-        PdfPCell c1 = new PdfPCell(new Phrase(key, keyFont));
-        c1.setBorder(Rectangle.BOX);
-        c1.setBorderColor(new BaseColor(220, 231, 240));
-        c1.setPadding(8f);
-        c1.setBackgroundColor(new BaseColor(248, 251, 253));
-        PdfPCell c2 = new PdfPCell(new Phrase(value != null ? value : "—", valFont));
-        c2.setBorder(Rectangle.BOX);
-        c2.setBorderColor(new BaseColor(220, 231, 240));
-        c2.setPadding(8f);
-        table.addCell(c1);
-        table.addCell(c2);
     }
 
     /**
@@ -203,9 +178,10 @@ public class PaymentReceiptService {
     }
 
     /**
-     * Record pour stocker les données du reçu.
+     * Record pour stocker les données du reçu (avec registrationId).
      */
     public record ReceiptData(
+            int registrationId,
             String receiptCode,
             String eventName,
             LocalDateTime eventDate,

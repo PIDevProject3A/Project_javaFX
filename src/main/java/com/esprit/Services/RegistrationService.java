@@ -6,6 +6,9 @@ import com.esprit.utils.MyDataBase;
 import com.esprit.utils.RegistrationTableSchema;
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class RegistrationService implements ICrud<Registration> {
@@ -18,6 +21,7 @@ public class RegistrationService implements ICrud<Registration> {
 
     public RegistrationService(Connection connection) {
         this.conn = connection;
+        ensureIdentityColumns();
     }
 
     private RegistrationTableSchema schema;
@@ -27,6 +31,27 @@ public class RegistrationService implements ICrud<Registration> {
             schema = new RegistrationTableSchema(conn);
         }
         return schema;
+    }
+
+    /**
+     * Auto-migration légère pour éviter la perte nom/prénom/email
+     * quand la table registrations est ancienne.
+     */
+    private void ensureIdentityColumns() {
+        String[] ddl = {
+                "ALTER TABLE registrations ADD COLUMN first_name VARCHAR(80) NOT NULL DEFAULT ''",
+                "ALTER TABLE registrations ADD COLUMN last_name VARCHAR(80) NOT NULL DEFAULT ''",
+                "ALTER TABLE registrations ADD COLUMN email VARCHAR(180) NULL",
+                "ALTER TABLE registrations ADD COLUMN registration_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"
+        };
+        for (String sql : ddl) {
+            try (Statement st = conn.createStatement()) {
+                st.executeUpdate(sql);
+            } catch (SQLException ignored) {
+                // colonne déjà existante ou droit insuffisant : on continue sans bloquer l'application
+            }
+        }
+        schema = null;
     }
 
     // ========================= HELPER =========================
@@ -68,6 +93,7 @@ public class RegistrationService implements ICrud<Registration> {
         String fCol = s.firstNameColumn();
         String lCol = s.lastNameColumn();
         String pCol = s.participantNameColumn();
+        String emailCol = s.emailColumn(); // Déclaration unique ici
 
         if (fCol != null && lCol != null) {
             cols.add(fCol);
@@ -91,8 +117,8 @@ public class RegistrationService implements ICrud<Registration> {
                     r.getRegistrationDate() != null ? r.getRegistrationDate() : java.time.LocalDateTime.now()));
         }
 
-        if (s.has("email")) {
-            cols.add("email");
+        if (emailCol != null) {
+            cols.add(emailCol);
             vals.add(r.getEmail());
         }
 
@@ -246,7 +272,7 @@ public class RegistrationService implements ICrud<Registration> {
             expr = "CONCAT(COUNT(*), ' inscription(s)')";
         }
 
-        String where = s.hasStatus() ? " WHERE r.status = 'REGISTERED' " : "";
+        String where = s.hasStatus() ? " WHERE r.status IN ('REGISTERED', 'PAID', 'PENDING_PAYMENT') " : "";
         String sql = "SELECT r.event_id, " + expr + " AS names FROM registrations r " + where + " GROUP BY r.event_id";
 
         try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
@@ -261,14 +287,23 @@ public class RegistrationService implements ICrud<Registration> {
 
     // ========================= TROUVER PAR ID =========================
     public Registration trouverParId(int id) throws SQLException {
-        String sql = """
+        RegistrationTableSchema s = schema();
+        String fCol = s.firstNameColumn();
+        String lCol = s.lastNameColumn();
+        String pCol = s.participantNameColumn();
+        String emailCol = s.emailColumn();
+        StringBuilder sql = new StringBuilder("""
             SELECT r.*, e.name AS event_name
             FROM registrations r
             INNER JOIN events e ON r.event_id = e.id
             WHERE r.id = ?
-            """;
+            """);
+        if (fCol != null) sql.insert(sql.indexOf("FROM"), ", r." + fCol + " AS reg_first_name ");
+        if (lCol != null) sql.insert(sql.indexOf("FROM"), ", r." + lCol + " AS reg_last_name ");
+        if (pCol != null) sql.insert(sql.indexOf("FROM"), ", r." + pCol + " AS reg_participant_name ");
+        if (emailCol != null) sql.insert(sql.indexOf("FROM"), ", r." + emailCol + " AS reg_email ");
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -357,8 +392,9 @@ public class RegistrationService implements ICrud<Registration> {
             vals.add(Timestamp.valueOf(r.getRegistrationDate()));
         }
 
-        if (s.has("email")) {
-            sets.add("email = ?");
+        String emailCol = s.emailColumn();
+        if (emailCol != null) {
+            sets.add(emailCol + " = ?");
             vals.add(r.getEmail());
         }
 
@@ -509,7 +545,16 @@ public class RegistrationService implements ICrud<Registration> {
 
     // ========================= HELPERS PRIVÉS =========================
     private String selectFromRegistrationsJoinEvents(RegistrationTableSchema s) {
-        StringBuilder sb = new StringBuilder("SELECT r.*, e.name AS event_name FROM registrations r ");
+        StringBuilder sb = new StringBuilder("SELECT r.*, e.name AS event_name");
+        String fCol = s.firstNameColumn();
+        String lCol = s.lastNameColumn();
+        String pCol = s.participantNameColumn();
+        String emailCol = s.emailColumn();
+        if (fCol != null) sb.append(", r.").append(fCol).append(" AS reg_first_name");
+        if (lCol != null) sb.append(", r.").append(lCol).append(" AS reg_last_name");
+        if (pCol != null) sb.append(", r.").append(pCol).append(" AS reg_participant_name");
+        if (emailCol != null) sb.append(", r.").append(emailCol).append(" AS reg_email");
+        sb.append(" FROM registrations r ");
         sb.append("INNER JOIN events e ON r.event_id = e.id ");
         if (s.hasStatus()) {
             sb.append("WHERE r.status IN ('REGISTERED', 'PAID', 'PENDING_PAYMENT') ");
@@ -560,8 +605,11 @@ public class RegistrationService implements ICrud<Registration> {
                 case "event_id" -> r.setEventId(rs.getInt(i));
                 case "first_name", "prenom", "firstname" -> r.setFirstName(rs.getString(i));
                 case "last_name", "nom", "lastname" -> r.setLastName(rs.getString(i));
+                case "reg_first_name" -> r.setFirstName(rs.getString(i));
+                case "reg_last_name" -> r.setLastName(rs.getString(i));
                 case "participant_name", "full_name", "nom_complet", "participant" ->
                         applyParticipantFull(rs.getString(i), r);
+                case "reg_participant_name" -> applyParticipantFull(rs.getString(i), r);
                 case "registration_date" -> {
                     Timestamp ts = rs.getTimestamp(i);
                     if (ts != null) {
@@ -569,6 +617,7 @@ public class RegistrationService implements ICrud<Registration> {
                     }
                 }
                 case "email", "mail" -> r.setEmail(rs.getString(i));
+                case "reg_email" -> r.setEmail(rs.getString(i));
                 case "amount" -> r.setAmount(rs.getDouble(i));
                 case "budget" -> r.setBudget(rs.getDouble(i));
                 case "is_paid" -> r.setPaid(rs.getBoolean(i));
@@ -593,6 +642,7 @@ public class RegistrationService implements ICrud<Registration> {
         String fCol = s.firstNameColumn();
         String lCol = s.lastNameColumn();
         String pCol = s.participantNameColumn();
+        String emailCol = s.emailColumn(); // Ajouté ici
 
         StringBuilder sql = new StringBuilder("""
         SELECT r.*, e.name AS event_name
@@ -600,6 +650,10 @@ public class RegistrationService implements ICrud<Registration> {
         INNER JOIN events e ON r.event_id = e.id
         WHERE r.user_id = ? AND r.event_id = ?
         """);
+        if (fCol != null) sql.insert(sql.indexOf("FROM"), ", r." + fCol + " AS reg_first_name ");
+        if (lCol != null) sql.insert(sql.indexOf("FROM"), ", r." + lCol + " AS reg_last_name ");
+        if (pCol != null) sql.insert(sql.indexOf("FROM"), ", r." + pCol + " AS reg_participant_name ");
+        if (emailCol != null) sql.insert(sql.indexOf("FROM"), ", r." + emailCol + " AS reg_email ");
 
         List<Object> params = new ArrayList<>();
         params.add(userId);
@@ -644,4 +698,73 @@ public class RegistrationService implements ICrud<Registration> {
         return null;
     }
 
+    /**
+     * Met à jour l'email d'une inscription par son ID.
+     */
+    public void updateEmailById(int registrationId, String newEmail) throws SQLException {
+        RegistrationTableSchema s = schema();
+        String emailCol = s.emailColumn();
+        if (emailCol == null) {
+            return; // Colonne email n'existe pas
+        }
+        try (PreparedStatement ps = conn.prepareStatement("UPDATE registrations SET " + emailCol + " = ? WHERE id = ?")) {
+            ps.setString(1, newEmail != null ? newEmail.trim() : "");
+            ps.setInt(2, registrationId);
+        ps.executeUpdate();
+        }
+    }
+
+    /**
+     * Retourne les notifications "événement demain" pour l'utilisateur.
+     * Affiché pendant toute la journée J-1.
+     */
+    public List<String> remindersForTomorrow(int userId) throws SQLException {
+        RegistrationTableSchema s = schema();
+        LocalDateTime start = LocalDate.now().plusDays(1).atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+
+        StringBuilder sql = new StringBuilder("""
+                SELECT DISTINCT e.name, e.eventDate
+                FROM registrations r
+                INNER JOIN events e ON e.id = r.event_id
+                WHERE e.eventDate >= ? AND e.eventDate < ?
+                """);
+
+        List<Object> params = new ArrayList<>();
+        params.add(Timestamp.valueOf(start));
+        params.add(Timestamp.valueOf(end));
+
+        if (s.has("user_id")) {
+            sql.append(" AND r.user_id = ? ");
+            params.add(userId);
+        }
+        if (s.hasStatus()) {
+            sql.append(" AND r.status IN ('REGISTERED', 'PAID', 'PENDING_PAYMENT') ");
+        }
+        sql.append(" ORDER BY e.eventDate ASC ");
+
+        List<String> out = new ArrayList<>();
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                Object p = params.get(i);
+                if (p instanceof Timestamp ts) {
+                    ps.setTimestamp(i + 1, ts);
+                } else if (p instanceof Integer n) {
+                    ps.setInt(i + 1, n);
+                }
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String name = rs.getString("name");
+                    Timestamp ts = rs.getTimestamp("eventDate");
+                    if (name == null || name.isBlank() || ts == null) {
+                        continue;
+                    }
+                    out.add(name.trim() + " (" + ts.toLocalDateTime().format(fmt) + ")");
+                }
+            }
+        }
+        return out;
+    }
 }

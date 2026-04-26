@@ -17,8 +17,7 @@
                         <Button text="📋 Mes inscriptions" onAction="#handleOpenRegistrations" styleClass="btn-secondary"/>
                     </children>
                 </HBox>
-                <Label text="Inscription : prénom, nom, date/heure d'inscription. Le montant et le mode de paiement sont fixés par l'organisateur (événement). Utilisez « Mes inscriptions » pour filtrer par nom si besoin."
-                       styleClass="label-subtitle" wrapText="true" maxWidth="980"/>
+                <Label fx:id="tomorrowReminderLabel" managed="false" visible="false" wrapText="true" maxWidth="1080"/>
                 <ListView fx:id="eventList" prefWidth="1118" prefHeight="620" styleClass="list-view-registration"/>
             </children>
         </VBox>

@@ -74,7 +74,6 @@ public class RegisterEventFormController {
             fixedAmountLabel.setText("Événement gratuit — montant : 0,00 TND");
         }
 
-
         registrationDatePicker.setValue(LocalDate.now());
         registrationTimeField.setText(LocalTime.now().truncatedTo(ChronoUnit.MINUTES).format(HM));
 
@@ -88,6 +87,26 @@ public class RegisterEventFormController {
         }
         if (registrationTimeField != null) {
             registrationTimeField.setText(LocalTime.now().truncatedTo(ChronoUnit.MINUTES).format(HM));
+        }
+
+
+        prefillFromSession();
+    }
+
+
+    private void prefillFromSession() {
+        String firstName = AppSession.getRegistrantFirstName();
+        String lastName = AppSession.getRegistrantLastName();
+        String email = AppSession.getRegistrantEmail();
+
+        if (firstName != null && !firstName.isBlank()) {
+            firstNameField.setText(firstName);
+        }
+        if (lastName != null && !lastName.isBlank()) {
+            lastNameField.setText(lastName);
+        }
+        if (email != null && !email.isBlank()) {
+            emailField.setText(email);
         }
     }
 
@@ -135,7 +154,23 @@ public class RegisterEventFormController {
                 existing = registrationService.trouverParIdUtilisateur(
                         AppSession.getCurrentUserId(), event.getId(), fn, ln);
                 if (existing != null && event.getPrice() > 0 && !existing.isPaid()) {
-                    // Déjà inscrit mais paiement non confirmé : on relance Stripe.
+                    // Déjà inscrit mais paiement non confirmé : on met à jour les coordonnées,
+                    // puis on relance Stripe avec les données à jour.
+                    existing.setFirstName(fn);
+                    existing.setLastName(ln);
+                    existing.setEmail(email);
+                    if (existing.getRegistrationDate() == null) {
+                        existing.setRegistrationDate(registrationDt);
+                    }
+                    if (existing.getPaymentMethod() == null || existing.getPaymentMethod().isBlank()) {
+                        existing.setPaymentMethod(paymentMethodFromEvent(event));
+                    }
+                    if (existing.getAmount() <= 0 && event.getPrice() > 0) {
+                        existing.setAmount(event.getPrice());
+                        existing.setBudget(event.getPrice());
+                    }
+                    registrationService.modifier(existing);
+                    AppSession.setRegistrant(fn, ln, email);
                     handleStripePayment(existing);
                     close();
                     return;
@@ -163,7 +198,7 @@ public class RegisterEventFormController {
             Registration fresh = registrationService.trouverParIdUtilisateur(
                     AppSession.getCurrentUserId(), event.getId(), fn, ln);
             if (fresh == null) {
-                AppSession.setRegistrant(fn, ln);
+                AppSession.setRegistrant(fn, ln, email);
                 showInfo("✅ Inscription confirmée.");
                 close();
                 return;
@@ -173,7 +208,7 @@ public class RegisterEventFormController {
             if (event.getPrice() > 0) {
                 handleStripePayment(fresh);
             } else {
-                AppSession.setRegistrant(fn, ln);
+                AppSession.setRegistrant(fn, ln, email);
                 showInfo("✅ Inscription confirmée.");
             }
 
@@ -182,8 +217,6 @@ public class RegisterEventFormController {
             showError("Erreur: " + e.getMessage());
         }
     }
-
-
 
     private LocalDateTime parseRegistrationDateTime() {
         LocalDate date = registrationDatePicker.getValue();
@@ -251,7 +284,7 @@ public class RegisterEventFormController {
                 if (paid) {
                     registrationService.effectuerPaiement(registration.getId());
                     registrationService.saveStripeSession(registration.getId(), session.sessionId(), "PAID");
-                    AppSession.setRegistrant(registration.getFirstName(), registration.getLastName());
+                    AppSession.setRegistrant(registration.getFirstName(), registration.getLastName(), registration.getEmail());
                     showInfo("✅ Inscription et paiement Stripe confirmés.");
                 } else {
                     showError("Le paiement n'est pas encore confirmé par Stripe.\n"

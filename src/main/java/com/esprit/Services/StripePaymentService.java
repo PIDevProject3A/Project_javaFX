@@ -17,7 +17,7 @@ public class StripePaymentService {
     private static final String SUCCESS_URL = "https://example.com/payment-success";
     private static final String CANCEL_URL = "https://example.com/payment-cancel";
 
-    // ⚡ taux approximatif (à améliorer plus tard si tu veux)
+
     private static final double TND_TO_EUR_RATE = 3.3;
 
     private final Properties localConfig = loadLocalStripeConfig();
@@ -28,7 +28,7 @@ public class StripePaymentService {
             throw new IllegalStateException(
                     "Clé Stripe introuvable. Configurez : ENV / VM option / stripe.properties");
         }
-        Stripe.apiKey = key;
+        Stripe.apiKey = key; //la clé secrète est définie ici
     }
 
     public CheckoutSessionInfo createCheckoutSession(Registration registration, Event event) throws StripeException {

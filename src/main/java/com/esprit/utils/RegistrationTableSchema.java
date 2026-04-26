@@ -95,11 +95,11 @@ public final class RegistrationTableSchema {
         if (has("first_name")) {
             return "first_name";
         }
-        if (has("prenom")) {
-            return "prenom";
-        }
         if (has("firstname")) {
             return "firstname";
+        }
+        if (has("prenom")) {
+            return "prenom";
         }
         return null;
     }
@@ -109,11 +109,11 @@ public final class RegistrationTableSchema {
         if (has("last_name")) {
             return "last_name";
         }
-        if (has("nom")) {
-            return "nom";
-        }
         if (has("lastname")) {
             return "lastname";
+        }
+        if (has("nom")) {
+            return "nom";
         }
         return null;
     }
@@ -123,14 +123,31 @@ public final class RegistrationTableSchema {
         if (has("participant_name")) {
             return "participant_name";
         }
+        if (has("participantname")) {
+            return "participantname";
+        }
         if (has("full_name")) {
             return "full_name";
+        }
+        if (has("fullname")) {
+            return "fullname";
         }
         if (has("nom_complet")) {
             return "nom_complet";
         }
         if (has("participant")) {
             return "participant";
+        }
+        return null;
+    }
+
+    /** Colonne email selon schémas possibles. */
+    public String emailColumn() {
+        if (has("email")) {
+            return "email";
+        }
+        if (has("mail")) {
+            return "mail";
         }
         return null;
     }

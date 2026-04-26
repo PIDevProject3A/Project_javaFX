@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @SuppressWarnings("unused")
 public class EventAddController {
@@ -20,6 +21,8 @@ public class EventAddController {
     private TextArea descriptionField;
     @FXML
     private ComboBox<String> typeCombo;
+    @FXML
+    private DatePicker eventDatePicker;  // ✅ NOUVEAU
     @FXML
     private Label inputMessageLabel;
     @FXML
@@ -35,14 +38,17 @@ public class EventAddController {
         typeCombo.setItems(FXCollections.observableArrayList("FREE", "PAID"));
         typeCombo.getSelectionModel().selectFirst();
 
+        // ===== INITIALISER LE DATEPICKER À LA DATE D'AUJOURD'HUI =====
+        eventDatePicker.setValue(LocalDate.now());
+
         // 🔸 AJOUTER LE LISTENER POUR DÉSACTIVER/ACTIVER LE PRIX
         typeCombo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if ("FREE".equals(newVal)) {
                 priceField.setDisable(true);
-                priceField.setText("0");  // Mettre 0 si c'est gratuit
+                priceField.setText("0");
             } else {
                 priceField.setDisable(false);
-                priceField.setText("");   // Vider le champ
+                priceField.setText("");
             }
         });
 
@@ -52,6 +58,7 @@ public class EventAddController {
         priceField.setTooltip(new Tooltip("Nombre décimal : 0, 10, 49.99..."));
         typeCombo.setTooltip(new Tooltip("Choisir : FREE ou PAID"));
         maxPlacesField.setTooltip(new Tooltip("Nombre entier positif : 10, 100..."));
+        eventDatePicker.setTooltip(new Tooltip("Sélectionnez la date de l'événement"));
     }
 
     @FXML
@@ -69,7 +76,15 @@ public class EventAddController {
                 event.setPrice(Double.parseDouble(priceRaw));
                 event.setEventType(typeRaw);
                 event.setMaxPlaces(Integer.parseInt(maxRaw));
-                event.setEventDate(LocalDateTime.now());
+
+                // ✅ RÉCUPÉRER LA DATE DU DATEPICKER
+                LocalDate selectedDate = eventDatePicker.getValue();
+                if (selectedDate != null) {
+                    event.setEventDate(selectedDate.atStartOfDay()); // 00:00:00
+                } else {
+                    event.setEventDate(LocalDateTime.now());
+                }
+
                 event.setPaymentType("CASH");
                 event.setStatus("OPEN");
 
@@ -99,9 +114,10 @@ public class EventAddController {
         String typeRaw = typeCombo.getSelectionModel().getSelectedItem();
         String maxRaw = maxPlacesField.getText() != null ? maxPlacesField.getText().trim() : "";
         String priceRaw = priceField.getText() != null ? priceField.getText().trim().replace(',', '.') : "";
+        LocalDate date = eventDatePicker.getValue();
 
         if (name.isEmpty() || desc.isEmpty() || location.isEmpty()
-                || typeRaw == null || typeRaw.isEmpty() || maxRaw.isEmpty()) {
+                || typeRaw == null || typeRaw.isEmpty() || maxRaw.isEmpty() || date == null) {
             setInputMessage("Tous les champs sont obligatoires.");
             return false;
         }
