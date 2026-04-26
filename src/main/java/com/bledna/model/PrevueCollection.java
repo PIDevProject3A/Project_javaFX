@@ -2,9 +2,7 @@ package com.bledna.model;
 
 import javafx.beans.property.*;
 
-/**
- * Model for the prevue_collection table.
- */
+
 public class PrevueCollection {
 
     private final IntegerProperty id                = new SimpleIntegerProperty();

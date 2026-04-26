@@ -34,36 +34,55 @@ public class StatisticsController {
 
     private void loadStatistics() {
         try {
+            // rcuperer tous les wastes depuis la base de données
             List<WasteCollection> collections = dao.getAll();
-            
-            // ── Pie Chart Data (Type vs Quantity)
+
+            //  Pie Chart :
             Map<String, Double> typeMap = new HashMap<>();
+
+            // pour cumuler la quantité par type
             for (WasteCollection w : collections) {
+                // Si le type existe dreja additionner, sinon creer nv
                 typeMap.put(w.getWasteType(), typeMap.getOrDefault(w.getWasteType(), 0.0) + w.getQuantity());
             }
 
             ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList();
+
+            // Boucle sur typeMap pour créer une part de camembert par type
+
             typeMap.forEach((type, qty) -> pieData.add(new PieChart.Data(type + " (" + qty + " kg)", qty)));
+
+            // Envoyer les données au PieChart pour affichage
             pieChart.setData(pieData);
 
-            // ── Bar Chart Data (Date vs Quantity)
+            //Bar Chart : quantité totale par date de collecte
             XYChart.Series<String, Double> series = new XYChart.Series<>();
             series.setName("Waste Quantity");
 
             Map<String, Double> dateMap = new HashMap<>();
+            // Format de date utilisé comme clé : "yyyy-MM-dd" ex: "2026-04-09"
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            // Boucle sur tous les wastes pour cumuler la quantité par date
+
             for (WasteCollection w : collections) {
                 if (w.getCollectionDate() != null) {
+                    // Convertir LocalDateTime en String "yyyy-MM-dd"
                     String dateStr = w.getCollectionDate().format(fmt);
+                    // Si la date existe déjà → additionner, sinon → créer avec 0.0
                     dateMap.put(dateStr, dateMap.getOrDefault(dateStr, 0.0) + w.getQuantity());
                 }
             }
 
-            // Sort by date or just add
+            // Boucle sur dateMap triée par date croissante pour créer les barres du graphique
+            // .stream()  → traiter les entrées comme un flux
+            // .sorted()  → trier par date (ordre alphabétique )
+            // .forEach() → pour chaque entrée, ajouter une barre dans le BarChart
             dateMap.entrySet().stream()
-                   .sorted(Map.Entry.comparingByKey())
-                   .forEach(entry -> series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue())));
+                    .sorted(Map.Entry.comparingByKey())
+                    .forEach(entry -> series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue())));
 
+            // Envoyer la série au BarChart pour affichage
             barChart.getData().setAll(series);
 
         } catch (SQLException e) {
@@ -71,11 +90,14 @@ public class StatisticsController {
         }
     }
 
+    // ── Bouton Retour : revenir à la vue Waste ────────────────────────────
     @FXML
     private void handleBack() {
         try {
+            // Chercher le StackPane central (#contentPane) défini dans main.fxml
             StackPane contentPane = (StackPane) pieChart.getScene().lookup("#contentPane");
             if (contentPane != null) {
+                // Charger waste_view.fxml et le placer dans le StackPane central
                 Node view = FXMLLoader.load(getClass().getResource("/com/bledna/waste_view.fxml"));
                 contentPane.getChildren().setAll(view);
             }

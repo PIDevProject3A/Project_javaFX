@@ -12,13 +12,11 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.util.Base64;
 
-/**
- * AI Service implementation using Roboflow API for specialized waste detection.
- */
+
 public class RoboflowAIService implements AIService {
 
-    // You can get your API key from Roboflow dashboard
-    private static final String API_KEY = "";
+    // api mt3 roboflow
+    private static final String API_KEY = "u6qj8ChNPWi8sTQh6qbs";
     private static final String MODEL_ID = "garbage-classification-3";
     private static final String VERSION = "2";
     private static final String API_URL = "https://detect.roboflow.com/" + MODEL_ID + "/" + VERSION + "?api_key=" + API_KEY;
@@ -75,7 +73,7 @@ public class RoboflowAIService implements AIService {
             String className = best.get("class").getAsString();
             double confidence = best.get("confidence").getAsDouble() * 100;
 
-            return className; // Return the class name (e.g., "plastic", "glass")
+            return className; // Return the class name
         } catch (Exception e) {
             return "Error parsing Roboflow response: " + e.getMessage();
         }

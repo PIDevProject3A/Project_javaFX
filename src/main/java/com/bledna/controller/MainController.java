@@ -8,9 +8,6 @@ import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
 
-/**
- * Root controller — manages sidebar navigation and dynamic view loading.
- */
 public class MainController {
 
     @FXML private StackPane contentPane;

@@ -50,7 +50,7 @@ public class WasteController {
     private final WasteCollectionDAO dao = new WasteCollectionDAO();
     private final ObservableList<WasteCollection> data = FXCollections.observableArrayList();
     private final AIService aiService = new com.bledna.util.RoboflowAIService();
-    // private final AIService aiService = new HuggingFaceAIService(); // Alternative
+
 
     @FXML
     public void initialize() {
@@ -168,7 +168,7 @@ public class WasteController {
         ComboBox<String> statusBox = new ComboBox<>(FXCollections.observableArrayList("PENDING","IN_PROGRESS","COMPLETED","CANCELLED"));
         DatePicker datePicker      = new DatePicker(LocalDate.now());
 
-        // ── Image fields
+        // verifier img
         ImageView preview = new ImageView();
         preview.setFitWidth(100); preview.setFitHeight(100);
         preview.setPreserveRatio(true);
@@ -177,6 +177,7 @@ public class WasteController {
         Button btnPick = new Button("📷 Browse");
         Button btnAnalyze = new Button("🤖 AI Analyze");
         btnAnalyze.setDisable(true);
+        //ableau d'un élément pour pouvoir modifier la variable
 
         final File[] selectedFile = {null};
 
