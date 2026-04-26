@@ -5,15 +5,14 @@
 }
 
 .social-feed-root {
-    -fx-background-color: #f0f2f5;
+    -fx-background-color: #edf2f7;
 }
 
 .social-hero {
-    /* JavaFX: pas de “135deg” — utiliser to bottom / to right */
-    -fx-background-color: linear-gradient(to bottom right, #166534, #15803d, #0f766e);
-    -fx-background-radius: 14;
+    -fx-background-color: linear-gradient(to right, #0f172a, #155e75, #0f766e);
+    -fx-background-radius: 18;
     -fx-padding: 18 22;
-    -fx-effect: dropshadow(gaussian, #064e3b, 16, 0.25, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.32), 20, 0.24, 0, 5);
 }
 
 .social-hero-emoji {
@@ -34,7 +33,7 @@
 }
 
 .social-hero-meta {
-    -fx-text-fill: #a7f3d0;
+    -fx-text-fill: #99f6e4;
     -fx-font-size: 11px;
 }
 
@@ -45,7 +44,7 @@
 }
 
 .table-feed .column-header-background {
-    -fx-background-color: linear-gradient(to bottom, #14532d, #0f3d24);
+    -fx-background-color: linear-gradient(to bottom, #155e75, #0f766e);
     -fx-background-radius: 10 10 0 0;
 }
 
@@ -76,12 +75,12 @@
 }
 
 .table-feed .table-row-cell:hover {
-    -fx-background-color: #f0fdf4;
+    -fx-background-color: #f0fdfa;
 }
 
 .table-feed .table-row-cell:selected {
-    -fx-background-color: #dcfce7;
-    -fx-border-color: #86efac;
+    -fx-background-color: #ccfbf1;
+    -fx-border-color: #5eead4;
 }
 
 .table-feed .table-cell {
@@ -90,7 +89,7 @@
 }
 
 .table-feed .table-view:focused .table-row-cell:selected {
-    -fx-background-color: #bbf7d0;
+    -fx-background-color: #99f6e4;
 }
 
 /* Avatar chip in “From” column */
@@ -100,7 +99,7 @@
     -fx-max-width: 40px;
     -fx-max-height: 40px;
     -fx-alignment: center;
-    -fx-background-color: linear-gradient(to bottom right, #22c55e, #15803d);
+    -fx-background-color: linear-gradient(to bottom right, #14b8a6, #0f766e);
     -fx-background-radius: 20;
     -fx-text-fill: #ffffff;
     -fx-font-size: 15px;
@@ -112,7 +111,7 @@
 }
 
 .member-name {
-    -fx-text-fill: #14532d;
+    -fx-text-fill: #155e75;
     -fx-font-size: 13px;
     -fx-font-weight: bold;
 }
@@ -151,8 +150,8 @@
 }
 
 .btn-feed-action:hover {
-    -fx-background-color: #e2e8f0;
-    -fx-border-color: #94a3b8;
+    -fx-background-color: #ecfeff;
+    -fx-border-color: #5eead4;
 }
 
 /* Fond liste sujets / formulaire : définitions dans afficher-topic.css et ajouter-topic.css */

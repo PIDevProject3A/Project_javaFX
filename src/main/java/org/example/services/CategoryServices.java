@@ -25,15 +25,23 @@ public class CategoryServices implements Icrud<Category> {
     }
 
     @Override
-    public void ajouter(Category category) throws SQLException {
+    public int ajouter(Category category) throws SQLException {
         ensureConnection();
-        String sql = "INSERT INTO category (name, description) VALUES ('"
-                + category.getName() + "', '"
-                + category.getDescription() + "')";
-        try (Statement statement = con.createStatement()) {
-            statement.executeUpdate(sql);
+        String sql = "INSERT INTO category (name, description) VALUES (?, ?)";
+        try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, category.getName());
+            ps.setString(2, category.getDescription());
+            int affected = ps.executeUpdate();
+            if (affected == 0) {
+                throw new SQLException("Creating category failed, no rows affected.");
+            }
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                }
+            }
         }
-        System.out.println("Category cree avec succee ");
+        return -1;
     }
 
     @Override

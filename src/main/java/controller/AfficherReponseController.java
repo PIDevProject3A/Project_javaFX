@@ -18,15 +18,18 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.entities.Reponse;
 import org.example.entities.Topic;
+import org.example.services.NotificationService;
 import org.example.services.ReponseServices;
 import org.example.utils.AppConstants;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
-
 public class AfficherReponseController {
 
     private static final SimpleDateFormat DF = new SimpleDateFormat("MMM d, yyyy  ·  HH:mm", Locale.ENGLISH);
@@ -41,6 +44,7 @@ public class AfficherReponseController {
     private int topicId;
     private String topicTitle = "";
     private final ReponseServices reponseServices = new ReponseServices();
+    private final NotificationService notificationService = NotificationService.getInstance();
     private boolean columnsReady;
 
     public void initForTopic(Topic topic) {
@@ -54,6 +58,7 @@ public class AfficherReponseController {
         }
         refresh();
     }
+
 
     private void buildColumns() {
         TableColumn<Reponse, String> fromCol = new TableColumn<>("From");
@@ -83,7 +88,7 @@ public class AfficherReponseController {
         });
 
         TableColumn<Reponse, String> msgCol = new TableColumn<>("Message");
-        msgCol.setPrefWidth(320);
+        msgCol.setPrefWidth(260);
         msgCol.setCellValueFactory(c -> {
             String t = preview(c.getValue());
             return new SimpleStringProperty(t);
@@ -106,7 +111,7 @@ public class AfficherReponseController {
         });
 
         TableColumn<Reponse, String> postedCol = new TableColumn<>("Posted");
-        postedCol.setPrefWidth(150);
+        postedCol.setPrefWidth(120);
         postedCol.setCellValueFactory(c ->
                 new SimpleStringProperty(formatDate(c.getValue().getCreated_at())));
         postedCol.setCellFactory(col -> new TableCell<>() {
@@ -122,7 +127,7 @@ public class AfficherReponseController {
         });
 
         TableColumn<Reponse, String> editedCol = new TableColumn<>("Last edit");
-        editedCol.setPrefWidth(150);
+        editedCol.setPrefWidth(130);
         editedCol.setCellValueFactory(c -> {
             Date u = c.getValue().getUpdated_at();
             return new SimpleStringProperty(u == null ? "—  Not edited yet" : formatDate(u));
@@ -144,22 +149,34 @@ public class AfficherReponseController {
         });
 
         TableColumn<Reponse, Void> actionsCol = new TableColumn<>("Actions");
-        actionsCol.setPrefWidth(220);
-        actionsCol.setMinWidth(200);
-        actionsCol.setMaxWidth(260);
+        actionsCol.setPrefWidth(420);
+        actionsCol.setMinWidth(400);
+        actionsCol.setMaxWidth(520);
         actionsCol.setResizable(false);
         actionsCol.setSortable(false);
         actionsCol.setCellFactory(ac -> new TableCell<>() {
+            private final Button btnLike = new Button();
+            private final Button btnDislike = new Button();
+            private final Button btnReply = new Button("Reply");
             private final Button btnDetails = new Button("View");
             private final Button btnEdit = new Button("Edit");
             private final Button btnDelete = new Button("Delete");
-            private final HBox box = new HBox(8, btnDetails, btnEdit, btnDelete);
+            private final HBox box = new HBox(8, btnLike, btnDislike, btnReply, btnDetails, btnEdit, btnDelete);
 
             {
                 box.setAlignment(Pos.CENTER_LEFT);
+                btnLike.getStyleClass().add("btn-reaction-like");
+                btnDislike.getStyleClass().add("btn-reaction-dislike");
+                btnReply.getStyleClass().add("btn-reaction-reply");
                 btnDetails.getStyleClass().add("btn-feed-action");
                 btnEdit.getStyleClass().add("btn-feed-action");
                 btnDelete.getStyleClass().add("btn-feed-action");
+                btnLike.setMinWidth(62);
+                btnDislike.setMinWidth(62);
+                btnReply.setMinWidth(66);
+                btnDetails.setMinWidth(56);
+                btnEdit.setMinWidth(52);
+                btnDelete.setMinWidth(62);
             }
 
             @Override
@@ -169,6 +186,11 @@ public class AfficherReponseController {
                     setGraphic(null);
                 } else {
                     Reponse r = getTableRow().getItem();
+                    btnLike.setText("👍 " + r.getLikeCount());
+                    btnDislike.setText("👎 " + r.getDislikeCount());
+                    btnLike.setOnAction(e -> reactToReply(r, true));
+                    btnDislike.setOnAction(e -> reactToReply(r, false));
+                    btnReply.setOnAction(e -> openAddReplyWithPrefill(r));
                     btnDetails.setOnAction(e -> openDetail(r));
                     btnEdit.setOnAction(e -> openEdit(r));
                     btnDelete.setOnAction(e -> openDelete(r));
@@ -178,7 +200,7 @@ public class AfficherReponseController {
         });
 
         tableReponses.getColumns().setAll(fromCol, msgCol, postedCol, editedCol, actionsCol);
-        tableReponses.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        tableReponses.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
     }
 
     private static String initialFromUser() {
@@ -272,12 +294,68 @@ public class AfficherReponseController {
             FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource("/AjouterReponse.fxml")));
             Parent root = loader.load();
             AjouterReponseController ctrl = loader.getController();
-            ctrl.initContext(topicId, topicTitle);
+            ctrl.initContext(topicId, topicTitle, this);
             setSceneOnCurrentStage(root, "New reply");
         } catch (IOException ex) {
             showError(ex);
         }
     }
+
+    private void openAddReplyWithPrefill(Reponse targetReply) {
+        try {
+            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource("/AjouterReponse.fxml")));
+            Parent root = loader.load();
+            AjouterReponseController ctrl = loader.getController();
+            String snippet = preview(targetReply);
+            ctrl.initContext(topicId, topicTitle, this, "@reply-" + targetReply.getId() + " " + snippet + System.lineSeparator());
+            setSceneOnCurrentStage(root, "Reply to comment");
+        } catch (IOException ex) {
+            showError(ex);
+        }
+    }
+
+    private void reactToReply(Reponse reply, boolean like) {
+        try {
+            if (sendReplyReactionToRestApi(reply.getId(), like)) {
+                if (like) {
+                    reply.setLikeCount(reply.getLikeCount() + 1);
+                } else {
+                    reply.setDislikeCount(reply.getDislikeCount() + 1);
+                }
+                tableReponses.refresh();
+            } else {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("API error");
+                a.setHeaderText("Could not register reaction");
+                a.setContentText("Reply like/dislike failed via REST API.");
+                a.showAndWait();
+            }
+        } catch (IOException ex) {
+            Alert a = new Alert(Alert.AlertType.ERROR);
+            a.setTitle("API error");
+            a.setHeaderText("REST API not reachable");
+            a.setContentText(ex.getMessage());
+            a.showAndWait();
+        }
+    }
+
+    private boolean sendReplyReactionToRestApi(int replyId, boolean like) throws IOException {
+        String endpoint = like ? "like" : "dislike";
+        URL url = new URL("http://localhost:" + notificationService.getApiPort() + "/api/replies/" + endpoint);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+        connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+        String payload = "{\"replyId\":" + replyId + "}";
+        byte[] body = payload.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        try (OutputStream os = connection.getOutputStream()) {
+            os.write(body);
+        }
+        int status = connection.getResponseCode();
+        connection.disconnect();
+        return status >= 200 && status < 300;
+    }
+
 
     @FXML
     void refresh() {
@@ -310,5 +388,8 @@ public class AfficherReponseController {
         a.setHeaderText("Could not open this window");
         a.setContentText(ex.getMessage());
         a.showAndWait();
+    }
+    public void addNotificationForNewReply(String replyContent) {
+        notificationService.publishReply("Membre", topicTitle, topicId);
     }
 }

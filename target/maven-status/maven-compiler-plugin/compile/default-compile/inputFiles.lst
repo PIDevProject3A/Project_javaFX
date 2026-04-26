@@ -7,9 +7,12 @@ C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\controller\DetailReponseCo
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\controller\DetailTopicController.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\controller\ModifierReponseController.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\controller\ModifierTopicController.java
+C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\controller\Notification.java
+C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\controller\NotificationsWindowController.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\controller\SupprimerReponseController.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\controller\SupprimerTopicController.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\entities\Category.java
+C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\entities\Notification.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\entities\Reponse.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\entities\Topic.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\entities\TopicCategory.java
@@ -18,9 +21,11 @@ C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\Main.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\services\CategoryServices.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\services\ForumServices.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\services\Icrud.java
+C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\services\NotificationService.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\services\ReponseServices.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\utils\AppConstants.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\utils\MainFx.java
+C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\utils\ModerationApiClient.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\utils\MyDataBase.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\utils\TopicStatusComboHelper.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\utils\TopicStatusStringConverter.java

@@ -8,6 +8,8 @@ public class Reponse {
     private int Topic_id;
     private Date created_at;
     private Date updated_at;
+    private int likeCount;
+    private int dislikeCount;
 
     public Reponse() {}
 
@@ -38,6 +40,14 @@ public class Reponse {
         return updated_at;
     }
 
+    public int getLikeCount() {
+        return likeCount;
+    }
+
+    public int getDislikeCount() {
+        return dislikeCount;
+    }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -58,6 +68,14 @@ public class Reponse {
         this.updated_at = updated_at;
     }
 
+    public void setLikeCount(int likeCount) {
+        this.likeCount = Math.max(0, likeCount);
+    }
+
+    public void setDislikeCount(int dislikeCount) {
+        this.dislikeCount = Math.max(0, dislikeCount);
+    }
+
     @Override
     public String toString() {
         return "Reponse{" +
@@ -66,6 +84,8 @@ public class Reponse {
                 ", Topic_id=" + Topic_id +
                 ", created_at=" + created_at +
                 ", updated_at=" + updated_at +
+                ", likeCount=" + likeCount +
+                ", dislikeCount=" + dislikeCount +
                 '}';
     }
 }

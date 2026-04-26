@@ -18,6 +18,8 @@ public class ReponseServices implements Icrud<Reponse> {
     private static final String TABLE = "forum_reponse";
 
     private final Connection con;
+    private Boolean reponseHasLikeColumn;
+    private Boolean reponseHasDislikeColumn;
 
     public ReponseServices() {
         con = MyDataBase.getInstance().getConnection();
@@ -29,35 +31,64 @@ public class ReponseServices implements Icrud<Reponse> {
         }
     }
 
-    /** Pour INSERT en concaténation : date SQL ou NULL */
-    private static String sqlDateTime(Date d) {
-        if (d == null) {
-            return "NULL";
+    private boolean hasLikeColumn() {
+        if (reponseHasLikeColumn != null) {
+            return reponseHasLikeColumn;
         }
-        return "'" + new Timestamp(d.getTime()) + "'";
+        try {
+            java.sql.DatabaseMetaData meta = con.getMetaData();
+            try (ResultSet rs = meta.getColumns(null, null, TABLE, "like_count")) {
+                reponseHasLikeColumn = rs.next();
+            }
+        } catch (SQLException e) {
+            reponseHasLikeColumn = false;
+        }
+        return reponseHasLikeColumn;
     }
 
-    private static String escapeContent(String s) {
-        if (s == null) {
-            return "";
+    private boolean hasDislikeColumn() {
+        if (reponseHasDislikeColumn != null) {
+            return reponseHasDislikeColumn;
         }
-        return s.replace("'", "''");
+        try {
+            java.sql.DatabaseMetaData meta = con.getMetaData();
+            try (ResultSet rs = meta.getColumns(null, null, TABLE, "dislike_count")) {
+                reponseHasDislikeColumn = rs.next();
+            }
+        } catch (SQLException e) {
+            reponseHasDislikeColumn = false;
+        }
+        return reponseHasDislikeColumn;
     }
 
     @Override
-    public void ajouter(Reponse reponse) throws SQLException {
+    public int ajouter(Reponse reponse) throws SQLException {
         ensureConnection();
-        String created = reponse.getCreated_at() != null ? sqlDateTime(reponse.getCreated_at()) : "NOW()";
-        String updated = reponse.getUpdated_at() != null ? sqlDateTime(reponse.getUpdated_at()) : "NULL";
-        String sql = "INSERT INTO " + TABLE + " (content, topic_id, created_at, updated_at) VALUES ('"
-                + escapeContent(reponse.getContent()) + "', "
-                + reponse.getTopic_id() + ", "
-                + created + ", "
-                + updated + ")";
-        try (Statement statement = con.createStatement()) {
-            statement.executeUpdate(sql);
+        String sql = "INSERT INTO " + TABLE + " (content, topic_id, created_at, updated_at) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, reponse.getContent());
+            ps.setInt(2, reponse.getTopic_id());
+            if (reponse.getCreated_at() != null) {
+                ps.setTimestamp(3, new Timestamp(reponse.getCreated_at().getTime()));
+            } else {
+                ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            }
+            if (reponse.getUpdated_at() != null) {
+                ps.setTimestamp(4, new Timestamp(reponse.getUpdated_at().getTime()));
+            } else {
+                ps.setNull(4, java.sql.Types.TIMESTAMP);
+            }
+            int affected = ps.executeUpdate();
+            if (affected == 0) {
+                throw new SQLException("Creating reply failed, no rows affected.");
+            }
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                }
+            }
         }
-        System.out.println("Reponse cree avec succee ");
+        return -1;
     }
 
     @Override
@@ -101,6 +132,8 @@ public class ReponseServices implements Icrud<Reponse> {
                 if (ua != null) {
                     r.setUpdated_at(new Date(ua.getTime()));
                 }
+                r.setLikeCount(hasLikeColumn() ? rs.getInt("like_count") : 0);
+                r.setDislikeCount(hasDislikeColumn() ? rs.getInt("dislike_count") : 0);
                 list.add(r);
             }
         }
@@ -127,6 +160,8 @@ public class ReponseServices implements Icrud<Reponse> {
                     if (ua != null) {
                         r.setUpdated_at(new Date(ua.getTime()));
                     }
+                    r.setLikeCount(hasLikeColumn() ? rs.getInt("like_count") : 0);
+                    r.setDislikeCount(hasDislikeColumn() ? rs.getInt("dislike_count") : 0);
                     list.add(r);
                 }
             }
@@ -155,5 +190,34 @@ public class ReponseServices implements Icrud<Reponse> {
             ps.executeUpdate();
         }
         System.out.println("Reponse modifiee avec succee ");
+    }
+
+    public void likeReponse(int reponseId) throws SQLException {
+        ensureConnection();
+        if (!hasLikeColumn()) {
+            return;
+        }
+        String sql = "UPDATE " + TABLE + " SET like_count = COALESCE(like_count, 0) + 1 WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, reponseId);
+            ps.executeUpdate();
+        }
+    }
+
+    public void dislikeReponse(int reponseId) throws SQLException {
+        ensureConnection();
+        if (!hasDislikeColumn()) {
+            return;
+        }
+        String sql = "UPDATE " + TABLE + " SET dislike_count = COALESCE(dislike_count, 0) + 1 WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, reponseId);
+            ps.executeUpdate();
+        }
+    }
+
+    public boolean supportsReactions() throws SQLException {
+        ensureConnection();
+        return hasLikeColumn() && hasDislikeColumn();
     }
 }

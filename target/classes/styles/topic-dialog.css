@@ -1,7 +1,7 @@
 /* Dialogues — thème “réseau social” (cartes, teal, arrondis) */
 
 .root-dialog {
-    -fx-background-color: linear-gradient(to bottom, #f0f2f5 0%, #ecfdf5 40%, #e0f2f1 100%);
+    -fx-background-color: linear-gradient(to bottom, #f5fbff 0%, #eefbf5 45%, #edf2f7 100%);
 }
 
 .social-dialog {
@@ -11,7 +11,7 @@
 .dialog-accent-bar {
     -fx-min-height: 5;
     -fx-max-height: 5;
-    -fx-background-color: linear-gradient(to right, #0d9488, #16a34a, #059669);
+    -fx-background-color: linear-gradient(to right, #0f172a, #155e75, #14b8a6);
 }
 
 .dialog-scroll {
@@ -28,8 +28,8 @@
     -fx-background-color: rgba(255, 255, 255, 0.97);
     -fx-background-radius: 16;
     -fx-padding: 22 26;
-    -fx-effect: dropshadow(gaussian, rgba(15, 118, 110, 0.14), 18, 0.22, 0, 4);
-    -fx-border-color: rgba(13, 148, 136, 0.12);
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.12), 18, 0.22, 0, 4);
+    -fx-border-color: rgba(21, 94, 117, 0.14);
     -fx-border-radius: 16;
     -fx-border-width: 1;
 }
@@ -41,7 +41,7 @@
 .heading-dialog {
     -fx-font-size: 20px;
     -fx-font-weight: bold;
-    -fx-text-fill: #0f3d2e;
+    -fx-text-fill: #0f172a;
 }
 
 .heading-dialog-hero {
@@ -103,21 +103,21 @@
 .field-label {
     -fx-font-size: 13px;
     -fx-font-weight: 700;
-    -fx-text-fill: #14532d;
+    -fx-text-fill: #155e75;
 }
 
 .text-field-social {
     -fx-background-color: #ffffff;
-    -fx-border-color: #7dd3b0;
+    -fx-border-color: #99f6e4;
     -fx-border-radius: 10;
     -fx-background-radius: 10;
     -fx-padding: 10 14;
     -fx-font-size: 13px;
-    -fx-text-fill: #14532d;
+    -fx-text-fill: #0f172a;
 }
 
 .text-field-social:focused {
-    -fx-border-color: #0d9488;
+    -fx-border-color: #14b8a6;
     -fx-border-width: 2;
 }
 
@@ -129,12 +129,12 @@
 
 .text-area-social {
     -fx-background-color: #ffffff;
-    -fx-border-color: #7dd3b0;
+    -fx-border-color: #99f6e4;
     -fx-border-radius: 10;
     -fx-background-radius: 10;
     -fx-padding: 4;
     -fx-font-size: 13px;
-    -fx-text-fill: #14532d;
+    -fx-text-fill: #0f172a;
 }
 
 .text-area-social .content {
@@ -142,26 +142,26 @@
 }
 
 .text-area-social:focused {
-    -fx-border-color: #0d9488;
+    -fx-border-color: #14b8a6;
     -fx-border-width: 2;
 }
 
 .combo-social {
     -fx-background-color: #ffffff;
-    -fx-border-color: #7dd3b0;
+    -fx-border-color: #99f6e4;
     -fx-border-radius: 10;
     -fx-background-radius: 10;
     -fx-font-size: 13px;
 }
 
 .combo-social > .list-cell {
-    -fx-text-fill: #14532d;
+    -fx-text-fill: #0f172a;
     -fx-background-color: #ffffff;
     -fx-padding: 8 12;
 }
 
 .combo-social .arrow-button {
-    -fx-background-color: linear-gradient(to bottom, #d1fae5, #a7f3d0);
+    -fx-background-color: linear-gradient(to bottom, #ccfbf1, #99f6e4);
     -fx-background-radius: 0 8 8 0;
 }
 
@@ -175,24 +175,24 @@
 }
 
 .btn-primary {
-    -fx-background-color: linear-gradient(to bottom, #0d9488, #0f766e);
+    -fx-background-color: linear-gradient(to bottom, #14b8a6, #0f766e);
     -fx-text-fill: #ffffff;
     -fx-font-weight: 700;
     -fx-font-size: 13px;
     -fx-padding: 11 26;
     -fx-background-radius: 10;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(13, 148, 136, 0.3), 8, 0.25, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(15, 118, 110, 0.32), 8, 0.25, 0, 2);
 }
 
 .btn-primary:hover {
-    -fx-background-color: linear-gradient(to bottom, #14b8a6, #0d9488);
+    -fx-background-color: linear-gradient(to bottom, #2dd4bf, #14b8a6);
 }
 
 .btn-secondary {
     -fx-background-color: rgba(255, 255, 255, 0.95);
-    -fx-border-color: #0d9488;
-    -fx-text-fill: #0f766e;
+    -fx-border-color: #0f766e;
+    -fx-text-fill: #155e75;
     -fx-font-weight: 700;
     -fx-font-size: 13px;
     -fx-padding: 11 22;
@@ -201,7 +201,7 @@
 }
 
 .btn-secondary:hover {
-    -fx-background-color: #ccfbf1;
+    -fx-background-color: #ecfeff;
 }
 
 .btn-danger {

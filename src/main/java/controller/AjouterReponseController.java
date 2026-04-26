@@ -14,10 +14,14 @@ import javafx.stage.Stage;
 import org.example.entities.Topic;
 import org.example.entities.Reponse;
 import org.example.services.ReponseServices;
+import org.example.utils.ModerationApiClient;
 import org.example.utils.ValidationSaisie;
 
 import java.net.URL;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
@@ -32,6 +36,7 @@ public class AjouterReponseController implements Initializable {
 
     private int topicId;
     private String topicTitle = "";
+    private AfficherReponseController parentController; // ← AJOUTÉ POUR NOTIFICATIONS
     private final ReponseServices reponseServices = new ReponseServices();
 
     private static void setFieldError(Label label, String message) {
@@ -55,10 +60,27 @@ public class AjouterReponseController implements Initializable {
         areaContent.textProperty().addListener((o, a, b) -> setFieldError(errContent, null));
     }
 
+    // MODIFIER cette méthode pour accepter le parentController
     public void initContext(int topicId, String topicTitle) {
         this.topicId = topicId;
         this.topicTitle = topicTitle != null ? topicTitle : "";
         labTopic.setText("Topic: " + (this.topicTitle.isEmpty() ? "(no title)" : this.topicTitle));
+    }
+
+    // NOUVELLE MÉTHODE avec parent pour les notifications
+    public void initContext(int topicId, String topicTitle, AfficherReponseController parent) {
+        this.topicId = topicId;
+        this.topicTitle = topicTitle != null ? topicTitle : "";
+        this.parentController = parent;
+        labTopic.setText("Topic: " + (this.topicTitle.isEmpty() ? "(no title)" : this.topicTitle));
+    }
+
+    public void initContext(int topicId, String topicTitle, AfficherReponseController parent, String prefillText) {
+        initContext(topicId, topicTitle, parent);
+        if (prefillText != null && !prefillText.isBlank()) {
+            areaContent.setText(prefillText);
+            areaContent.positionCaret(areaContent.getText().length());
+        }
     }
 
     @FXML
@@ -67,19 +89,50 @@ public class AjouterReponseController implements Initializable {
         String msgContenu = ValidationSaisie.validerContenuReponse(areaContent.getText());
         if (msgContenu != null) {
             setFieldError(errContent, msgContenu);
-        }
-        if (msgContenu != null) {
             return;
         }
+
         String text = areaContent.getText().trim();
         try {
+            List<String> blockedWords = ModerationApiClient.checkBadWords(text);
+            if (!blockedWords.isEmpty()) {
+                Alert warn = new Alert(Alert.AlertType.WARNING);
+                warn.setTitle("Blocked content");
+                warn.setHeaderText("Your reply contains inappropriate words");
+                warn.setContentText("Please remove: " + String.join(", ", blockedWords));
+                warn.showAndWait();
+                return;
+            }
+
+            // Sauvegarder la réponse
             reponseServices.ajouter(new Reponse(text, topicId, new Date(), null));
+
+            // ✅ AJOUTER LA NOTIFICATION SOCIALE
+            if (parentController != null) {
+                parentController.addNotificationForNewReply(text);
+            }
+
+            // Naviguer vers la liste des réponses
             navigateToReplies(event);
+
             Alert ok = new Alert(Alert.AlertType.INFORMATION);
             ok.setTitle("Saved");
             ok.setHeaderText(null);
             ok.setContentText("Reply posted.");
             ok.showAndWait();
+
+        } catch (IOException e) {
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Moderation API unavailable");
+            errorAlert.setContentText(e.getMessage());
+            errorAlert.showAndWait();
+        } catch (SQLException e) {
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Database error");
+            errorAlert.setContentText(e.getMessage());
+            errorAlert.showAndWait();
         } catch (Exception e) {
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
             errorAlert.setTitle("Error");

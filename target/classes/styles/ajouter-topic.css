@@ -1,18 +1,18 @@
 /* Formulaire sujet — palette pro, accent teal / vert */
 
 .root-form {
-    -fx-background-color: linear-gradient(to bottom, #f0fdf9 0%, #ecfdf5 38%, #e8f5e9 100%);
+    -fx-background-color: linear-gradient(to bottom, #f5fbff 0%, #eefbf5 42%, #edf2f7 100%);
     -fx-padding: 0;
 }
 
 .sm-form-page-root {
-    -fx-background-color: linear-gradient(to bottom, #e8ecf1 0%, #ecfdf5 40%, #f8fafc 100%);
+    -fx-background-color: linear-gradient(to bottom, #edf2f7 0%, #ecfeff 42%, #f8fafc 100%);
 }
 
 .form-accent-bar {
     -fx-min-height: 5;
     -fx-max-height: 5;
-    -fx-background-color: linear-gradient(to right, #0d9488, #16a34a, #059669);
+    -fx-background-color: linear-gradient(to right, #0f172a, #155e75, #14b8a6);
 }
 
 .form-scroll {
@@ -34,13 +34,13 @@
 }
 
 .field-group {
-    -fx-background-color: rgba(255, 255, 255, 0.88);
+    -fx-background-color: rgba(255, 255, 255, 0.94);
     -fx-background-radius: 14;
     -fx-padding: 16 18 16 18;
-    -fx-border-color: rgba(13, 148, 136, 0.18);
+    -fx-border-color: rgba(21, 94, 117, 0.2);
     -fx-border-radius: 14;
     -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(15, 118, 110, 0.08), 12, 0.2, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.09), 14, 0.2, 0, 3);
 }
 
 .field-group-dates {
@@ -55,14 +55,14 @@
 .heading {
     -fx-font-size: 24px;
     -fx-font-weight: bold;
-    -fx-text-fill: #0f3d2e;
+    -fx-text-fill: #0f172a;
     -fx-letter-spacing: -0.3px;
 }
 
 .field-label {
     -fx-font-size: 13px;
     -fx-font-weight: 700;
-    -fx-text-fill: #14532d;
+    -fx-text-fill: #155e75;
 }
 
 .hint {
@@ -82,19 +82,19 @@
 
 .text-field-rounded {
     -fx-background-color: #ffffff;
-    -fx-border-color: #7dd3b0;
+    -fx-border-color: #99f6e4;
     -fx-border-radius: 10;
     -fx-background-radius: 10;
     -fx-padding: 10 14;
     -fx-font-size: 13px;
-    -fx-text-fill: #14532d;
-    -fx-prompt-text-fill: #7a9e8e;
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #64748b;
 }
 
 .text-field-rounded:focused {
-    -fx-border-color: #0d9488;
+    -fx-border-color: #14b8a6;
     -fx-border-width: 2;
-    -fx-effect: dropshadow(gaussian, rgba(13, 148, 136, 0.22), 10, 0.35, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(20, 184, 166, 0.24), 10, 0.35, 0, 0);
 }
 
 .text-field-readonly {
@@ -105,13 +105,13 @@
 
 .text-area-topic {
     -fx-background-color: #ffffff;
-    -fx-border-color: #7dd3b0;
+    -fx-border-color: #99f6e4;
     -fx-border-radius: 10;
     -fx-background-radius: 10;
     -fx-padding: 4;
     -fx-font-size: 13px;
-    -fx-text-fill: #14532d;
-    -fx-prompt-text-fill: #7a9e8e;
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #64748b;
 }
 
 .text-area-topic .content {
@@ -119,7 +119,7 @@
 }
 
 .text-area-topic:focused {
-    -fx-border-color: #0d9488;
+    -fx-border-color: #14b8a6;
     -fx-border-width: 2;
     -fx-effect: dropshadow(gaussian, rgba(13, 148, 136, 0.18), 8, 0.3, 0, 0);
 }
@@ -135,24 +135,24 @@
 
 .combo-topic {
     -fx-background-color: #ffffff;
-    -fx-border-color: #7dd3b0;
+    -fx-border-color: #99f6e4;
     -fx-border-radius: 10;
     -fx-background-radius: 10;
     -fx-font-size: 13px;
 }
 
 .combo-topic > .list-cell {
-    -fx-text-fill: #14532d;
+    -fx-text-fill: #0f172a;
     -fx-background-color: #ffffff;
     -fx-padding: 8 12;
 }
 
 .combo-topic:hover {
-    -fx-border-color: #0d9488;
+    -fx-border-color: #14b8a6;
 }
 
 .combo-topic .arrow-button {
-    -fx-background-color: linear-gradient(to bottom, #d1fae5, #a7f3d0);
+    -fx-background-color: linear-gradient(to bottom, #ccfbf1, #99f6e4);
     -fx-background-radius: 0 8 8 0;
 }
 
@@ -161,18 +161,18 @@
 }
 
 .btn-primary {
-    -fx-background-color: linear-gradient(to bottom, #0d9488, #0f766e);
+    -fx-background-color: linear-gradient(to bottom, #14b8a6, #0f766e);
     -fx-text-fill: #ffffff;
     -fx-font-weight: 700;
     -fx-font-size: 14px;
     -fx-padding: 12 32;
     -fx-background-radius: 10;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(13, 148, 136, 0.35), 8, 0.25, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(15, 118, 110, 0.32), 10, 0.24, 0, 2);
 }
 
 .btn-primary:hover {
-    -fx-background-color: linear-gradient(to bottom, #14b8a6, #0d9488);
+    -fx-background-color: linear-gradient(to bottom, #2dd4bf, #14b8a6);
 }
 
 .btn-primary:pressed {
@@ -181,8 +181,8 @@
 
 .btn-nav {
     -fx-background-color: rgba(255, 255, 255, 0.9);
-    -fx-border-color: #0d9488;
-    -fx-text-fill: #0f766e;
+    -fx-border-color: #0f766e;
+    -fx-text-fill: #155e75;
     -fx-font-weight: 700;
     -fx-font-size: 12px;
     -fx-border-radius: 10;
@@ -192,5 +192,5 @@
 }
 
 .btn-nav:hover {
-    -fx-background-color: #ccfbf1;
+    -fx-background-color: #ecfeff;
 }

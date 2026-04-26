@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
@@ -60,6 +61,19 @@
                                                 <Label styleClass="field-label" text="Status"/>
                                                 <ComboBox fx:id="statusCombo" minHeight="40.0" styleClass="combo-social"/>
                                                 <Label fx:id="errStatus" managed="false" visible="false" styleClass="field-error"/>
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="8.0">
+                                            <children>
+                                                <Label styleClass="field-label" text="Image (optional)"/>
+                                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                                    <children>
+                                                        <Button mnemonicParsing="false" onAction="#chooseImage" styleClass="btn-secondary" text="Upload image"/>
+                                                        <Label fx:id="imagePathLabel" styleClass="label-muted" text="No image selected"/>
+                                                    </children>
+                                                </HBox>
+                                                <Label styleClass="label-muted" text="Max size: 5 MB"/>
+                                                <ImageView fx:id="imagePreview" fitHeight="180.0" fitWidth="300.0" preserveRatio="true" smooth="true" visible="false" managed="false"/>
                                             </children>
                                         </VBox>
                                     </children>

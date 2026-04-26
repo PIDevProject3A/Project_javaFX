@@ -14,11 +14,14 @@ import javafx.stage.Stage;
 import org.example.entities.Reponse;
 import org.example.entities.Topic;
 import org.example.services.ReponseServices;
+import org.example.utils.ModerationApiClient;
 import org.example.utils.ValidationSaisie;
 
 import java.sql.SQLException;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -92,6 +95,16 @@ public class ModifierReponseController {
         }
         String text = areaContent.getText().trim();
         try {
+            List<String> blockedWords = ModerationApiClient.checkBadWords(text);
+            if (!blockedWords.isEmpty()) {
+                Alert warn = new Alert(Alert.AlertType.WARNING);
+                warn.setTitle("Blocked content");
+                warn.setHeaderText("Your reply contains inappropriate words");
+                warn.setContentText("Please remove: " + String.join(", ", blockedWords));
+                warn.showAndWait();
+                return;
+            }
+
             reponse.setContent(text);
             reponse.setUpdated_at(new Date());
             reponseServices.modifier(reponse);
@@ -100,6 +113,11 @@ public class ModifierReponseController {
             ok.setTitle("Saved");
             ok.setContentText("Reply updated.");
             ok.showAndWait();
+        } catch (IOException e) {
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setContentText("Moderation API unavailable: " + e.getMessage());
+            errorAlert.showAndWait();
         } catch (SQLException e) {
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
             errorAlert.setTitle("Error");

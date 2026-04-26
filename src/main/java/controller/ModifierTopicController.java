@@ -17,12 +17,15 @@ import org.example.entities.Topic;
 import org.example.entities.TopicCategory;
 import org.example.entities.TopicStatus;
 import org.example.services.ForumServices;
+import org.example.utils.ModerationApiClient;
 import org.example.utils.TopicStatusComboHelper;
 import org.example.utils.ValidationSaisie;
 
 import java.sql.SQLException;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -150,6 +153,16 @@ public class ModifierTopicController {
             return;
         }
         try {
+            List<String> blockedWords = ModerationApiClient.checkBadWords(titleField.getText() + " " + contentArea.getText());
+            if (!blockedWords.isEmpty()) {
+                Alert warn = new Alert(Alert.AlertType.WARNING);
+                warn.setTitle("Blocked content");
+                warn.setHeaderText("Your topic contains inappropriate words");
+                warn.setContentText("Please remove: " + String.join(", ", blockedWords));
+                warn.showAndWait();
+                return;
+            }
+
             topic.setTitle(titleField.getText().trim());
             topic.setContent(contentArea.getText().trim());
             topic.setStatus(statusVal);
@@ -165,6 +178,11 @@ public class ModifierTopicController {
             ok.setHeaderText(null);
             ok.setContentText("Your topic was updated.");
             ok.showAndWait();
+        } catch (IOException e) {
+            Alert err = new Alert(Alert.AlertType.ERROR);
+            err.setTitle("Error");
+            err.setContentText("Moderation API unavailable: " + e.getMessage());
+            err.showAndWait();
         } catch (SQLException e) {
             Alert err = new Alert(Alert.AlertType.ERROR);
             err.setTitle("Error");

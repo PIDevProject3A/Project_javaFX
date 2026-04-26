@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.example.services.NotificationService;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,12 +13,18 @@ public class MainFx extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        NotificationService.getInstance().startRestApi();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherTopic.fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root);
         stage.setTitle("Community topics");
         stage.setScene(scene);
         stage.show();
+    }
+
+    @Override
+    public void stop() {
+        NotificationService.getInstance().stopRestApi();
     }
 
     public static void main(String[] args) {
