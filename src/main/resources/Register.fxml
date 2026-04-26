@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.RegisterController" stylesheets="@style.css">
+    <VBox styleClass="page-card" spacing="12" maxWidth="740">
+        <Label text="Create Account" styleClass="title"/>
+        <Label text="Formulaire harmonise pour la creation de comptes avec validation en direct" styleClass="subtitle" wrapText="true"/>
+
+        <GridPane styleClass="form-grid">
+            <Label text="First name" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <TextField fx:id="firstNameField" promptText="First name" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+            <Label fx:id="firstNameHintLabel" text="First name must be at least 3 characters." styleClass="validation-hint" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+            <Label text="Last name" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <TextField fx:id="lastNameField" promptText="Last name" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            <Label fx:id="lastNameHintLabel" text="Last name must be at least 3 characters." styleClass="validation-hint" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+            <Label text="Email" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+            <TextField fx:id="emailField" promptText="Email" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+            <Label text="Password" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+            <PasswordField fx:id="passwordField" promptText="Password" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+            <Label fx:id="passwordHintLabel" text="Password must be at least 8 characters." styleClass="validation-hint" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+
+            <Label text="Role" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
+            <ComboBox fx:id="adminTypeBox" promptText="Admin type" GridPane.columnIndex="1" GridPane.rowIndex="7"/>
+        </GridPane>
+
+        <HBox spacing="10">
+            <Button fx:id="registerButton" text="Register" onAction="#handleRegister" styleClass="primary-button"/>
+            <Button text="Go to Login" onAction="#goToLogin" styleClass="secondary-button"/>
+        </HBox>
+
+        <Label fx:id="messageLabel" styleClass="status-message" wrapText="true"/>
+    </VBox>
+    <padding>
+        <Insets top="26" right="26" bottom="26" left="26"/>
+    </padding>
+</StackPane>

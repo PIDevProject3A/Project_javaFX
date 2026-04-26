@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.FaceIdEnrollController" stylesheets="@style.css">
+    <VBox styleClass="page-card" spacing="12" maxWidth="420" minWidth="360">
+        <Label text="Enrollement Face ID" styleClass="title"/>
+        <Label text="Confirmez votre compte puis ajoutez une photo de votre visage." styleClass="subtitle" wrapText="true"/>
+
+        <Label text="Email" styleClass="form-label"/>
+        <TextField fx:id="emailField" promptText="name@domain.com"/>
+
+        <Label text="Mot de passe" styleClass="form-label"/>
+        <PasswordField fx:id="passwordField" promptText="Votre mot de passe"/>
+
+        <Label text="Image selectionnee" styleClass="form-label"/>
+        <Label fx:id="selectedImageLabel" text="Aucune image" styleClass="subtitle"/>
+
+        <Button text="Choisir une image" onAction="#handlePickImage" styleClass="secondary-button" maxWidth="Infinity"/>
+        <Button text="Enregistrer Face ID" onAction="#handleEnrollFaceId" styleClass="primary-button" maxWidth="Infinity"/>
+        <Button text="Retour login" onAction="#goBackToLogin" styleClass="secondary-button" maxWidth="Infinity"/>
+
+        <Label fx:id="messageLabel" styleClass="status-message" wrapText="true"/>
+    </VBox>
+    <padding>
+        <Insets top="28" right="28" bottom="28" left="28"/>
+    </padding>
+</StackPane>
+

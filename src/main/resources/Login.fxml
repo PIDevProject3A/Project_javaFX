@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
+
+<StackPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LoginController" stylesheets="@style.css">
+    <HBox spacing="26" maxWidth="940">
+        <VBox spacing="12" HBox.hgrow="ALWAYS">
+            <Label text="Nature Account Suite" styleClass="title"/>
+            <Label text="Une interface plus claire, securisee et rapide pour gerer vos comptes." styleClass="subtitle" wrapText="true"/>
+        </VBox>
+
+        <VBox styleClass="page-card" spacing="12" maxWidth="360" minWidth="320">
+            <Label text="Connexion" styleClass="title"/>
+            <Label text="Connectez-vous pour acceder au tableau de bord" styleClass="subtitle" wrapText="true"/>
+
+            <Label text="Email" styleClass="form-label"/>
+            <TextField fx:id="emailField" promptText="name@domain.com"/>
+
+            <Label text="Mot de passe" styleClass="form-label"/>
+            <PasswordField fx:id="passwordField" promptText="Votre mot de passe"/>
+
+            <Label text="Verification" styleClass="form-label"/>
+            <WebView fx:id="recaptchaView" prefHeight="112" minHeight="112" maxHeight="112"/>
+
+            <Button text="Login" onAction="#handleLogin" styleClass="primary-button" maxWidth="Infinity"/>
+            <Button text="Login with Face ID (sans email)" onAction="#handleFaceLogin" styleClass="secondary-button" maxWidth="Infinity"/>
+            <Button text="Configurer mon Face ID" onAction="#openFaceEnrollment" styleClass="secondary-button" maxWidth="Infinity"/>
+            <Label fx:id="messageLabel" styleClass="status-message" wrapText="true"/>
+        </VBox>
+    </HBox>
+    <padding>
+        <Insets top="28" right="28" bottom="28" left="28"/>
+    </padding>
+</StackPane>
