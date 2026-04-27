@@ -1,6 +1,5 @@
 package controller;
 
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -21,18 +20,22 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.collections.ListChangeListener;
 import org.example.entities.Topic;
 import org.example.entities.TopicCategory;
 import org.example.entities.TopicStatus;
 import org.example.services.ForumServices;
 import org.example.services.NotificationService;
+import org.example.entities.Notification;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ListCell;
 
 import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -51,10 +54,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.io.File;
-import org.example.entities.Notification;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ListCell;
 
 public class AfficherTopic implements Initializable {
 
@@ -94,7 +93,6 @@ public class AfficherTopic implements Initializable {
     private final List<Topic> sourceTopics = new ArrayList<>();
     private Integer pinnedTopicId;
     private boolean savedOnlyMode;
-    private boolean reactionsWarningShown;
 
     private void updateNotifBadge() {
         if (notifBadge != null) {
@@ -123,7 +121,6 @@ public class AfficherTopic implements Initializable {
     @FXML
     void clearNotifications() {
         notificationsGlobal.clear();
-        System.out.println("✅ Toutes les notifications effacées");
         updateNotifBadge();
     }
 
@@ -131,8 +128,6 @@ public class AfficherTopic implements Initializable {
     void testNotif() {
         String message = "🧪 Test notification à " + new SimpleDateFormat("HH:mm:ss").format(new Date());
         notificationsGlobal.add(0, new Notification(message));
-        System.out.println("✅ Test notification ajoutée - Total: " + notificationsGlobal.size());
-
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Test");
         alert.setHeaderText("Notification ajoutée");
@@ -151,8 +146,6 @@ public class AfficherTopic implements Initializable {
         // notificationList can be absent in the current FXML (button-only notification UI)
         if (notificationList != null) {
             notificationList.setItems(notificationsGlobal);
-
-            // Version SIMPLIFIÉE qui fonctionne à coup sûr
             notificationList.setCellFactory(lv -> new ListCell<Notification>() {
                 @Override
                 protected void updateItem(Notification notif, boolean empty) {
@@ -161,29 +154,14 @@ public class AfficherTopic implements Initializable {
                         setText(null);
                         setStyle("");
                     } else {
-                        // Afficher simplement le message complet
-                        String displayText = notif.getMessage();
-                        setText(displayText);
+                        setText(notif.getMessage());
                         setStyle("-fx-padding: 8px; -fx-font-size: 12px; -fx-background-color: #f0fdf4; -fx-border-color: #bbf7d0; -fx-border-radius: 5px;");
                     }
                 }
             });
-
-            // 🔴 AJOUTE LA BORDURE ROUGE ICI 🔴
-            notificationList.setStyle("-fx-border-color: red; -fx-border-width: 3px; -fx-border-radius: 5px;");
-
-            // Afficher aussi la taille dans la console
-            System.out.println("📋 notificationList configuré - Hauteur: " + notificationList.getPrefHeight());
-
-            // Listener pour les mises à jour
-            notificationsGlobal.addListener((javafx.collections.ListChangeListener.Change<? extends Notification> c) -> {
-                System.out.println("📢 Mise à jour UI - Nombre de notifications: " + notificationsGlobal.size());
+            notificationsGlobal.addListener((ListChangeListener.Change<? extends Notification> c) -> {
                 notificationList.scrollTo(0);
                 updateNotifBadge();
-
-                for (Notification n : notificationsGlobal) {
-                    System.out.println("  - Message: " + n.getMessage());
-                }
             });
         }
 
@@ -245,7 +223,7 @@ public class AfficherTopic implements Initializable {
             err.showAndWait();
         }
     }
-
+    //appel de api like ou dislike
     private boolean sendReactionToRestApi(int topicId, boolean like) throws IOException {
         String endpoint = like ? "like" : "dislike";
         URL url = new URL("http://localhost:" + notificationService.getApiPort() + "/api/topics/" + endpoint);
@@ -662,7 +640,6 @@ public class AfficherTopic implements Initializable {
         } else {
             savedTopicIds.add(topicId);
         }
-        // no-op placeholder to keep toggles in sync
     }
 
     private void shareTopic(Topic topic) {

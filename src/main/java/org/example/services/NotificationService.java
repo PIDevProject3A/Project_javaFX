@@ -142,7 +142,7 @@ public final class NotificationService {
     public int getApiPort() {
         return apiPort;
     }
-
+    //post et get apinotification
     private final class NotificationsHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -159,6 +159,7 @@ public final class NotificationService {
             sendJson(exchange, 405, "{\"error\":\"Method not allowed\"}");
         }
     }
+    //nbr des des notif nn read
 
     private final class UnreadCountHandler implements HttpHandler {
         @Override
@@ -170,6 +171,7 @@ public final class NotificationService {
             sendJson(exchange, 200, "{\"count\":" + unreadCount() + "}");
         }
     }
+    //marker tout read
 
     private final class MarkAllReadHandler implements HttpHandler {
         @Override
@@ -182,6 +184,7 @@ public final class NotificationService {
             sendJson(exchange, 200, "{\"status\":\"ok\"}");
         }
     }
+    //api like and dislike
 
     private final class TopicReactionHandler implements HttpHandler {
         private final boolean like;
@@ -260,6 +263,7 @@ public final class NotificationService {
             }
         }
     }
+    //epingle le topic plus aimer
 
     private final class PinMostLikedTopicHandler implements HttpHandler {
         @Override

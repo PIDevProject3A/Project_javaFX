@@ -22,7 +22,7 @@ public class ForumServices implements Icrud<Topic> {
 
     public ForumServices() {
         con = MyDataBase.getInstance().getConnection();
-        }
+    }
 
     private boolean hasCategoryColumn() {
         if (topicHasCategoryColumn != null) {
@@ -101,13 +101,6 @@ public class ForumServices implements Icrud<Topic> {
             }
         }
         return 0;
-    }
-
-    private static String sqlDateTime(Date d) {
-        if (d == null) {
-            return "NULL";
-        }
-        return "'" + new Timestamp(d.getTime()) + "'";
     }
 
     @Override

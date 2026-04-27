@@ -181,6 +181,7 @@ public class AjouterTopic implements Initializable {
         if (e1 != null || e2 != null || e3 != null || e4 != null) {
             return;
         }
+        //appel de methode bad words
         try {
             List<String> blockedWords = ModerationApiClient.checkBadWords(Title.getText() + " " + contentArea.getText());
             if (!blockedWords.isEmpty()) {

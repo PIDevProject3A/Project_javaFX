@@ -338,6 +338,7 @@ public class AfficherReponseController {
             a.showAndWait();
         }
     }
+    //appel like and dislike
 
     private boolean sendReplyReactionToRestApi(int replyId, boolean like) throws IOException {
         String endpoint = like ? "like" : "dislike";
