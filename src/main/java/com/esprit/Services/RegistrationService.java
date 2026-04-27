@@ -735,11 +735,14 @@ public class RegistrationService implements ICrud<Registration> {
         params.add(Timestamp.valueOf(end));
 
         if (s.has("user_id")) {
-            sql.append(" AND r.user_id = ? ");
+            // En mode démo, certaines anciennes lignes peuvent avoir user_id NULL.
+            // On garde le filtre utilisateur mais on n'exclut pas les anciennes inscriptions NULL.
+            sql.append(" AND (r.user_id = ? OR r.user_id IS NULL) ");
             params.add(userId);
         }
         if (s.hasStatus()) {
-            sql.append(" AND r.status IN ('REGISTERED', 'PAID', 'PENDING_PAYMENT') ");
+            // Anciennes données peuvent avoir status NULL.
+            sql.append(" AND (r.status IN ('REGISTERED', 'PAID', 'PENDING_PAYMENT') OR r.status IS NULL) ");
         }
         sql.append(" ORDER BY e.eventDate ASC ");
 

@@ -249,6 +249,10 @@ public class RegistrationListController {
                 return;
             }
 
+            Stage owner = registrationList.getScene() != null && registrationList.getScene().getWindow() instanceof Stage s ? s : null;
+            if (owner != null) {
+                owner.hide();
+            }
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/esprit/RegistrationEdit.fxml"));
             Stage stage = new Stage();
             stage.setTitle("bledna — modifier l'inscription");
@@ -256,6 +260,9 @@ public class RegistrationListController {
 
             StyleHelper.apply(sc);
             stage.setScene(sc);
+            if (owner != null) {
+                stage.initOwner(owner);
+            }
 
             RegistrationEditController c = loader.getController();
             c.setRegistration(fresh);
@@ -267,6 +274,11 @@ public class RegistrationListController {
             showError("Erreur de chargement : " + e.getMessage());
         } catch (SQLException e) {
             showError("Erreur DB : " + e.getMessage());
+        } finally {
+            Stage owner = registrationList.getScene() != null && registrationList.getScene().getWindow() instanceof Stage s ? s : null;
+            if (owner != null) {
+                owner.show();
+            }
         }
     }
 
@@ -404,13 +416,26 @@ public class RegistrationListController {
         root.setStyle("-fx-padding: 20; -fx-background-color: white;");
         root.setAlignment(Pos.TOP_LEFT);
 
+        Stage owner = registrationList.getScene() != null && registrationList.getScene().getWindow() instanceof Stage s ? s : null;
+        if (owner != null) {
+            owner.hide();
+        }
         Stage st = new Stage();
         st.initModality(Modality.APPLICATION_MODAL);
         st.setTitle("bledna — reçu de paiement");
         Scene sc = new Scene(root, 760, 760);
         StyleHelper.apply(sc);
         st.setScene(sc);
-        st.showAndWait();
+        if (owner != null) {
+            st.initOwner(owner);
+        }
+        try {
+            st.showAndWait();
+        } finally {
+            if (owner != null) {
+                owner.show();
+            }
+        }
     }
 
     private String resolveEmailForReceipt(String currentEmail) {

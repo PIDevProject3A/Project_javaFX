@@ -177,17 +177,29 @@ public class EventAdminController {
 
     private void openEdit(Event event) {
         try {
+            Stage owner = eventList.getScene() != null && eventList.getScene().getWindow() instanceof Stage s ? s : null;
+            if (owner != null) {
+                owner.hide();
+            }
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/esprit/EventEdit.fxml"));
             Stage st = new Stage();
             st.setTitle("bledna — modifier l'événement");
             Scene sc = new Scene(loader.load(), 820, 620);
             StyleHelper.apply(sc);
             st.setScene(sc);
+            if (owner != null) {
+                st.initOwner(owner);
+            }
             loader.<EventEditController>getController().setEventToEdit(event);
             st.showAndWait();
             loadEvents();
         } catch (Exception e) {
             showError(e.getMessage());
+        } finally {
+            Stage owner = eventList.getScene() != null && eventList.getScene().getWindow() instanceof Stage s ? s : null;
+            if (owner != null) {
+                owner.show();
+            }
         }
     }
 
@@ -208,16 +220,28 @@ public class EventAdminController {
     @FXML
     private void handleAddEvent() {
         try {
+            Stage owner = eventList.getScene() != null && eventList.getScene().getWindow() instanceof Stage s ? s : null;
+            if (owner != null) {
+                owner.hide();
+            }
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/esprit/EventAdd.fxml"));
             Stage st = new Stage();
             st.setTitle("bledna — nouvel événement");
             Scene sc = new Scene(loader.load(), 820, 620);
             StyleHelper.apply(sc);
             st.setScene(sc);
+            if (owner != null) {
+                st.initOwner(owner);
+            }
             st.showAndWait();
             loadEvents();
         } catch (Exception e) {
             showError(e.getMessage());
+        } finally {
+            Stage owner = eventList.getScene() != null && eventList.getScene().getWindow() instanceof Stage s ? s : null;
+            if (owner != null) {
+                owner.show();
+            }
         }
     }
 

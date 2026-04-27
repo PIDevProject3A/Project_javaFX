@@ -15,6 +15,10 @@ import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
@@ -95,37 +99,84 @@ public class PaymentReceiptService {
             PdfWriter.getInstance(doc, baos);
             doc.open();
 
-            Font titleFont = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD, BaseColor.DARK_GRAY);
-            Font normal = new Font(Font.FontFamily.HELVETICA, 11, Font.NORMAL, BaseColor.DARK_GRAY);
-            Font strong = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD, new BaseColor(27, 94, 32));
+            Font appTag = new Font(Font.FontFamily.HELVETICA, 11, Font.BOLD, new BaseColor(96, 125, 139));
+            Font titleFont = new Font(Font.FontFamily.HELVETICA, 28, Font.BOLD, new BaseColor(27, 94, 32));
+            Font codeFont = new Font(Font.FontFamily.HELVETICA, 13, Font.BOLD, BaseColor.DARK_GRAY);
+            Font eventFont = new Font(Font.FontFamily.HELVETICA, 24, Font.BOLD, new BaseColor(13, 27, 42));
+            Font normal = new Font(Font.FontFamily.HELVETICA, 12, Font.NORMAL, BaseColor.DARK_GRAY);
+            Font amountFont = new Font(Font.FontFamily.HELVETICA, 30, Font.BOLD, new BaseColor(13, 27, 42));
+            Font qrInfo = new Font(Font.FontFamily.HELVETICA, 11, Font.NORMAL, new BaseColor(96, 125, 139));
 
-            Paragraph title = new Paragraph("Bledna - Reçu de paiement", titleFont);
-            title.setAlignment(Element.ALIGN_CENTER);
-            title.setSpacingAfter(14f);
+            Paragraph app = new Paragraph("BLEDNA", appTag);
+            app.setAlignment(Element.ALIGN_LEFT);
+            app.setSpacingAfter(4f);
+            doc.add(app);
+
+            Paragraph title = new Paragraph("Reçu de paiement", titleFont);
+            title.setAlignment(Element.ALIGN_LEFT);
+            title.setSpacingAfter(12f);
             doc.add(title);
 
-            doc.add(new Paragraph("Code reçu : " + d.receiptCode(), strong));
-            doc.add(new Paragraph("Événement : " + d.eventName(), normal));
-            doc.add(new Paragraph("Date événement : " + formatDate(d.eventDate()), normal));
-            doc.add(new Paragraph("Lieu : " + d.location(), normal));
-            doc.add(new Paragraph("Participant : " + d.participantName(), normal));
-            doc.add(new Paragraph("Email : " + d.email(), normal));
-            doc.add(new Paragraph("Date inscription : " + formatDate(d.registrationDate()), normal));
-            doc.add(new Paragraph(String.format(Locale.FRANCE, "Montant payé : %.2f TND", d.amount()), strong));
-            doc.add(new Paragraph("Méthode paiement : " + d.paymentMethod(), normal));
-            doc.add(new Paragraph("Statut : " + d.status(), normal));
-            doc.add(Chunk.NEWLINE);
+            PdfPTable card = new PdfPTable(1);
+            card.setWidthPercentage(100f);
+            PdfPCell cardCell = new PdfPCell();
+            cardCell.setPadding(16f);
+            cardCell.setBorderColor(new BaseColor(219, 229, 239));
+            cardCell.setBorderWidth(1f);
+            cardCell.setBackgroundColor(new BaseColor(248, 250, 252));
+
+            Paragraph code = new Paragraph("Code reçu : " + d.receiptCode(), codeFont);
+            code.setSpacingAfter(12f);
+            cardCell.addElement(code);
+
+            Paragraph event = new Paragraph(nullSafe(d.eventName()), eventFont);
+            event.setSpacingAfter(8f);
+            cardCell.addElement(event);
+
+            Paragraph eventMeta = new Paragraph(
+                    "\uD83D\uDCC5 " + formatDate(d.eventDate()) + "    \uD83D\uDCCD " + nullSafe(d.location()),
+                    normal);
+            eventMeta.setSpacingAfter(12f);
+            cardCell.addElement(eventMeta);
+
+            PdfPTable info = new PdfPTable(1);
+            info.setWidthPercentage(100f);
+            info.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+            info.addCell(noBorder("Participant : " + nullSafe(d.participantName()), normal));
+            info.addCell(noBorder("Email : " + nullSafe(d.email()), normal));
+            info.addCell(noBorder("Date d'inscription : " + formatDate(d.registrationDate()), normal));
+            info.addCell(noBorder("Méthode de paiement : " + nullSafe(d.paymentMethod()), normal));
+            info.setSpacingAfter(8f);
+            cardCell.addElement(info);
+
+            Paragraph amount = new Paragraph(String.format(Locale.FRANCE, "Montant payé : %.2f TND", d.amount()), amountFont);
+            amount.setSpacingBefore(6f);
+            cardCell.addElement(amount);
+
+            card.addCell(cardCell);
+            card.setSpacingAfter(18f);
+            doc.add(card);
 
             byte[] qrPng = createQrPng(d.qrPayload(), 260);
             com.itextpdf.text.Image qr = com.itextpdf.text.Image.getInstance(qrPng);
-            qr.setAlignment(Element.ALIGN_CENTER);
-            doc.add(qr);
+            qr.scaleToFit(140f, 140f);
 
+            PdfPTable qrRow = new PdfPTable(new float[]{1f, 3f});
+            qrRow.setWidthPercentage(100f);
+            PdfPCell qrCell = new PdfPCell(qr, true);
+            qrCell.setBorder(Rectangle.NO_BORDER);
+            qrCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+            qrCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            qrCell.setPadding(0f);
+            qrRow.addCell(qrCell);
 
-            Paragraph note = new Paragraph("QR code de vérification du reçu", normal);
-            note.setAlignment(Element.ALIGN_CENTER);
-            note.setSpacingBefore(8f);
-            doc.add(note);
+            Paragraph note = new Paragraph("Présentez ce reçu à l'entrée\nScannez le QR code pour vérifier l'authenticité.", qrInfo);
+            PdfPCell noteCell = new PdfPCell(new Phrase(note));
+            noteCell.setBorder(Rectangle.NO_BORDER);
+            noteCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            noteCell.setPaddingLeft(10f);
+            qrRow.addCell(noteCell);
+            doc.add(qrRow);
 
             doc.close();
         } catch (Exception ex) {
@@ -163,6 +214,13 @@ public class PaymentReceiptService {
         return s == null ? "" : s;
     }
 
+    private static PdfPCell noBorder(String text, Font font) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, font));
+        cell.setBorder(Rectangle.NO_BORDER);
+        cell.setPaddingBottom(4f);
+        return cell;
+    }
+
     /**
      * Génère un QR code PNG à partir du payload.
      */
@@ -177,9 +235,8 @@ public class PaymentReceiptService {
         return out.toByteArray();
     }
 
-    /**
-     * Record pour stocker les données du reçu (avec registrationId).
-     */
+    //Record pour stocker les données du reçu (avec registrationId).
+
     public record ReceiptData(
             int registrationId,
             String receiptCode,

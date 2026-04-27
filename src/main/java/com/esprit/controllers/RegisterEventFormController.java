@@ -153,7 +153,7 @@ public class RegisterEventFormController {
                     event.getId(), AppSession.getCurrentUserId(), fn, ln)) {
                 existing = registrationService.trouverParIdUtilisateur(
                         AppSession.getCurrentUserId(), event.getId(), fn, ln);
-                if (existing != null && event.getPrice() > 0 && !existing.isPaid()) {
+                if (existing != null && isStripeRequired(event) && !existing.isPaid()) {
                     // Déjà inscrit mais paiement non confirmé : on met à jour les coordonnées,
                     // puis on relance Stripe avec les données à jour.
                     existing.setFirstName(fn);
@@ -165,7 +165,7 @@ public class RegisterEventFormController {
                     if (existing.getPaymentMethod() == null || existing.getPaymentMethod().isBlank()) {
                         existing.setPaymentMethod(paymentMethodFromEvent(event));
                     }
-                    if (existing.getAmount() <= 0 && event.getPrice() > 0) {
+                    if (existing.getAmount() <= 0 && isStripeRequired(event)) {
                         existing.setAmount(event.getPrice());
                         existing.setBudget(event.getPrice());
                     }
@@ -187,8 +187,8 @@ public class RegisterEventFormController {
             r.setLastName(ln);
             r.setEmail(email);
             r.setRegistrationDate(registrationDt);
-            r.setAmount(event.getPrice());          // Prix de l'événement
-            r.setBudget(event.getPrice());          // Budget à payer
+            r.setAmount(isStripeRequired(event) ? event.getPrice() : 0.0);
+            r.setBudget(isStripeRequired(event) ? event.getPrice() : 0.0);
             r.setPaymentMethod(paymentMethodFromEvent(event));
             r.setPaid(false);                        // Pas encore payé
             r.setStatus("REGISTERED");
@@ -205,7 +205,7 @@ public class RegisterEventFormController {
             }
 
             // Événement payant => Stripe systématiquement.
-            if (event.getPrice() > 0) {
+            if (isStripeRequired(event)) {
                 handleStripePayment(fresh);
             } else {
                 AppSession.setRegistrant(fn, ln, email);
@@ -246,11 +246,18 @@ public class RegisterEventFormController {
     }
 
     private static String paymentMethodFromEvent(Event e) {
-        // Dans ce projet : événement payant => Stripe (carte), gratuit => espèces par défaut.
-        if (e != null && e.getEventType() != null && e.getEventType().equalsIgnoreCase("PAID")) {
+        // Verrou métier : FREE ne passe jamais par Stripe.
+        if (isStripeRequired(e)) {
             return "CARD";
         }
         return "CASH";
+    }
+
+    private static boolean isStripeRequired(Event e) {
+        return e != null
+                && e.getEventType() != null
+                && e.getEventType().equalsIgnoreCase("PAID")
+                && e.getPrice() > 0;
     }
 
     private static String labelPaymentFr(String code) {

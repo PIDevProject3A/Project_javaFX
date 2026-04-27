@@ -235,18 +235,30 @@ public class EventCatalogController {
             return;
         }
         try {
+            Stage owner = eventList.getScene() != null && eventList.getScene().getWindow() instanceof Stage s ? s : null;
+            if (owner != null) {
+                owner.hide();
+            }
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/esprit/RegisterEventForm.fxml"));
             Stage st = new Stage();
             st.setTitle("bledna — inscription : " + event.getName());
             Scene sc = new Scene(loader.load(), 560, formHeight(event));
             StyleHelper.apply(sc);
             st.setScene(sc);
+            if (owner != null) {
+                st.initOwner(owner);
+            }
             RegisterEventFormController c = loader.getController();
             c.setEvent(event);
             st.showAndWait();
             loadEvents();
         } catch (Exception e) {
             showError("Impossible d'ouvrir le formulaire : " + e.getMessage());
+        } finally {
+            Stage owner = eventList.getScene() != null && eventList.getScene().getWindow() instanceof Stage s ? s : null;
+            if (owner != null) {
+                owner.show();
+            }
         }
     }
 
