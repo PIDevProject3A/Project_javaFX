@@ -12,7 +12,7 @@ public class Main extends Application {
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
         Scene scene = new Scene(root, APP_WIDTH, APP_HEIGHT);
-        stage.setTitle("Account Access");
+        stage.setTitle("BLADNA");
         stage.setMinWidth(700);
         stage.setMinHeight(500);
         stage.setScene(scene);

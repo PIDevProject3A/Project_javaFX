@@ -34,6 +34,9 @@ public class AdminAccountsController {
 
     @FXML
     public void initialize() {
+        messageLabel.visibleProperty().bind(messageLabel.textProperty().isNotEmpty());
+        messageLabel.managedProperty().bind(messageLabel.visibleProperty());
+
         if (UserSession.getCurrentUserRole() != User.AdminType.ADMIN_ACCOUNT) {
             setEditingEnabled(false);
             setMessage("Access denied: admin role required.", false);
@@ -72,7 +75,7 @@ public class AdminAccountsController {
 
     @FXML
     private void goBack() {
-        switchScene("/Welcome.fxml");
+        switchScene("/Dashboard.fxml");
     }
 
     @FXML

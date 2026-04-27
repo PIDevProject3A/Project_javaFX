@@ -14,10 +14,9 @@ Assurez-vous que `localhost` et `127.0.0.1` sont bien ajoutes dans la console re
 
 ## Face ID (CompreFace)
 
-Deux options sont disponibles dans l'ecran de connexion:
+Une option est disponible dans l'ecran de connexion:
 
-- `Configurer mon Face ID` (enrollement)
-- `Login with Face ID (sans email)` (connexion biometrie uniquement)
+- `Login with Face ID (camera PC)` (connexion biometrie sans email)
 
 Quand un admin est connecte, une page `Manage Face ID` est disponible depuis le dashboard:
 

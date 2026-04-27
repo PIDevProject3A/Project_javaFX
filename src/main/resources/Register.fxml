@@ -41,7 +41,7 @@
             <Button text="Go to Login" onAction="#goToLogin" styleClass="secondary-button"/>
         </HBox>
 
-        <Label fx:id="messageLabel" styleClass="status-message" wrapText="true"/>
+        <Label fx:id="messageLabel" styleClass="status-message" wrapText="true" visible="false" managed="false"/>
     </VBox>
     <padding>
         <Insets top="26" right="26" bottom="26" left="26"/>

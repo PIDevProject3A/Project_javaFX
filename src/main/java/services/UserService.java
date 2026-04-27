@@ -132,7 +132,7 @@ public class UserService {
             String migratedHash = hashPassword(password);
             boolean migrated = dataBase.updateUserCredentials(user.getAdminType(), user.getEmail(), user.getEmail(), migratedHash);
             if (migrated) {
-                return new User(user.getFirstName(), user.getLastName(), user.getEmail(), migratedHash, user.getAdminType());
+                return new User(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), migratedHash, user.getAdminType());
             }
         }
         return null;
@@ -161,7 +161,7 @@ public class UserService {
         }
 
         String passwordHash = hashPassword(password);
-        User user = new User(firstName.trim(), lastName.trim(), email.trim().toLowerCase(), passwordHash, targetRole);
+        User user = new User(0, firstName.trim(), lastName.trim(), email.trim().toLowerCase(), passwordHash, targetRole);
         boolean saved = dataBase.addUser(user);
         if (!saved) {
             return "Email already exists.";
@@ -194,6 +194,17 @@ public class UserService {
             return Collections.emptyList();
         }
         return dataBase.findAllUsers();
+    }
+
+    public List<User> getOtherUsersEditableByCurrentUser(User.AdminType currentRole, String currentUserEmail) {
+        if (currentRole != User.AdminType.ADMIN_ACCOUNT) {
+            return Collections.emptyList();
+        }
+        List<User> allUsers = dataBase.findAllUsers();
+        if (currentUserEmail == null) return allUsers;
+        
+        allUsers.removeIf(user -> user.getEmail().equalsIgnoreCase(currentUserEmail));
+        return allUsers;
     }
 
     public String updateCredentialsByAdmin(User.AdminType currentRole,

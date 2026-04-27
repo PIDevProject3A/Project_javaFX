@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Line?>
+
+<BorderPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AdminSettingsController" stylesheets="@style.css">
+    <left>
+        <VBox styleClass="sidebar">
+            <Label text="BLADNA" styleClass="sidebar-title"/>
+            <Label text="Admin Dashboard" styleClass="sidebar-subtitle"/>
+            
+            <Region prefHeight="20"/>
+            
+            <Button text="Dashboard" onAction="#goToOverview" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F3E0;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button text="Manage Accounts" onAction="#goToManageAccounts" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F465;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button text="Settings" onAction="#refresh" styleClass="nav-button, nav-button-active">
+                <graphic>
+                    <Label text="&#x2699;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            
+            <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Logout" onAction="#logout" styleClass="nav-button, nav-button-logout">
+                <graphic>
+                    <Label text="&#x2B05;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+        </VBox>
+    </left>
+
+    <center>
+        <StackPane styleClass="content-area">
+            <VBox styleClass="page-card" maxWidth="680" spacing="15">
+                <Label text="My Settings" styleClass="title"/>
+                <Label text="Manage your own account credentials, face ID, and account deletion." styleClass="subtitle" wrapText="true"/>
+
+                <Label text="Profile Information" styleClass="section-title"/>
+                <GridPane styleClass="form-grid" vgap="5" hgap="10">
+                    <Label text="First name" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <TextField fx:id="firstNameField" promptText="First name" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <Label fx:id="firstNameHintLabel" text="First name must be at least 3 characters." styleClass="validation-hint" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                    <Label text="Last name" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                    <TextField fx:id="lastNameField" promptText="Last name" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                    <Label fx:id="lastNameHintLabel" text="Last name must be at least 3 characters." styleClass="validation-hint" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                    <Label text="Email" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                    <TextField fx:id="emailField" promptText="New email" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+                    <Label text="New password (optional)" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+                    <PasswordField fx:id="newPasswordField" promptText="Leave empty to keep current password" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                    <TextField fx:id="newPasswordVisibleField" promptText="Leave empty to keep current password" visible="false" managed="false" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                    <CheckBox fx:id="showPasswordCheckBox" text="Show password" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+                    <Label fx:id="newPasswordHintLabel" text="Password must be at least 8 characters when provided." styleClass="validation-hint" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="7"/>
+                </GridPane>
+
+                <HBox spacing="10">
+                    <Button fx:id="saveChangesButton" text="Save Profile Changes" onAction="#handleSave" styleClass="primary-button"/>
+                </HBox>
+
+                <Region prefHeight="10"/>
+                
+                <Label text="Advanced Actions" styleClass="section-title"/>
+                <HBox spacing="15">
+                    <Button text="Manage My Face ID" onAction="#handleFaceId" styleClass="secondary-button">
+                        <graphic>
+                            <Label text="&#x1F4F7;" styleClass="icon-label"/>
+                        </graphic>
+                    </Button>
+                    <Button text="Delete My Account" onAction="#handleDeleteAccount" styleClass="danger-button">
+                        <graphic>
+                            <Label text="&#x1F5D1;" styleClass="icon-label"/>
+                        </graphic>
+                    </Button>
+                </HBox>
+
+                <Label fx:id="messageLabel" styleClass="status-message" wrapText="true" visible="false" managed="false"/>
+            </VBox>
+        </StackPane>
+    </center>
+</BorderPane>

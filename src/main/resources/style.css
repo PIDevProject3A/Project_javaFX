@@ -1,13 +1,21 @@
 .root {
     -fx-font-family: "Segoe UI", "Inter", Arial, sans-serif;
     -color-primary: #2E7D32;
+    -color-primary-dark: #1B5E20;
     -color-light: #A5D6A7;
     -color-bg: #F1F8E9;
     -color-accent: #66BB6A;
     -color-surface: #FFFFFF;
     -color-text: #204223;
+    -color-text-light: #4e6f50;
     -fx-background-color: -color-bg;
     -fx-text-fill: -color-text;
+}
+
+.icon-label {
+    -fx-font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Apple Color Emoji", "Noto Color Emoji", "Inter", Arial, sans-serif;
+    -fx-font-size: 18px;
+    -fx-text-fill: #37474F;
 }
 
 .app-shell {
@@ -44,6 +52,7 @@
     -fx-font-size: 13px;
     -fx-font-weight: 600;
     -fx-cursor: hand;
+    -fx-graphic-text-gap: 12px;
 }
 
 .nav-button:hover {
@@ -67,6 +76,34 @@
     -fx-padding: 28px;
     -fx-spacing: 16px;
     -fx-effect: dropshadow(gaussian, rgba(46, 125, 50, 0.14), 20, 0.24, 0, 5);
+}
+
+.login-card {
+    -fx-background-color: rgba(255, 255, 255, 0.92);
+    -fx-background-radius: 28px;
+    -fx-border-radius: 28px;
+    -fx-border-color: rgba(255, 255, 255, 0.5);
+    -fx-border-width: 2px;
+    -fx-padding: 45px;
+    -fx-spacing: 24px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 50, 0, 0, 15);
+}
+
+.login-background {
+    -fx-background-color: linear-gradient(to bottom right, #004D40, #00796B, #4DB6AC, #E0F2F1, #FFFFFF);
+}
+
+.brand-title {
+    -fx-font-size: 36px;
+    -fx-font-weight: 900;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 4, 0, 0, 2);
+}
+
+.brand-subtitle {
+    -fx-font-size: 16px;
+    -fx-text-fill: rgba(255, 255, 255, 0.9);
+    -fx-font-weight: 500;
 }
 
 .title {
@@ -94,7 +131,7 @@
 .form-label {
     -fx-font-size: 12px;
     -fx-font-weight: 600;
-    -fx-text-fill: #3f5f41;
+    -fx-text-fill: #37474F;
 }
 
 .text-field,
@@ -129,6 +166,11 @@
     -fx-font-weight: 700;
     -fx-cursor: hand;
     -fx-padding: 0 14px;
+    -fx-graphic-text-gap: 8px;
+}
+
+.button .icon-label {
+    -fx-text-fill: inherit;
 }
 
 .button:hover {
@@ -136,21 +178,31 @@
 }
 
 .primary-button {
-    -fx-background-color: -color-primary;
+    -fx-background-color: linear-gradient(to right, -color-primary, -color-primary-dark);
     -fx-text-fill: white;
+    -fx-background-radius: 12px;
+    -fx-transition: all 0.3s ease;
 }
 
 .primary-button:hover {
-    -fx-background-color: #256b2a;
+    -fx-background-color: linear-gradient(to right, #388E3C, #2E7D32);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
 }
 
 .secondary-button {
-    -fx-background-color: #e4f3df;
-    -fx-text-fill: #245126;
+    -fx-background-color: white;
+    -fx-text-fill: -color-primary;
+    -fx-border-color: -color-primary;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
 }
 
 .secondary-button:hover {
-    -fx-background-color: #d4ebcd;
+    -fx-background-color: #f1f8e9;
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
 }
 
 .danger-button {
@@ -176,18 +228,19 @@
 
 .status-message {
     -fx-font-size: 12px;
-    -fx-padding: 9px 11px;
-    -fx-background-radius: 10px;
-    -fx-background-color: #eef5eb;
-    -fx-text-fill: #486149;
+    -fx-text-fill: transparent;
 }
 
 .status-success {
+    -fx-padding: 9px 11px;
+    -fx-background-radius: 10px;
     -fx-text-fill: #1f5f23;
     -fx-background-color: #dcedd8;
 }
 
 .status-error {
+    -fx-padding: 9px 11px;
+    -fx-background-radius: 10px;
     -fx-text-fill: #8f1f1b;
     -fx-background-color: #f9dddc;
 }
@@ -237,4 +290,104 @@
 .password-info {
     -fx-font-size: 11px;
     -fx-text-fill: #5f755f;
+}
+
+/* Dashboard Specific Styles */
+.search-field {
+    -fx-background-color: #ffffff;
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-padding: 0 16px;
+}
+
+.action-bar {
+    -fx-padding: 16px 0 0 0;
+    -fx-border-color: transparent transparent transparent transparent;
+    -fx-border-width: 1px 0 0 0;
+}
+
+.action-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #3f5f41;
+}
+
+.nav-button-logout {
+    -fx-text-fill: #ffbaba;
+}
+
+.nav-button-logout:hover {
+    -fx-background-color: rgba(255, 0, 0, 0.16);
+    -fx-text-fill: #ffcece;
+}
+
+.button:disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: default;
+}
+
+.secondary-button:disabled {
+    -fx-background-color: #f1f8e9;
+    -fx-text-fill: #a0bca1;
+}
+
+.danger-button:disabled {
+    -fx-background-color: #f9dddc;
+    -fx-text-fill: #e8a8a6;
+}
+
+.stat-card {
+    -fx-padding: 20px;
+    -fx-background-radius: 15px;
+    -fx-spacing: 5px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 10, 0.1, 0, 4);
+}
+
+.stat-card-green { -fx-background-color: linear-gradient(to bottom right, #E8F5E9, #C8E6C9); }
+.stat-card-blue { -fx-background-color: linear-gradient(to bottom right, #E3F2FD, #BBDEFB); }
+.stat-card-orange { -fx-background-color: linear-gradient(to bottom right, #FFF3E0, #FFE0B2); }
+.stat-card-purple { -fx-background-color: linear-gradient(to bottom right, #F3E5F5, #E1BEE7); }
+
+.stat-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #444;
+}
+
+.stat-value {
+    -fx-font-size: 28px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -color-primary;
+}
+
+.chart-container {
+    -fx-background-color: white;
+    -fx-padding: 20px;
+    -fx-background-radius: 18px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 15, 0.1, 0, 5);
+}
+
+.chart-container .section-title {
+    -fx-padding: 0 0 10px 0;
+}
+
+.chart {
+    -fx-legend-side: bottom;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.chart-vertical-grid-lines {
+    -fx-stroke: #f0f0f0;
+}
+
+.chart-horizontal-grid-lines {
+    -fx-stroke: #f0f0f0;
+}
+
+.axis {
+    -fx-tick-label-fill: #888;
+    -fx-font-size: 11px;
 }

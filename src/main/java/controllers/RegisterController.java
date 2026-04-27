@@ -50,6 +50,8 @@ public class RegisterController {
 
     @FXML
     public void initialize() {
+        messageLabel.visibleProperty().bind(messageLabel.textProperty().isNotEmpty());
+        messageLabel.managedProperty().bind(messageLabel.visibleProperty());
         adminTypeBox.setItems(FXCollections.observableArrayList(User.AdminType.values()));
         adminTypeBox.setValue(User.AdminType.EVENT_MANAGER);
         setMessage("Public registration is disabled. Login with an existing account.", false);

@@ -7,18 +7,24 @@ public class User {
         FINANCE_MANAGER
     }
 
+    private final int id;
     private final String firstName;
     private final String lastName;
     private final String email;
     private final String passwordHash;
     private final AdminType adminType;
 
-    public User(String firstName, String lastName, String email, String passwordHash, AdminType adminType) {
+    public User(int id, String firstName, String lastName, String email, String passwordHash, AdminType adminType) {
+        this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.passwordHash = passwordHash;
         this.adminType = adminType;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getFirstName() {

@@ -13,39 +13,58 @@
 <BorderPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WelcomeController" stylesheets="@style.css">
     <left>
         <VBox styleClass="sidebar">
-            <Label text="Green Desk" styleClass="sidebar-title"/>
+            <Label text="BLADNA" styleClass="sidebar-title"/>
             <Label text="Navigation" styleClass="sidebar-subtitle"/>
 
-            <Button text="[] Dashboard" styleClass="nav-button"/>
-            <Button fx:id="manageAccountsButton" text="[+] Accounts" onAction="#goToManageAccounts" styleClass="nav-button"/>
-            <Button fx:id="manageFaceIdButton" text="[F] Face ID" onAction="#goToManageFaceId" styleClass="nav-button"/>
-            <Button fx:id="modifyCredentialsNavButton" text="[~] Credentials" onAction="#goToModifyCredentials" styleClass="nav-button"/>
-            <Button text="[-] Delete account" onAction="#goToDeleteAccount" styleClass="nav-button"/>
+            <Region prefHeight="20"/>
+
+            <Button text="Dashboard" styleClass="nav-button, nav-button-active">
+                <graphic>
+                    <Label text="&#x1F3E0;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button fx:id="manageAccountsNavButton" text="Manage Accounts" onAction="#goToManageAccounts" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F465;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button fx:id="settingsNavButton" text="Settings" onAction="#goToSettings" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x2699;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
 
             <Region VBox.vgrow="ALWAYS"/>
-            <Button text="[x] Logout" onAction="#logout" styleClass="nav-button"/>
+            <Button text="Logout" onAction="#logout" styleClass="nav-button, nav-button-logout">
+                <graphic>
+                    <Label text="&#x2B05;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
         </VBox>
     </left>
 
     <center>
         <StackPane styleClass="content-area">
-            <VBox styleClass="page-card" maxWidth="680">
-                <Label text="Bienvenue" styleClass="title"/>
+            <VBox styleClass="page-card" maxWidth="680" alignment="CENTER_LEFT">
+                <Label text="Welcome" styleClass="title"/>
                 <Label fx:id="messageLabel" styleClass="subtitle" wrapText="true"/>
 
-                <HBox spacing="12" styleClass="spacer">
-                    <Button fx:id="manageAccountsShortcutButton" text="Manage Accounts" onAction="#goToManageAccounts" styleClass="primary-button"/>
-                    <Button fx:id="manageFaceIdShortcutButton" text="Manage Face ID" onAction="#goToManageFaceId" styleClass="secondary-button"/>
-                    <Button fx:id="modifyCredentialsButton" text="Modify Credentials" onAction="#goToModifyCredentials" styleClass="secondary-button"/>
-                    <Button text="Delete Account" onAction="#goToDeleteAccount" styleClass="danger-button"/>
+                <HBox spacing="15" styleClass="action-bar">
+                    <Button fx:id="manageAccountsShortcutButton" text="Manage Accounts" onAction="#goToManageAccounts" styleClass="primary-button">
+                        <graphic>
+                            <Label text="&#x1F465;" styleClass="icon-label"/>
+                        </graphic>
+                    </Button>
+                    <Button fx:id="settingsShortcutButton" text="Settings" onAction="#goToSettings" styleClass="secondary-button">
+                        <graphic>
+                            <Label text="&#x2699;" styleClass="icon-label"/>
+                        </graphic>
+                    </Button>
                 </HBox>
 
-                <Label text="Raccourcis" styleClass="section-title"/>
-                <Label text="Utilisez la barre laterale pour changer de page rapidement. Les actions critiques sont clairement distinguees pour eviter les erreurs." styleClass="subtitle" wrapText="true"/>
+                <Label text="Quick Actions" styleClass="section-title"/>
+                <Label text="Use the navigation bar or shortcuts above to manage users or configure your own settings." styleClass="subtitle" wrapText="true"/>
             </VBox>
-            <padding>
-                <Insets top="6" right="6" bottom="6" left="6"/>
-            </padding>
         </StackPane>
     </center>
 </BorderPane>

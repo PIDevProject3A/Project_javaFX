@@ -12,52 +12,32 @@ public class WelcomeController {
     private Label messageLabel;
 
     @FXML
-    private Button manageAccountsButton;
+    private Button manageAccountsNavButton;
 
     @FXML
     private Button manageAccountsShortcutButton;
 
     @FXML
-    private Button modifyCredentialsNavButton;
+    private Button settingsNavButton;
 
     @FXML
-    private Button modifyCredentialsButton;
-
-    @FXML
-    private Button manageFaceIdButton;
-
-    @FXML
-    private Button manageFaceIdShortcutButton;
+    private Button settingsShortcutButton;
 
     @FXML
     public void initialize() {
         User.AdminType role = UserSession.getCurrentUserRole();
         String roleLabel = role == null ? "UNKNOWN" : role.name();
-        messageLabel.setText("Welcome to Bladna application\nRole: " + roleLabel);
+        messageLabel.setText("Dashboard Overview\nRole: " + roleLabel);
 
         boolean isAdmin = role == User.AdminType.ADMIN_ACCOUNT;
-        manageAccountsButton.setVisible(isAdmin);
-        manageAccountsButton.setManaged(isAdmin);
+        manageAccountsNavButton.setVisible(isAdmin);
+        manageAccountsNavButton.setManaged(isAdmin);
         manageAccountsShortcutButton.setVisible(isAdmin);
         manageAccountsShortcutButton.setManaged(isAdmin);
-        modifyCredentialsNavButton.setVisible(isAdmin);
-        modifyCredentialsNavButton.setManaged(isAdmin);
-        modifyCredentialsButton.setVisible(isAdmin);
-        modifyCredentialsButton.setManaged(isAdmin);
-        manageFaceIdButton.setVisible(isAdmin);
-        manageFaceIdButton.setManaged(isAdmin);
-        manageFaceIdShortcutButton.setVisible(isAdmin);
-        manageFaceIdShortcutButton.setManaged(isAdmin);
-    }
-
-    @FXML
-    private void goToModifyCredentials() {
-        switchScene("/ModifyCredentials.fxml");
-    }
-
-    @FXML
-    private void goToDeleteAccount() {
-        switchScene("/DeleteAccount.fxml");
+        settingsNavButton.setVisible(isAdmin);
+        settingsNavButton.setManaged(isAdmin);
+        settingsShortcutButton.setVisible(isAdmin);
+        settingsShortcutButton.setManaged(isAdmin);
     }
 
     @FXML
@@ -66,20 +46,20 @@ public class WelcomeController {
             messageLabel.setText("Access denied: admin role required.");
             return;
         }
-        switchScene("/AdminAccounts.fxml");
+        switchScene("/AdminDashboard.fxml");
     }
 
     @FXML
-    private void goToManageFaceId() {
-        if (UserSession.getCurrentUserRole() != User.AdminType.ADMIN_ACCOUNT) {
-            messageLabel.setText("Access denied: admin role required.");
-            return;
-        }
-        switchScene("/FaceIdAdminManagement.fxml");
+    private void goToSettings() {
+        switchScene("/AdminSettings.fxml");
     }
 
     @FXML
     private void logout() {
+        int logId = UserSession.getCurrentLoginLogId();
+        if (logId != -1) {
+            utils.MyDataBase.getInstance().updateLogoutTime(logId);
+        }
         UserSession.clear();
         switchScene("/Login.fxml");
     }
@@ -88,4 +68,3 @@ public class WelcomeController {
         SceneNavigator.navigate(messageLabel, fxml, messageLabel::setText);
     }
 }
-

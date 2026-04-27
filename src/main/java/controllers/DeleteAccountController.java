@@ -14,6 +14,12 @@ public class DeleteAccountController {
     private final UserService userService = new UserService();
 
     @FXML
+    public void initialize() {
+        messageLabel.visibleProperty().bind(messageLabel.textProperty().isNotEmpty());
+        messageLabel.managedProperty().bind(messageLabel.visibleProperty());
+    }
+
+    @FXML
     private void handleDeleteAccount() {
         String currentEmail = UserSession.getCurrentUserEmail();
         User.AdminType currentRole = UserSession.getCurrentUserRole();
@@ -33,7 +39,7 @@ public class DeleteAccountController {
 
     @FXML
     private void goBack() {
-        switchScene("/Welcome.fxml");
+        switchScene("/Dashboard.fxml");
     }
 
     private void switchScene(String fxml) {

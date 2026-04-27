@@ -5,6 +5,8 @@ import entities.User;
 public final class UserSession {
     private static String currentUserEmail;
     private static User.AdminType currentUserRole;
+    private static User userToEdit;
+    private static int currentLoginLogId = -1;
 
     private UserSession() {
     }
@@ -25,9 +27,27 @@ public final class UserSession {
         currentUserRole = role;
     }
 
+    public static User getUserToEdit() {
+        return userToEdit;
+    }
+
+    public static void setUserToEdit(User user) {
+        userToEdit = user;
+    }
+
+    public static int getCurrentLoginLogId() {
+        return currentLoginLogId;
+    }
+
+    public static void setCurrentLoginLogId(int id) {
+        currentLoginLogId = id;
+    }
+
     public static void clear() {
         currentUserEmail = null;
         currentUserRole = null;
+        userToEdit = null;
+        currentLoginLogId = -1;
     }
 }
 

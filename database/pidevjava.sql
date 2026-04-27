@@ -31,14 +31,21 @@ CREATE TABLE IF NOT EXISTS finance_manager (
     UNIQUE KEY uq_finance_manager_email (email)
 );
 
-CREATE TABLE IF NOT EXISTS face_id_profiles (
+-- Default admin account is created by the application with a BCrypt-hashed password.
+
+CREATE TABLE IF NOT EXISTS login_history (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(150) NOT NULL,
-    face_subject VARCHAR(80) NOT NULL,
-    is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
-    enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_face_id_profiles_email (email),
-    UNIQUE KEY uq_face_id_profiles_subject (face_subject)
+    user_id INT NOT NULL,
+    user_role VARCHAR(50) NOT NULL,
+    login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    logout_time TIMESTAMP NULL
 );
 
--- Default admin account is created by the application with a BCrypt-hashed password.
+CREATE TABLE IF NOT EXISTS email_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender VARCHAR(150) NOT NULL,
+    recipient VARCHAR(150) NOT NULL,
+    subject VARCHAR(255),
+    status ENUM('sent', 'failed') NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

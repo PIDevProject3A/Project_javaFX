@@ -12,9 +12,16 @@
 <BorderPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.DeleteAccountController" stylesheets="@style.css">
     <left>
         <VBox styleClass="sidebar">
-            <Label text="Green Desk" styleClass="sidebar-title"/>
+            <Label text="BLADNA" styleClass="sidebar-title"/>
             <Label text="Security" styleClass="sidebar-subtitle"/>
-            <Button text="[Back] Dashboard" onAction="#goBack" styleClass="nav-button"/>
+            
+            <Region prefHeight="20"/>
+
+            <Button text="Dashboard" onAction="#goBack" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x2B05;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
             <Region VBox.vgrow="ALWAYS"/>
         </VBox>
     </left>
@@ -27,11 +34,15 @@
                 <Label text="Vous serez deconnecte immediatement apres suppression." styleClass="subtitle" wrapText="true"/>
 
                 <HBox spacing="10">
-                    <Button text="Delete My Account" onAction="#handleDeleteAccount" styleClass="danger-button"/>
+                    <Button text="Delete My Account" onAction="#handleDeleteAccount" styleClass="danger-button">
+                        <graphic>
+                            <Label text="&#x1F5D1;" styleClass="icon-label"/>
+                        </graphic>
+                    </Button>
                     <Button text="Back" onAction="#goBack" styleClass="secondary-button"/>
                 </HBox>
 
-                <Label fx:id="messageLabel" styleClass="status-message" wrapText="true"/>
+                <Label fx:id="messageLabel" styleClass="status-message" wrapText="true" visible="false" managed="false"/>
             </VBox>
             <padding>
                 <Insets top="6" right="6" bottom="6" left="6"/>
