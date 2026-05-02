@@ -14,10 +14,11 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -25,21 +26,22 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.collections.ListChangeListener;
+import org.example.entities.Notification;
 import org.example.entities.Topic;
 import org.example.entities.TopicCategory;
 import org.example.entities.TopicStatus;
 import org.example.services.ForumServices;
 import org.example.services.NotificationService;
-import org.example.entities.Notification;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ListCell;
 
+import java.awt.Desktop;
 import java.io.IOException;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -54,6 +56,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.nio.charset.StandardCharsets;
 
 public class AfficherTopic implements Initializable {
 
@@ -643,15 +646,27 @@ public class AfficherTopic implements Initializable {
     }
 
     private void shareTopic(Topic topic) {
-        String fakePublicLink = "https://zsocial.local/topic/" + topic.getId();
-        ClipboardContent content = new ClipboardContent();
-        content.putString(fakePublicLink);
-        Clipboard.getSystemClipboard().setContent(content);
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Shared");
-        alert.setHeaderText(null);
-        alert.setContentText("Topic link copied:\n" + fakePublicLink);
-        alert.showAndWait();
+        String publicLink = "https://zsocial.local/topic/" + topic.getId();
+        try {
+            String facebookShareUrl = "https://www.facebook.com/sharer/sharer.php?u="
+                    + URLEncoder.encode(publicLink, StandardCharsets.UTF_8);
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().browse(URI.create(facebookShareUrl));
+            } else {
+                throw new IOException("Desktop browser is not supported on this machine.");
+            }
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Shared");
+            alert.setHeaderText(null);
+            alert.setContentText("Facebook share dialog opened for this topic.");
+            alert.showAndWait();
+        } catch (IOException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Share failed");
+            alert.setHeaderText("Facebook share unavailable");
+            alert.setContentText(ex.getMessage());
+            alert.showAndWait();
+        }
     }
 
     private static boolean matchesSearch(Topic t, String q) {

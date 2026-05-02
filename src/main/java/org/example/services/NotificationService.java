@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.example.entities.Notification;
 import org.example.entities.Notification.NotificationType;
+import org.example.entities.Reponse;
 import org.example.entities.Topic;
 import org.example.utils.AppConstants;
 
@@ -33,6 +34,9 @@ public final class NotificationService {
     private final AtomicInteger idSequence = new AtomicInteger(1);
     private final ForumServices forumServices = new ForumServices();
     private final ReponseServices reponseServices = new ReponseServices();
+    private final FacebookShareService facebookShareService = new FacebookShareService();
+    private final ExternalShareLinkService externalShareLinkService = new ExternalShareLinkService();
+    private final AiTopicInsightsService aiTopicInsightsService = new AiTopicInsightsService();
     private final List<String> badWords = List.of(
             "con", "connard", "connasse", "putain", "merde", "salope", "encule",
             "fuck", "shit", "bitch", "asshole", "bastard"
@@ -117,6 +121,10 @@ public final class NotificationService {
                 server.createContext("/api/topics/pin-most-liked", new PinMostLikedTopicHandler());
                 server.createContext("/api/topics/pinned", new PinnedTopicHandler());
                 server.createContext("/api/moderation/check", new ModerationCheckHandler());
+                server.createContext("/api/topics/", new TopicsRouterHandler());
+                server.createContext("/api/replies/", new RepliesByIdRestHandler());
+                server.createContext("/api/share/facebook", new FacebookShareHandler());
+                server.createContext("/api/share/facebook-link", new FacebookShareLinkHandler());
                 server.setExecutor(Executors.newCachedThreadPool());
                 server.start();
                 apiServer = server;
@@ -325,6 +333,223 @@ public final class NotificationService {
         }
     }
 
+    private final class TopicsRouterHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            String path = exchange.getRequestURI().getPath();
+            if (path == null || !path.startsWith("/api/topics/")) {
+                sendJson(exchange, 404, "{\"error\":\"Route not found\"}");
+                return;
+            }
+
+            if (path.endsWith("/ai/summary")) {
+                handleAiSummary(exchange, path);
+                return;
+            }
+
+            if (path.endsWith("/replies")) {
+                handleTopicReplies(exchange, path);
+                return;
+            }
+
+            sendJson(exchange, 404, "{\"error\":\"Route not found\"}");
+        }
+    }
+
+    private void handleAiSummary(HttpExchange exchange, String path) throws IOException {
+        Integer topicId = extractResourceId(path, "/api/topics/", "/ai/summary");
+        if (topicId == null || topicId <= 0) {
+            sendJson(exchange, 404, "{\"error\":\"Route not found\"}");
+            return;
+        }
+        if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+            sendJson(exchange, 405, "{\"error\":\"Method not allowed\"}");
+            return;
+        }
+        try {
+            Topic topic = forumServices.getTopicById(topicId);
+            if (topic == null) {
+                sendJson(exchange, 404, "{\"error\":\"Topic not found\"}");
+                return;
+            }
+            AiTopicInsightsService.AiResult result = aiTopicInsightsService.summarizeAndTag(topic);
+            sendJson(exchange, 200, "{"
+                    + "\"topicId\":" + topicId + ","
+                    + "\"summary\":\"" + escapeJson(result.summary()) + "\","
+                    + "\"tags\":{"
+                    + "\"labels\":" + result.tagsLabelsJson() + ","
+                    + "\"scores\":" + result.tagsScoresJson()
+                    + "}"
+                    + "}");
+        } catch (IllegalArgumentException ex) {
+            sendJson(exchange, 400, "{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
+        } catch (IllegalStateException ex) {
+            sendJson(exchange, 500, "{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
+        } catch (SQLException ex) {
+            sendJson(exchange, 500, "{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
+        } catch (IOException ex) {
+            sendJson(exchange, 502, "{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
+        }
+    }
+
+    private void handleTopicReplies(HttpExchange exchange, String path) throws IOException {
+        Integer topicId = extractResourceId(path, "/api/topics/", "/replies");
+        if (topicId == null || topicId <= 0) {
+            sendJson(exchange, 404, "{\"error\":\"Route not found\"}");
+            return;
+        }
+
+        String method = exchange.getRequestMethod();
+        try {
+            if ("GET".equalsIgnoreCase(method)) {
+                List<Reponse> replies = reponseServices.afficherParTopic(topicId);
+                sendJson(exchange, 200, toRepliesJsonArray(replies));
+                return;
+            }
+
+            if ("POST".equalsIgnoreCase(method)) {
+                String body = readBody(exchange.getRequestBody());
+                String content = extractString(body, "content", "").trim();
+                String username = extractString(body, "username", AppConstants.FORUM_USER_DISPLAY_NAME);
+                if (content.isEmpty()) {
+                    sendJson(exchange, 400, "{\"error\":\"content is required\"}");
+                    return;
+                }
+
+                Topic topic = forumServices.getTopicById(topicId);
+                if (topic == null) {
+                    sendJson(exchange, 404, "{\"error\":\"Topic not found\"}");
+                    return;
+                }
+
+                Reponse reponse = new Reponse();
+                reponse.setContent(content);
+                reponse.setTopic_id(topicId);
+                reponse.setCreated_at(new java.util.Date());
+                reponse.setUpdated_at(new java.util.Date());
+                int createdId = reponseServices.ajouter(reponse);
+                Reponse created = reponseServices.getById(createdId);
+                publishReply(username, topic.getTitle(), topicId);
+                sendJson(exchange, 201, toReplyJsonObject(created != null ? created : reponse));
+                return;
+            }
+
+            sendJson(exchange, 405, "{\"error\":\"Method not allowed\"}");
+        } catch (SQLException ex) {
+            sendJson(exchange, 500, "{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
+        }
+    }
+
+    private final class RepliesByIdRestHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            String path = exchange.getRequestURI().getPath();
+            Integer replyId = extractResourceId(path, "/api/replies/", null);
+            if (replyId == null || replyId <= 0) {
+                sendJson(exchange, 404, "{\"error\":\"Route not found\"}");
+                return;
+            }
+
+            String method = exchange.getRequestMethod();
+            try {
+                Reponse existing = reponseServices.getById(replyId);
+                if (existing == null) {
+                    sendJson(exchange, 404, "{\"error\":\"Reply not found\"}");
+                    return;
+                }
+
+                if ("GET".equalsIgnoreCase(method)) {
+                    sendJson(exchange, 200, toReplyJsonObject(existing));
+                    return;
+                }
+
+                if ("PUT".equalsIgnoreCase(method)) {
+                    String body = readBody(exchange.getRequestBody());
+                    String content = extractString(body, "content", "").trim();
+                    if (content.isEmpty()) {
+                        sendJson(exchange, 400, "{\"error\":\"content is required\"}");
+                        return;
+                    }
+                    existing.setContent(content);
+                    existing.setUpdated_at(new java.util.Date());
+                    reponseServices.modifier(existing);
+                    Reponse updated = reponseServices.getById(replyId);
+                    sendJson(exchange, 200, toReplyJsonObject(updated != null ? updated : existing));
+                    return;
+                }
+
+                if ("DELETE".equalsIgnoreCase(method)) {
+                    reponseServices.supprimer(replyId);
+                    sendJson(exchange, 200, "{\"status\":\"deleted\",\"replyId\":" + replyId + "}");
+                    return;
+                }
+
+                sendJson(exchange, 405, "{\"error\":\"Method not allowed\"}");
+            } catch (SQLException ex) {
+                sendJson(exchange, 500, "{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
+            }
+        }
+    }
+
+    private final class FacebookShareHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendJson(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+
+            String body = readBody(exchange.getRequestBody());
+            String message = extractString(body, "message", "").trim();
+            try {
+                String externalPostId = facebookShareService.share(message);
+                sendJson(exchange, 200, "{"
+                        + "\"status\":\"ok\","
+                        + "\"provider\":\"facebook\","
+                        + "\"externalPostId\":\"" + escapeJson(externalPostId) + "\""
+                        + "}");
+            } catch (IllegalArgumentException ex) {
+                sendJson(exchange, 400, "{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
+            } catch (IllegalStateException ex) {
+                sendJson(exchange, 500, "{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
+            } catch (IOException ex) {
+                sendJson(exchange, 502, "{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
+            }
+        }
+    }
+
+    /**
+     * Plan B: external REST API without OAuth.
+     * Calls TinyURL to shorten a link, then returns a Facebook share URL.
+     *
+     * POST /api/share/facebook-link
+     * Body: {"url":"https://example.com/topic/12"}
+     */
+    private final class FacebookShareLinkHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendJson(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+            String body = readBody(exchange.getRequestBody());
+            String url = extractString(body, "url", "").trim();
+            try {
+                ExternalShareLinkService.ShareLinkResult result = externalShareLinkService.buildFacebookShareLink(url);
+                sendJson(exchange, 200, "{"
+                        + "\"status\":\"ok\","
+                        + "\"provider\":\"tinyurl\","
+                        + "\"shortUrl\":\"" + escapeJson(result.shortUrl()) + "\","
+                        + "\"facebookShareUrl\":\"" + escapeJson(result.facebookShareUrl()) + "\""
+                        + "}");
+            } catch (IllegalArgumentException ex) {
+                sendJson(exchange, 400, "{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
+            } catch (IOException ex) {
+                sendJson(exchange, 502, "{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
+            }
+        }
+    }
+
     private Topic refreshPinnedTopic() throws SQLException {
         Topic top = forumServices.getMostLikedTopic();
         pinnedTopicId = top != null ? top.getId() : null;
@@ -403,6 +628,36 @@ public final class NotificationService {
         return sb.toString();
     }
 
+    private static String toRepliesJsonArray(List<Reponse> list) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < list.size(); i++) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append(toReplyJsonObject(list.get(i)));
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    private static String toReplyJsonObject(Reponse r) {
+        if (r == null) {
+            return "{}";
+        }
+        long createdAt = r.getCreated_at() != null ? r.getCreated_at().getTime() : 0L;
+        long updatedAt = r.getUpdated_at() != null ? r.getUpdated_at().getTime() : 0L;
+        return "{"
+                + "\"id\":" + r.getId() + ","
+                + "\"content\":\"" + escapeJson(r.getContent()) + "\","
+                + "\"topicId\":" + r.getTopic_id() + ","
+                + "\"createdAt\":" + createdAt + ","
+                + "\"updatedAt\":" + updatedAt + ","
+                + "\"likeCount\":" + r.getLikeCount() + ","
+                + "\"dislikeCount\":" + r.getDislikeCount()
+                + "}";
+    }
+
     private static String toJsonObject(Notification n) {
         return "{"
                 + "\"id\":" + n.getId() + ","
@@ -460,5 +715,26 @@ public final class NotificationService {
             return "";
         }
         return value.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    private static Integer extractResourceId(String fullPath, String prefix, String suffix) {
+        if (fullPath == null || !fullPath.startsWith(prefix)) {
+            return null;
+        }
+        String remaining = fullPath.substring(prefix.length());
+        if (suffix != null) {
+            if (!remaining.endsWith(suffix)) {
+                return null;
+            }
+            remaining = remaining.substring(0, remaining.length() - suffix.length());
+        }
+        if (remaining.contains("/")) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(remaining);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }

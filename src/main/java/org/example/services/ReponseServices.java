@@ -169,6 +169,34 @@ public class ReponseServices implements Icrud<Reponse> {
         return list;
     }
 
+    public Reponse getById(int reponseId) throws SQLException {
+        ensureConnection();
+        String sql = "SELECT * FROM " + TABLE + " WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, reponseId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                Reponse r = new Reponse();
+                r.setId(rs.getInt("id"));
+                r.setContent(rs.getString("content"));
+                r.setTopic_id(rs.getInt("topic_id"));
+                Timestamp ca = rs.getTimestamp("created_at");
+                if (ca != null) {
+                    r.setCreated_at(new Date(ca.getTime()));
+                }
+                Timestamp ua = rs.getTimestamp("updated_at");
+                if (ua != null) {
+                    r.setUpdated_at(new Date(ua.getTime()));
+                }
+                r.setLikeCount(hasLikeColumn() ? rs.getInt("like_count") : 0);
+                r.setDislikeCount(hasDislikeColumn() ? rs.getInt("dislike_count") : 0);
+                return r;
+            }
+        }
+    }
+
     @Override
     public void modifier(Reponse reponse) throws SQLException {
         ensureConnection();
