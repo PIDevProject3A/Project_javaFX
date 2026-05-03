@@ -10,6 +10,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import services.EmailService;
 import services.UserService;
+import utils.MyDataBase;
 import utils.SceneNavigator;
 import utils.UserSession;
 
@@ -124,6 +125,21 @@ public class AdminAccountsController {
     @FXML
     private void goBack() {
         switchScene("/AdminDashboard.fxml");
+    }
+
+    @FXML
+    private void goToDashboard() {
+        switchScene("/Dashboard.fxml");
+    }
+
+    @FXML
+    private void logout() {
+        int logId = UserSession.getCurrentLoginLogId();
+        if (logId != -1) {
+            MyDataBase.getInstance().updateLogoutTime(logId);
+        }
+        UserSession.clear();
+        switchScene("/Login.fxml");
     }
 
     @FXML

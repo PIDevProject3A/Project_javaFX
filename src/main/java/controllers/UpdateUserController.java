@@ -163,6 +163,21 @@ public class UpdateUserController {
         switchScene("/AdminDashboard.fxml");
     }
 
+    @FXML
+    private void goToDashboard() {
+        switchScene("/Dashboard.fxml");
+    }
+
+    @FXML
+    private void logout() {
+        int logId = UserSession.getCurrentLoginLogId();
+        if (logId != -1) {
+            utils.MyDataBase.getInstance().updateLogoutTime(logId);
+        }
+        UserSession.clear();
+        switchScene("/Login.fxml");
+    }
+
     private void switchScene(String fxml) {
         SceneNavigator.navigate(emailField, fxml, message -> setMessage(message, false));
     }

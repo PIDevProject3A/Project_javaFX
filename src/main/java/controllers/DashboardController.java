@@ -128,17 +128,17 @@ public class DashboardController {
         if (UserSession.getCurrentUserRole() != User.AdminType.ADMIN_ACCOUNT) {
             return;
         }
-        switchScene("/AdminDashboard.fxml");
+        switchScene(manageAccountsButton, "/AdminAccounts.fxml");
     }
 
     @FXML
     private void goToSettings() {
-        switchScene("/AdminSettings.fxml");
+        switchScene(settingsButton, "/AdminSettings.fxml");
     }
 
     @FXML
     private void goToDeleteAccount() {
-        switchScene("/DeleteAccount.fxml");
+        switchScene(nonAdminContainer, "/DeleteAccount.fxml");
     }
 
     @FXML
@@ -148,10 +148,10 @@ public class DashboardController {
             MyDataBase.getInstance().updateLogoutTime(logId);
         }
         UserSession.clear();
-        switchScene("/Login.fxml");
+        switchScene(totalUsersLabel, "/Login.fxml");
     }
 
-    private void switchScene(String fxml) {
-        SceneNavigator.navigate(totalUsersLabel, fxml, msg -> {});
+    private void switchScene(javafx.scene.Node source, String fxml) {
+        SceneNavigator.navigate(source, fxml, msg -> System.err.println("[Dashboard Error] " + msg));
     }
 }

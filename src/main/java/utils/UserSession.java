@@ -4,6 +4,7 @@ import entities.AppUser;
 import entities.User;
 
 public final class UserSession {
+    private static int currentUserId = -1;
     private static String currentUserEmail;
     private static User.AdminType currentUserRole;
     private static User userToEdit;
@@ -13,6 +14,14 @@ public final class UserSession {
     private static AppUser.UserType currentAppUserType;
 
     private UserSession() {
+    }
+
+    public static int getCurrentUserId() {
+        return currentUserId;
+    }
+
+    public static void setCurrentUserId(int id) {
+        currentUserId = id;
     }
 
     public static String getCurrentUserEmail() {
@@ -72,6 +81,7 @@ public final class UserSession {
     }
 
     public static void clear() {
+        currentUserId = -1;
         currentUserEmail = null;
         currentUserRole = null;
         userToEdit = null;

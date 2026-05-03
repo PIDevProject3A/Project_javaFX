@@ -11,7 +11,7 @@ import java.util.*;
 
 public class MyDataBase {
     private static final MyDataBase INSTANCE = new MyDataBase();
-    private static final String URL = "jdbc:mysql://localhost:3306/pidevjava?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+    private static final String URL = "jdbc:mysql://localhost:3306/bledna?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     private static final String USERNAME = "root";
     private static final String PASSWORD = "";
 
@@ -56,6 +56,39 @@ public class MyDataBase {
                     "enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                     ")");
 
+            // Admin Accounts Table
+            statement.execute("CREATE TABLE IF NOT EXISTS admin_accounts (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY," +
+                    "first_name VARCHAR(100) NOT NULL," +
+                    "last_name VARCHAR(100) NOT NULL," +
+                    "email VARCHAR(150) NOT NULL," +
+                    "password VARCHAR(255) NOT NULL," +
+                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                    "UNIQUE KEY uq_admin_accounts_email (email)" +
+                    ")");
+
+            // Event Manager Table
+            statement.execute("CREATE TABLE IF NOT EXISTS event_manager (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY," +
+                    "first_name VARCHAR(100) NOT NULL," +
+                    "last_name VARCHAR(100) NOT NULL," +
+                    "email VARCHAR(150) NOT NULL," +
+                    "password VARCHAR(255) NOT NULL," +
+                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                    "UNIQUE KEY uq_event_manager_email (email)" +
+                    ")");
+
+            // Finance Manager Table
+            statement.execute("CREATE TABLE IF NOT EXISTS finance_manager (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY," +
+                    "first_name VARCHAR(100) NOT NULL," +
+                    "last_name VARCHAR(100) NOT NULL," +
+                    "email VARCHAR(150) NOT NULL," +
+                    "password VARCHAR(255) NOT NULL," +
+                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                    "UNIQUE KEY uq_finance_manager_email (email)" +
+                    ")");
+
             // Users Table (Collector / Buyer / Donator)
             statement.execute("CREATE TABLE IF NOT EXISTS users (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
@@ -68,6 +101,24 @@ public class MyDataBase {
                     "created_by_admin VARCHAR(150) NULL," +
                     "UNIQUE KEY uq_users_email (email)" +
                     ")");
+
+            // Migration: Ensure created_at column exists for all manager tables
+            String[] managerTables = {"admin_accounts", "event_manager", "finance_manager", "users"};
+            for (String table : managerTables) {
+                try {
+                    statement.execute("ALTER TABLE " + table + " ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+                } catch (SQLException ignored) {}
+            }
+
+            // Migration: Ensure created_by_admin column exists for users table
+            try {
+                statement.execute("ALTER TABLE users ADD COLUMN created_by_admin VARCHAR(150) NULL");
+            } catch (SQLException ignored) {}
+
+            // Migration: Ensure collector_id exists in prevue_collection
+            try {
+                statement.execute("ALTER TABLE prevue_collection ADD COLUMN collector_id INT DEFAULT 1");
+            } catch (SQLException ignored) {}
         } catch (SQLException e) {
             throw new RuntimeException("Unable to ensure tables exist.", e);
         }
@@ -214,13 +265,26 @@ public class MyDataBase {
     private AppUser mapAppUser(ResultSet rs) throws SQLException {
         Timestamp ts = rs.getTimestamp("created_at");
         LocalDateTime createdAt = ts != null ? ts.toLocalDateTime() : null;
+        
+        String typeStr = rs.getString("user_type");
+        AppUser.UserType userType = AppUser.UserType.Collector; // Default
+        
+        if (typeStr != null) {
+            for (AppUser.UserType type : AppUser.UserType.values()) {
+                if (type.name().equalsIgnoreCase(typeStr)) {
+                    userType = type;
+                    break;
+                }
+            }
+        }
+
         return new AppUser(
                 rs.getInt("id"),
                 rs.getString("first_name"),
                 rs.getString("last_name"),
                 rs.getString("email"),
                 rs.getString("password"),
-                AppUser.UserType.valueOf(rs.getString("user_type")),
+                userType,
                 createdAt,
                 rs.getString("created_by_admin")
         );
