@@ -83,6 +83,13 @@ public class EventCatalogController {
         switchScene("/com/esprit/RegistrationList.fxml");
     }
 
+    @FXML
+    private void handleLogout() throws IOException {
+        com.esprit.utils.UserSession.clear();
+        com.esprit.utils.AppSession.clearRegistrant();
+        switchScene("/Login.fxml");
+    }
+
     private void configureListCells() {
         eventList.setCellFactory(lv -> new ListCell<>() {
             private final Label title = new Label();

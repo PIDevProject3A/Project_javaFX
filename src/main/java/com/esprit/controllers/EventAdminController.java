@@ -57,40 +57,9 @@ public class EventAdminController {
         loadEvents();
     }
 
-    private void switchScene(String fxmlPath) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            javafx.scene.Parent root = loader.load();
-            Stage stage = (Stage) eventList.getScene().getWindow();
-            javafx.scene.Scene scene = new Scene(root, 1100, 680);
-            StyleHelper.apply(scene);
-            stage.setScene(scene);
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Erreur de navigation : " + e.getMessage());
-        }
-    }
-
     @FXML
     private void handleHome() throws IOException {
-        switchScene("/Dashboard.fxml");
-    }
-
-    @FXML
-    private void goToManageAccounts() {
-        switchScene("/AdminDashboard.fxml");
-    }
-
-    @FXML
-    private void goToEventRegistrations() {
-        switchScene("/com/esprit/RegistrationList.fxml");
-    }
-
-    @FXML
-    private void logout() {
-        com.esprit.utils.UserSession.clear();
-        com.esprit.utils.AppSession.clearRegistrant();
-        switchScene("/Login.fxml");
+        NavigationManager.navigateTo("Home.fxml");
     }
 
     private void configureListCells() {

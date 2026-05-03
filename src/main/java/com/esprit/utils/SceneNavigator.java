@@ -56,7 +56,6 @@ public final class SceneNavigator {
 
             fadeOut.play();
         } catch (IOException e) {
-            e.printStackTrace();
             if (errorHandler != null) {
                 errorHandler.accept("Unable to open page.");
             }

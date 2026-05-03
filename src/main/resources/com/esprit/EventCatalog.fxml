@@ -15,6 +15,8 @@
                         <Label text="🌿 bledna — Catalogue" styleClass="label-title"/>
                         <Button text="🏠 Accueil" onAction="#handleHome" styleClass="btn-outline"/>
                         <Button text="📋 Mes inscriptions" onAction="#handleOpenRegistrations" styleClass="btn-secondary"/>
+                        <javafx.scene.layout.Region HBox.hgrow="ALWAYS" />
+                        <Button text="🚪 Déconnexion" onAction="#handleLogout" styleClass="btn-outline"/>
                     </children>
                 </HBox>
                 <Label fx:id="tomorrowReminderLabel" managed="false" visible="false" wrapText="true" maxWidth="1080"/>
