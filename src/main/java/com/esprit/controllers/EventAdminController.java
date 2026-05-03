@@ -89,7 +89,7 @@ public class EventAdminController {
     @FXML
     private void logout() {
         com.esprit.utils.UserSession.clear();
-        com.esprit.utils.AppSession.clear();
+        com.esprit.utils.AppSession.clearRegistrant();
         switchScene("/Login.fxml");
     }
 
