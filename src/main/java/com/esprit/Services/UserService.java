@@ -309,7 +309,7 @@ public class UserService {
         }
 
         String passwordHash = hashPassword(password);
-        String adminEmail = utils.UserSession.getCurrentUserEmail();
+        String adminEmail = com.esprit.utils.UserSession.getCurrentUserEmail();
         AppUser appUser = new AppUser(0, firstName.trim(), lastName.trim(), email.trim().toLowerCase(),
                 passwordHash, userType, null, adminEmail);
         boolean saved = dataBase.addAppUser(appUser);
