@@ -1,6 +1,6 @@
-package utils;
+package com.esprit.utils;
 
-import entities.User;
+import com.esprit.entities.User;
 
 public final class UserSession {
     private static String currentUserEmail;
@@ -50,4 +50,5 @@ public final class UserSession {
         currentLoginLogId = -1;
     }
 }
+
 

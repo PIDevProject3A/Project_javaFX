@@ -2,8 +2,8 @@ package com.esprit.controllers;
 
 import com.esprit.entities.Event;
 import com.esprit.entities.Registration;
-import com.esprit.Services.RegistrationService;
-import com.esprit.Services.StripePaymentService;
+import com.esprit.services.RegistrationService;
+import com.esprit.services.StripePaymentService;
 import com.esprit.utils.AppSession;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -337,3 +337,4 @@ public class RegisterEventFormController {
         a.showAndWait();
     }
 }
+

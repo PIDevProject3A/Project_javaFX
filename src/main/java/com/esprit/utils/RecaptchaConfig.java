@@ -1,4 +1,4 @@
-package utils;
+package com.esprit.utils;
 
 public final class RecaptchaConfig {
     private static final String SITE_KEY = "6LeZxcssAAAAANfhI0SWytATwDHIW8i7HuF8cLBF";
@@ -20,6 +20,7 @@ public final class RecaptchaConfig {
         return !siteKey().isBlank() && !secret().isBlank();
     }
 }
+
 
 
 

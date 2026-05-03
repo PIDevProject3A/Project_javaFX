@@ -1,4 +1,4 @@
-package utils;
+package com.esprit.utils;
 
 public final class CompreFaceConfig {
     private static final String DEFAULT_PROVIDER = "compreface";
@@ -59,4 +59,5 @@ public final class CompreFaceConfig {
         return defaultValue;
     }
 }
+
 

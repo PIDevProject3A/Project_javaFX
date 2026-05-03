@@ -8,7 +8,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.geometry.Insets?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.esprit.controllers.EventController" prefWidth="1000" prefHeight="600">
+<AnchorPane xmlns:fx="http://javafx.com/fxml" stylesheets="@bledna-theme.css" fx:controller="com.esprit.controllers.EventController" prefWidth="1000" prefHeight="600">
     <children>
         <!-- Titre -->
         <Label text="Gestion des Événements" layoutX="400" layoutY="15" style="-fx-font-size: 24; -fx-font-weight: bold;" />
@@ -42,4 +42,5 @@
         </VBox>
     </children>
 </AnchorPane>
+
 

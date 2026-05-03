@@ -2,10 +2,10 @@ package com.esprit.controllers;
 
 import com.esprit.entities.Registration;
 import com.esprit.entities.Event;
-import com.esprit.Services.EventService;
-import com.esprit.Services.PaymentReceiptService;
-import com.esprit.Services.ReceiptMailService;
-import com.esprit.Services.RegistrationService;
+import com.esprit.services.EventService;
+import com.esprit.services.PaymentReceiptService;
+import com.esprit.services.ReceiptMailService;
+import com.esprit.services.RegistrationService;
 import com.esprit.utils.AppSession;
 import com.esprit.utils.NavigationManager;
 import com.esprit.utils.StyleHelper;
@@ -521,3 +521,4 @@ public class RegistrationListController {
     }
 
 }
+

@@ -1,4 +1,4 @@
-package services;
+package com.esprit.services;
 
 import com.azure.communication.email.EmailClient;
 import com.azure.communication.email.EmailClientBuilder;
@@ -7,7 +7,7 @@ import com.azure.communication.email.models.EmailSendResult;
 import com.azure.core.util.polling.PollResponse;
 import com.azure.core.util.polling.SyncPoller;
 import io.github.cdimascio.dotenv.Dotenv;
-import utils.MyDataBase;
+import com.esprit.utils.MyDataBase;
 import java.util.List;
 
 public class EmailService {
@@ -84,3 +84,4 @@ public class EmailService {
         }
     }
 }
+

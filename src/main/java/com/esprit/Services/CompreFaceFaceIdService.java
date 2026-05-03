@@ -1,6 +1,6 @@
-package services;
+package com.esprit.services;
 
-import utils.CompreFaceConfig;
+import com.esprit.utils.CompreFaceConfig;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -365,6 +365,7 @@ public class CompreFaceFaceIdService {
         }
     }
 }
+
 
 
 

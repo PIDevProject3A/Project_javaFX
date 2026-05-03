@@ -1,4 +1,4 @@
-package entities;
+package com.esprit.entities;
 
 public class User {
     public enum AdminType {
@@ -52,4 +52,5 @@ public class User {
         return email + " (" + adminType + ")";
     }
 }
+
 

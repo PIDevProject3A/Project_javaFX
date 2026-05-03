@@ -17,3 +17,4 @@ public class HomeController {
         NavigationManager.navigateTo("EventCatalog.fxml");
     }
 }
+

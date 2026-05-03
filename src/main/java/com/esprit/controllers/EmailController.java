@@ -1,4 +1,4 @@
-package controllers;
+package com.esprit.controllers;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -9,8 +9,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import services.EmailService;
-import utils.SceneNavigator;
+import com.esprit.services.EmailService;
+import com.esprit.utils.SceneNavigator;
 
 public class EmailController {
 
@@ -39,9 +39,9 @@ public class EmailController {
         statusLabel.visibleProperty().bind(statusLabel.textProperty().isNotEmpty());
         statusLabel.managedProperty().bind(statusLabel.visibleProperty());
         emailService = new EmailService();
-        if (utils.UserSession.getUserToEdit() != null) {
-            toField.setText(utils.UserSession.getUserToEdit().getEmail());
-            utils.UserSession.setUserToEdit(null); // Clear after use so it doesn't persist
+        if (com.esprit.utils.UserSession.getUserToEdit() != null) {
+            toField.setText(com.esprit.utils.UserSession.getUserToEdit().getEmail());
+            com.esprit.utils.UserSession.setUserToEdit(null); // Clear after use so it doesn't persist
         }
     }
 
@@ -121,3 +121,4 @@ public class EmailController {
         SceneNavigator.navigate(sendButton, "/Dashboard.fxml", msg -> showStatusMessage(msg, false));
     }
 }
+

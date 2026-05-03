@@ -1,6 +1,6 @@
-package services;
+package com.esprit.services;
 
-import utils.MyDataBase;
+import com.esprit.utils.MyDataBase;
 import java.time.LocalDate;
 import java.util.Map;
 
@@ -35,3 +35,4 @@ public class DashboardService {
         return dataBase.getDailyActivityData();
     }
 }
+

@@ -1,8 +1,8 @@
-package controllers;
+package com.esprit.controllers;
 
 import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.WebcamResolution;
-import entities.User;
+import com.esprit.entities.User;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
@@ -23,15 +23,15 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import netscape.javascript.JSObject;
-import services.CompreFaceFaceIdService;
-import services.RecaptchaService;
-import services.UserService;
-import utils.LocalRecaptchaPageServer;
-import utils.RecaptchaConfig;
-import utils.SceneNavigator;
-import utils.UserSession;
-import services.EmailService;
-import utils.MyDataBase;
+import com.esprit.services.CompreFaceFaceIdService;
+import com.esprit.services.RecaptchaService;
+import com.esprit.services.UserService;
+import com.esprit.utils.LocalRecaptchaPageServer;
+import com.esprit.utils.RecaptchaConfig;
+import com.esprit.utils.SceneNavigator;
+import com.esprit.utils.UserSession;
+import com.esprit.services.EmailService;
+import com.esprit.utils.MyDataBase;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -101,7 +101,11 @@ public class LoginController {
         UserSession.setCurrentLoginLogId(logId);
 
         notifyAdmins(user, "Connexion");
-        switchScene("/Dashboard.fxml");
+        if (user.getAdminType() == User.AdminType.EVENT_MANAGER) {
+            switchScene("/com/esprit/EventAdmin.fxml");
+        } else {
+            switchScene("/Dashboard.fxml");
+        }
     }
 
     @FXML
@@ -152,9 +156,12 @@ public class LoginController {
         UserSession.setCurrentLoginLogId(logId);
 
         notifyAdmins(user, "Connexion (Face ID)");
-        switchScene("/Dashboard.fxml");
+        if (user.getAdminType() == User.AdminType.EVENT_MANAGER) {
+            switchScene("/com/esprit/EventAdmin.fxml");
+        } else {
+            switchScene("/Dashboard.fxml");
+        }
     }
-
 
     private void switchScene(String fxml) {
         SceneNavigator.navigate(emailField, fxml, this::showError);
@@ -340,5 +347,6 @@ public class LoginController {
         }
     }
 }
+
 
 

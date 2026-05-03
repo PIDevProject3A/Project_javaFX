@@ -1,4 +1,4 @@
-package entities;
+package com.esprit.entities;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -18,6 +18,7 @@ class UserTest {
     @BeforeEach
     void setUp() {
         user = new User(
+                1,
                 "Dali",
                 "Ben Ali",
                 "dali@example.com",
@@ -46,8 +47,8 @@ class UserTest {
     @Test
     @Order(3)
     void shouldSupportAllAdminTypes() {
-        User eventManager = new User("A", "B", "a@b.com", "hash", User.AdminType.EVENT_MANAGER);
-        User financeManager = new User("C", "D", "c@d.com", "hash", User.AdminType.FINANCE_MANAGER);
+        User eventManager = new User(2, "A", "B", "a@b.com", "hash", User.AdminType.EVENT_MANAGER);
+        User financeManager = new User(3, "C", "D", "c@d.com", "hash", User.AdminType.FINANCE_MANAGER);
 
         assertEquals(User.AdminType.EVENT_MANAGER, eventManager.getAdminType());
         assertEquals(User.AdminType.FINANCE_MANAGER, financeManager.getAdminType());
@@ -56,10 +57,11 @@ class UserTest {
     @Test
     @Order(4)
     void shouldAllowNullAdminTypeWithoutThrowing() {
-        User noRole = new User("No", "Role", "no@role.com", "hash", null);
+        User noRole = new User(4, "No", "Role", "no@role.com", "hash", null);
 
         assertNull(noRole.getAdminType());
         assertEquals("no@role.com (null)", noRole.toString());
     }
 }
+
 

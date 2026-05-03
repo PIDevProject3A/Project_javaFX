@@ -1,4 +1,4 @@
-package entities;
+package com.esprit.entities;
 
 import java.time.LocalDateTime;
 
@@ -43,3 +43,4 @@ public class EmailLog {
         return sentAt;
     }
 }
+

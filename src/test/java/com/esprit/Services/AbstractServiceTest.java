@@ -1,4 +1,4 @@
-package com.esprit.Services;
+package com.esprit.services;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -60,3 +60,4 @@ abstract class AbstractServiceTest {
         }
     }
 }
+

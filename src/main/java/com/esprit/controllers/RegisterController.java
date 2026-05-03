@@ -1,6 +1,6 @@
-package controllers;
+package com.esprit.controllers;
 
-import entities.User;
+import com.esprit.entities.User;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -8,9 +8,9 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import services.UserService;
-import utils.SceneNavigator;
-import utils.UserSession;
+import com.esprit.services.UserService;
+import com.esprit.utils.SceneNavigator;
+import com.esprit.utils.UserSession;
 
 public class RegisterController {
     private static final int MIN_NAME_LENGTH = 3;
@@ -154,4 +154,5 @@ public class RegisterController {
         messageLabel.setText(message);
     }
 }
+
 

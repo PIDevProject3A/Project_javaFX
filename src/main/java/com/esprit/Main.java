@@ -1,7 +1,7 @@
 package com.esprit;
 
 import com.esprit.entities.Event;
-import com.esprit.Services.EventService;
+import com.esprit.services.EventService;
 import com.esprit.utils.MyDataBase;
 
 import java.sql.SQLException;

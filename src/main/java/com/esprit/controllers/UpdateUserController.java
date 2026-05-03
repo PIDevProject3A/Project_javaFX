@@ -1,15 +1,15 @@
-package controllers;
+package com.esprit.controllers;
 
-import entities.User;
+import com.esprit.entities.User;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import services.UserService;
-import utils.SceneNavigator;
-import utils.UserSession;
+import com.esprit.services.UserService;
+import com.esprit.utils.SceneNavigator;
+import com.esprit.utils.UserSession;
 
 public class UpdateUserController {
     private static final int MIN_NAME_LENGTH = 3;
@@ -208,3 +208,4 @@ public class UpdateUserController {
         return value.startsWith("$2a$") || value.startsWith("$2b$") || value.startsWith("$2y$");
     }
 }
+

@@ -1,4 +1,4 @@
-package com.esprit.Services;
+package com.esprit.services;
 
 import com.esprit.entities.Event;
 import com.esprit.entities.Registration;
@@ -153,3 +153,4 @@ public class StripePaymentService {
     public record CheckoutSessionInfo(String sessionId, String checkoutUrl) {}
 
 }
+

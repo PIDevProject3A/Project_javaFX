@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Line?>
 
-<BorderPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AdminSettingsController" stylesheets="@style.css">
+<BorderPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.esprit.controllers.AdminSettingsController" stylesheets="@style.css">
     <left>
         <VBox styleClass="sidebar">
             <Label text="BLADNA" styleClass="sidebar-title"/>
@@ -98,3 +98,4 @@
         </StackPane>
     </center>
 </BorderPane>
+

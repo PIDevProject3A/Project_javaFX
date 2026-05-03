@@ -1,8 +1,8 @@
 package com.esprit.controllers;
 
 import com.esprit.entities.Event;
-import com.esprit.Services.EventService;
-import com.esprit.Services.RegistrationService;
+import com.esprit.services.EventService;
+import com.esprit.services.RegistrationService;
 import com.esprit.utils.NavigationManager;
 import com.esprit.utils.StyleHelper;
 import com.google.zxing.BinaryBitmap;
@@ -425,3 +425,4 @@ public class EventAdminController {
         a.showAndWait();
     }
 }
+

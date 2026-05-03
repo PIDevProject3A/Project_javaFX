@@ -1,7 +1,7 @@
 package com.esprit.controllers;
 
 import com.esprit.entities.Registration;
-import com.esprit.Services.RegistrationService;
+import com.esprit.services.RegistrationService;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -158,3 +158,4 @@ public class RegistrationEditController {
         a.showAndWait();
     }
 }
+

@@ -1,4 +1,4 @@
-package com.esprit.Services;
+package com.esprit.services;
 
 import com.esprit.entities.Event;
 import com.esprit.utils.MyDataBase;
@@ -160,3 +160,4 @@ public class EventService implements ICrud<Event> {
         return null;
     }
 }
+

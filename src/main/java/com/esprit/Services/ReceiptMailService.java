@@ -1,4 +1,4 @@
-package com.esprit.Services;
+package com.esprit.services;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -87,4 +87,5 @@ public class ReceiptMailService {
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }
+
 

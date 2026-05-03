@@ -1,4 +1,4 @@
-package com.esprit.Services;
+package com.esprit.services;
 
 import com.esprit.entities.Registration;
 import com.esprit.utils.AppSession;
@@ -886,3 +886,4 @@ public class RegistrationService implements ICrud<Registration> {
         return out;
     }
 }
+

@@ -5,7 +5,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.geometry.Insets?>
 
-<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.esprit.controllers.HomeController" spacing="0" alignment="TOP_CENTER"
+<VBox xmlns:fx="http://javafx.com/fxml" stylesheets="@bledna-theme.css" fx:controller="com.esprit.controllers.HomeController" spacing="0" alignment="TOP_CENTER"
       styleClass="root">
     <children>
         <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="12" prefWidth="1120">
@@ -33,3 +33,4 @@
         </VBox>
     </children>
 </VBox>
+

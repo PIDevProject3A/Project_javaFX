@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.EmailController" stylesheets="@style.css">
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.esprit.controllers.EmailController" stylesheets="@style.css">
     <!-- Padding global pour centrer la carte -->
     <padding>
         <Insets top="40" right="40" bottom="40" left="40"/>
@@ -50,3 +50,4 @@
         </StackPane>
     </center>
 </BorderPane>
+

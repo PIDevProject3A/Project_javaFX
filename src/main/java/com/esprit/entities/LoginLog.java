@@ -1,4 +1,4 @@
-package entities;
+package com.esprit.entities;
 
 import java.time.LocalDateTime;
 
@@ -37,3 +37,4 @@ public class LoginLog {
         return logoutTime;
     }
 }
+

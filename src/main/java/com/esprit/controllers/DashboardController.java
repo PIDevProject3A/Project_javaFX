@@ -1,4 +1,4 @@
-package controllers;
+package com.esprit.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.chart.*;
@@ -7,11 +7,11 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import services.DashboardService;
-import utils.SceneNavigator;
-import utils.UserSession;
-import utils.MyDataBase;
-import entities.User;
+import com.esprit.services.DashboardService;
+import com.esprit.utils.SceneNavigator;
+import com.esprit.utils.UserSession;
+import com.esprit.utils.MyDataBase;
+import com.esprit.entities.User;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -155,3 +155,4 @@ public class DashboardController {
         SceneNavigator.navigate(totalUsersLabel, fxml, msg -> {});
     }
 }
+

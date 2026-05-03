@@ -10,7 +10,7 @@
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.geometry.Insets?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.esprit.controllers.EventAddController" prefWidth="1000" prefHeight="700">
+<AnchorPane xmlns:fx="http://javafx.com/fxml" stylesheets="@bledna-theme.css" fx:controller="com.esprit.controllers.EventAddController" prefWidth="1000" prefHeight="700">
     <children>
         <VBox layoutX="150" layoutY="50" prefWidth="700" spacing="20" style="-fx-padding: 30;">
             <children>
@@ -96,3 +96,4 @@
         </VBox>
     </children>
 </AnchorPane>
+

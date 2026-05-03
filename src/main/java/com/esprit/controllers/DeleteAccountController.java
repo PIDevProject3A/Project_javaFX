@@ -1,11 +1,11 @@
-package controllers;
+package com.esprit.controllers;
 
-import entities.User;
+import com.esprit.entities.User;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import services.UserService;
-import utils.SceneNavigator;
-import utils.UserSession;
+import com.esprit.services.UserService;
+import com.esprit.utils.SceneNavigator;
+import com.esprit.utils.UserSession;
 
 public class DeleteAccountController {
     @FXML
@@ -52,4 +52,5 @@ public class DeleteAccountController {
         messageLabel.setText(message);
     }
 }
+
 

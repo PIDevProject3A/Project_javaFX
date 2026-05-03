@@ -1,4 +1,4 @@
-package utils;
+package com.esprit.utils;
 
 import org.junit.jupiter.api.Test;
 
@@ -21,6 +21,7 @@ class RecaptchaConfigTest {
         assertTrue(RecaptchaConfig.isConfigured());
     }
 }
+
 
 
 

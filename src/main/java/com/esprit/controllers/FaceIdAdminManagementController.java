@@ -1,8 +1,8 @@
-package controllers;
+package com.esprit.controllers;
 
 import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.WebcamResolution;
-import entities.User;
+import com.esprit.entities.User;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.embed.swing.SwingFXUtils;
@@ -19,9 +19,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import services.UserService;
-import utils.SceneNavigator;
-import utils.UserSession;
+import com.esprit.services.UserService;
+import com.esprit.utils.SceneNavigator;
+import com.esprit.utils.UserSession;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -285,3 +285,4 @@ public class FaceIdAdminManagementController {
         userBox.setDisable(!enabled);
     }
 }
+

@@ -1,6 +1,6 @@
-package controllers;
+package com.esprit.controllers;
 
-import entities.User;
+import com.esprit.entities.User;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -9,9 +9,9 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import services.UserService;
-import utils.SceneNavigator;
-import utils.UserSession;
+import com.esprit.services.UserService;
+import com.esprit.utils.SceneNavigator;
+import com.esprit.utils.UserSession;
 
 import java.util.Optional;
 
@@ -168,7 +168,7 @@ public class AdminSettingsController {
     private void logout() {
         int logId = UserSession.getCurrentLoginLogId();
         if (logId != -1) {
-            utils.MyDataBase.getInstance().updateLogoutTime(logId);
+            com.esprit.utils.MyDataBase.getInstance().updateLogoutTime(logId);
         }
         UserSession.clear();
         switchScene("/Login.fxml");
@@ -248,3 +248,4 @@ public class AdminSettingsController {
         messageLabel.setText(message);
     }
 }
+

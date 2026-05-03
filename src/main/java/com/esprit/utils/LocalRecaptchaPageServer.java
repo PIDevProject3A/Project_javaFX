@@ -1,4 +1,4 @@
-package utils;
+package com.esprit.utils;
 
 import com.sun.net.httpserver.HttpServer;
 
@@ -50,4 +50,5 @@ public final class LocalRecaptchaPageServer {
                 + "</script></body></html>";
     }
 }
+
 

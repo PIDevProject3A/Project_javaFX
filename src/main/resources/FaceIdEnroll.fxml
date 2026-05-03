@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.FaceIdEnrollController" stylesheets="@style.css">
+<StackPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.esprit.controllers.FaceIdEnrollController" stylesheets="@style.css">
     <VBox styleClass="page-card" spacing="12" maxWidth="420" minWidth="360">
         <Label text="Enrollement Face ID" styleClass="title"/>
         <Label text="Confirmez votre compte puis capturez votre visage via la camera." styleClass="subtitle" wrapText="true"/>
@@ -32,4 +32,5 @@
         <Insets top="28" right="28" bottom="28" left="28"/>
     </padding>
 </StackPane>
+
 

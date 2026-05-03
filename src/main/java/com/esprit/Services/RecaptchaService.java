@@ -1,6 +1,6 @@
-package services;
+package com.esprit.services;
 
-import utils.RecaptchaConfig;
+import com.esprit.utils.RecaptchaConfig;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -64,5 +64,6 @@ public class RecaptchaService {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }
+
 
 

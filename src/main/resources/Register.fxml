@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.RegisterController" stylesheets="@style.css">
+<StackPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.esprit.controllers.RegisterController" stylesheets="@style.css">
     <VBox styleClass="page-card" spacing="12" maxWidth="740">
         <Label text="Create Account" styleClass="title"/>
         <Label text="Formulaire harmonise pour la creation de comptes avec validation en direct" styleClass="subtitle" wrapText="true"/>
@@ -47,3 +47,4 @@
         <Insets top="26" right="26" bottom="26" left="26"/>
     </padding>
 </StackPane>
+

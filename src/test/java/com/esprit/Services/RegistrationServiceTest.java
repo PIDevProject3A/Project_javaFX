@@ -1,4 +1,4 @@
-package com.esprit.Services;
+package com.esprit.services;
 
 import com.esprit.entities.Registration;
 import org.junit.jupiter.api.AfterEach;
@@ -116,3 +116,4 @@ class RegistrationServiceTest extends AbstractServiceTest {
         ps.close();
     }
 }
+

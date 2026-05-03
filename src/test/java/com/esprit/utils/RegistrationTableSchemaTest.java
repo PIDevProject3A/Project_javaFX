@@ -25,3 +25,4 @@ class RegistrationTableSchemaTest {
         assertEquals("last_name", s.lastNameColumn());
     }
 }
+

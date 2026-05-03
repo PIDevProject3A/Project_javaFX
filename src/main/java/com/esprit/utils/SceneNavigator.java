@@ -1,4 +1,4 @@
-package utils;
+package com.esprit.utils;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
@@ -62,4 +62,5 @@ public final class SceneNavigator {
         }
     }
 }
+
 

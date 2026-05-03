@@ -1,8 +1,8 @@
-package controllers;
+package com.esprit.controllers;
 
 import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.WebcamResolution;
-import entities.User;
+import com.esprit.entities.User;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -19,9 +19,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import services.CompreFaceFaceIdService;
-import services.UserService;
-import utils.SceneNavigator;
+import com.esprit.services.CompreFaceFaceIdService;
+import com.esprit.services.UserService;
+import com.esprit.utils.SceneNavigator;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -250,3 +250,4 @@ public class FaceIdEnrollController {
         messageLabel.setText(message);
     }
 }
+

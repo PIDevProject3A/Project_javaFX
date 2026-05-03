@@ -1,8 +1,8 @@
-package services;
+package com.esprit.services;
 
-import entities.User;
+import com.esprit.entities.User;
 import org.mindrot.jbcrypt.BCrypt;
-import utils.MyDataBase;
+import com.esprit.utils.MyDataBase;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -311,3 +311,4 @@ public class UserService {
         return value.startsWith("$2a$") || value.startsWith("$2b$") || value.startsWith("$2y$");
     }
 }
+

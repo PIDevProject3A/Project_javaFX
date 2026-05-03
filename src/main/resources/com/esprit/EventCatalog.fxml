@@ -6,7 +6,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ListView?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.esprit.controllers.EventCatalogController" prefWidth="1150" prefHeight="760" styleClass="root">
+<AnchorPane xmlns:fx="http://javafx.com/fxml" stylesheets="@bledna-theme.css" fx:controller="com.esprit.controllers.EventCatalogController" prefWidth="1150" prefHeight="760" styleClass="root">
     <children>
         <VBox layoutX="16" layoutY="12" spacing="10" prefWidth="1118">
             <children>
@@ -23,3 +23,4 @@
         </VBox>
     </children>
 </AnchorPane>
+

@@ -8,7 +8,7 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.DatePicker?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.esprit.controllers.RegisterEventFormController"
+<AnchorPane xmlns:fx="http://javafx.com/fxml" stylesheets="@bledna-theme.css" fx:controller="com.esprit.controllers.RegisterEventFormController"
             prefWidth="520" prefHeight="620" styleClass="root">
     <children>
         <VBox layoutX="28" layoutY="20" spacing="14" prefWidth="464">
@@ -65,3 +65,4 @@
         </VBox>
     </children>
 </AnchorPane>
+

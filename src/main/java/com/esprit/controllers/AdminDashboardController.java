@@ -1,6 +1,6 @@
-package controllers;
+package com.esprit.controllers;
 
-import entities.User;
+import com.esprit.entities.User;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -8,11 +8,11 @@ import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import services.UserService;
-import utils.SceneNavigator;
-import utils.UserSession;
-import services.EmailService;
-import utils.MyDataBase;
+import com.esprit.services.UserService;
+import com.esprit.utils.SceneNavigator;
+import com.esprit.utils.UserSession;
+import com.esprit.services.EmailService;
+import com.esprit.utils.MyDataBase;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -194,7 +194,7 @@ public class AdminDashboardController {
         User selectedUser = accountsTable.getSelectionModel().getSelectedItem();
         if (selectedUser == null) return;
         
-        utils.UserSession.setUserToEdit(selectedUser);
+        com.esprit.utils.UserSession.setUserToEdit(selectedUser);
         switchScene("/Email.fxml");
     }
 
@@ -203,7 +203,7 @@ public class AdminDashboardController {
         User selectedUser = accountsTable.getSelectionModel().getSelectedItem();
         if (selectedUser == null) return;
         
-        utils.UserSession.setUserToEdit(selectedUser);
+        com.esprit.utils.UserSession.setUserToEdit(selectedUser);
         switchScene("/FaceIdAdminManagement.fxml");
     }
 
@@ -239,3 +239,4 @@ public class AdminDashboardController {
         messageLabel.setText(message);
     }
 }
+

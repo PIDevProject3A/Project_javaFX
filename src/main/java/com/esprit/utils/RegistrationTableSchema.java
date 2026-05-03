@@ -163,3 +163,4 @@ public final class RegistrationTableSchema {
         return has("registration_date");
     }
 }
+

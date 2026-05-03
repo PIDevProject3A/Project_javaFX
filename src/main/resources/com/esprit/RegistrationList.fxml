@@ -9,7 +9,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ListView?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.esprit.controllers.RegistrationListController"
+<BorderPane xmlns:fx="http://javafx.com/fxml" stylesheets="@bledna-theme.css" fx:controller="com.esprit.controllers.RegistrationListController"
             prefWidth="1100" prefHeight="720" styleClass="root page-registrations">
     <top>
         <HBox styleClass="top-bar-page" alignment="CENTER_LEFT" spacing="14">
@@ -46,3 +46,4 @@
         </VBox>
     </center>
 </BorderPane>
+

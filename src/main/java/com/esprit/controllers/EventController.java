@@ -1,7 +1,7 @@
 package com.esprit.controllers;
 
 import com.esprit.entities.Event;
-import com.esprit.Services.EventService;
+import com.esprit.services.EventService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -199,3 +199,4 @@ public class EventController {
         alert.showAndWait();
     }
 }
+

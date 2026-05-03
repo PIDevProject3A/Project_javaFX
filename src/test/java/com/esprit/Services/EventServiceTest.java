@@ -1,4 +1,4 @@
-package com.esprit.Services;
+package com.esprit.services;
 
 import com.esprit.entities.Event;
 import org.junit.jupiter.api.AfterEach;
@@ -107,3 +107,4 @@ class EventServiceTest extends AbstractServiceTest {
         ps.close();
     }
 }
+
