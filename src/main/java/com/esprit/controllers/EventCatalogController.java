@@ -46,6 +46,7 @@ public class EventCatalogController {
     private final EventService eventService = new EventService();
     private final RegistrationService registrationService = new RegistrationService();
     private Timeline reminderPulse;
+    private java.util.Set<Integer> userRegisteredEvents = new java.util.HashSet<>();
 
     @FXML
     public void initialize() {
@@ -143,8 +144,14 @@ public class EventCatalogController {
                             typeLabel(item.getEventType())));
                     boolean full = isFull(item);
                     boolean paid = isPaid(item);
+                    boolean registered = userRegisteredEvents.contains(item.getId());
+                    
                     regBtn.getStyleClass().removeAll("btn-register", "btn-register-alt", "btn-register-muted");
-                    if (full) {
+                    if (registered) {
+                        regBtn.setText("✅ Déjà inscrit(e)");
+                        regBtn.setDisable(true);
+                        regBtn.getStyleClass().add("btn-register-muted");
+                    } else if (full) {
                         regBtn.setText("⛔ Complet");
                         regBtn.setDisable(true);
                         regBtn.getStyleClass().add("btn-register-muted");
@@ -185,6 +192,12 @@ public class EventCatalogController {
 
     private void loadEvents() {
         try {
+            int currentUserId = AppSession.getCurrentUserId();
+            userRegisteredEvents = registrationService.listerFiltre(currentUserId, null, null, null, null)
+                                                      .stream()
+                                                      .map(com.esprit.entities.Registration::getEventId)
+                                                      .collect(Collectors.toSet());
+
             List<Event> events = eventService.afficher();
             eventList.setItems(FXCollections.observableArrayList(events));
         } catch (SQLException e) {
