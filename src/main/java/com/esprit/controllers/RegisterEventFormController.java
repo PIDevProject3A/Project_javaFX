@@ -99,6 +99,26 @@ public class RegisterEventFormController {
         String lastName = AppSession.getRegistrantLastName();
         String email = AppSession.getRegistrantEmail();
 
+        if (com.esprit.utils.UserSession.getCurrentUserEmail() != null) {
+            String currentEmail = com.esprit.utils.UserSession.getCurrentUserEmail();
+            com.esprit.services.UserService userService = new com.esprit.services.UserService();
+            if (com.esprit.utils.UserSession.isAppUser()) {
+                com.esprit.entities.AppUser appUser = userService.findAppUserByEmail(currentEmail);
+                if (appUser != null) {
+                    if (firstName == null || firstName.isBlank()) firstName = appUser.getFirstName();
+                    if (lastName == null || lastName.isBlank()) lastName = appUser.getLastName();
+                    if (email == null || email.isBlank()) email = appUser.getEmail();
+                }
+            } else {
+                com.esprit.entities.User admin = userService.findByEmail(currentEmail);
+                if (admin != null) {
+                    if (firstName == null || firstName.isBlank()) firstName = admin.getFirstName();
+                    if (lastName == null || lastName.isBlank()) lastName = admin.getLastName();
+                    if (email == null || email.isBlank()) email = admin.getEmail();
+                }
+            }
+        }
+
         if (firstName != null && !firstName.isBlank()) {
             firstNameField.setText(firstName);
         }
