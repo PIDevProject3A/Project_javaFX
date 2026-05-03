@@ -39,7 +39,11 @@
                 <VBox spacing="12.0" styleClass="card-reponse-feed-v2" VBox.vgrow="ALWAYS" maxWidth="Infinity">
                     <children>
                         <Label styleClass="feed-section-title-v2" text="Messages in this thread"/>
-                        <TableView fx:id="tableReponses" styleClass="table-feed" VBox.vgrow="ALWAYS" maxWidth="Infinity"/>
+                        <ScrollPane fitToWidth="true" styleClass="topic-feed-scroll" VBox.vgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: transparent;">
+                            <content>
+                                <VBox fx:id="commentsFeed" spacing="16.0" style="-fx-padding: 10 10 20 0;"/>
+                            </content>
+                        </ScrollPane>
                     </children>
                 </VBox>
             </children>

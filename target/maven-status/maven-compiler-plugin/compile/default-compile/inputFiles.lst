@@ -19,7 +19,9 @@ C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\entities\Topic
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\entities\TopicStatus.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\integrations\facebook\FacebookGraphApiClient.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\integrations\huggingface\HuggingFaceInferenceClient.java
+C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\integrations\pusher\PusherIntegrationService.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\integrations\tinyurl\TinyUrlClient.java
+C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\integrations\translation\TranslationService.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\Main.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\services\AiTopicInsightsService.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\services\CategoryServices.java
@@ -36,4 +38,5 @@ C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\utils\Moderati
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\utils\MyDataBase.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\utils\TopicStatusComboHelper.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\utils\TopicStatusStringConverter.java
+C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\utils\UIAnimator.java
 C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\org\example\utils\ValidationSaisie.java

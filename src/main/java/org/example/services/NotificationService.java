@@ -37,10 +37,7 @@ public final class NotificationService {
     private final FacebookShareService facebookShareService = new FacebookShareService();
     private final ExternalShareLinkService externalShareLinkService = new ExternalShareLinkService();
     private final AiTopicInsightsService aiTopicInsightsService = new AiTopicInsightsService();
-    private final List<String> badWords = List.of(
-            "con", "connard", "connasse", "putain", "merde", "salope", "encule",
-            "fuck", "shit", "bitch", "asshole", "bastard"
-    );
+
     private HttpServer apiServer;
     private int apiPort = AppConstants.NOTIFICATION_API_PORT;
     private volatile Integer pinnedTopicId;
@@ -120,7 +117,7 @@ public final class NotificationService {
                 server.createContext("/api/replies/dislike", new ReplyReactionHandler(false));
                 server.createContext("/api/topics/pin-most-liked", new PinMostLikedTopicHandler());
                 server.createContext("/api/topics/pinned", new PinnedTopicHandler());
-                server.createContext("/api/moderation/check", new ModerationCheckHandler());
+
                 server.createContext("/api/topics/", new TopicsRouterHandler());
                 server.createContext("/api/replies/", new RepliesByIdRestHandler());
                 server.createContext("/api/share/facebook", new FacebookShareHandler());
@@ -194,6 +191,15 @@ public final class NotificationService {
     }
     //api like and dislike
 
+    private boolean isAuthorized(HttpExchange exchange) throws IOException {
+        String authHeader = exchange.getRequestHeaders().getFirst("X-API-KEY");
+        if (authHeader == null || !AppConstants.REST_API_SECRET_KEY.equals(authHeader)) {
+            sendJson(exchange, 401, "{\"error\":\"Unauthorized: Invalid or missing API Key\"}");
+            return false;
+        }
+        return true;
+    }
+
     private final class TopicReactionHandler implements HttpHandler {
         private final boolean like;
 
@@ -203,6 +209,9 @@ public final class NotificationService {
 
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthorized(exchange)) {
+                return;
+            }
             if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 sendJson(exchange, 405, "{\"error\":\"Method not allowed\"}");
                 return;
@@ -224,6 +233,9 @@ public final class NotificationService {
                 String topicTitle = topic != null ? topic.getTitle() : "topic";
                 publishReaction(like, username, topicTitle, topicId);
                 refreshPinnedTopic();
+                
+                // Appel de l'API Externe Pusher (SaaS)
+                org.example.integrations.pusher.PusherIntegrationService.triggerReaction(topicId, like, "topic");
                 String response = "{"
                         + "\"status\":\"ok\","
                         + "\"topicId\":" + topicId + ","
@@ -245,6 +257,9 @@ public final class NotificationService {
 
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthorized(exchange)) {
+                return;
+            }
             if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 sendJson(exchange, 405, "{\"error\":\"Method not allowed\"}");
                 return;
@@ -265,6 +280,9 @@ public final class NotificationService {
                 } else {
                     reponseServices.dislikeReponse(replyId);
                 }
+                // Appel de l'API Externe Pusher (SaaS)
+                org.example.integrations.pusher.PusherIntegrationService.triggerReaction(replyId, like, "reply");
+                
                 sendJson(exchange, 200, "{\"status\":\"ok\",\"replyId\":" + replyId + "}");
             } catch (SQLException ex) {
                 sendJson(exchange, 500, "{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
@@ -313,25 +331,7 @@ public final class NotificationService {
         }
     }
 
-    private final class ModerationCheckHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                sendJson(exchange, 405, "{\"error\":\"Method not allowed\"}");
-                return;
-            }
-            String body = readBody(exchange.getRequestBody());
-            String text = extractString(body, "text", "");
-            List<String> blocked = findBlockedWords(text);
-            boolean allowed = blocked.isEmpty();
-            String blockedCsv = String.join(",", blocked);
-            String response = "{"
-                    + "\"allowed\":" + allowed + ","
-                    + "\"blockedCsv\":\"" + escapeJson(blockedCsv) + "\""
-                    + "}";
-            sendJson(exchange, 200, response);
-        }
-    }
+
 
     private final class TopicsRouterHandler implements HttpHandler {
         @Override
@@ -679,36 +679,7 @@ public final class NotificationService {
                 + "}";
     }
 
-    private List<String> findBlockedWords(String text) {
-        String normalized = normalizeText(text);
-        Set<String> detected = new LinkedHashSet<>();
-        for (String badWord : badWords) {
-            String normalizedWord = normalizeWord(badWord);
-            if (!normalizedWord.isEmpty() && containsWord(normalized, normalizedWord)) {
-                detected.add(badWord);
-            }
-        }
-        return new ArrayList<>(detected);
-    }
 
-    private static String normalizeText(String text) {
-        if (text == null) {
-            return "";
-        }
-        return text.toLowerCase().replaceAll("[^a-z0-9\\s]", " ");
-    }
-
-    private static String normalizeWord(String word) {
-        if (word == null) {
-            return "";
-        }
-        return word.toLowerCase().replaceAll("[^a-z0-9]", "");
-    }
-
-    private static boolean containsWord(String normalizedText, String normalizedWord) {
-        Pattern p = Pattern.compile("(^|\\s)" + Pattern.quote(normalizedWord) + "(\\s|$)");
-        return p.matcher(normalizedText).find();
-    }
 
     private static String escapeJson(String value) {
         if (value == null) {

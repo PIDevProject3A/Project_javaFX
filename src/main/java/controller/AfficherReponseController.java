@@ -1,19 +1,19 @@
 package controller;
 
-import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.entities.Reponse;
@@ -28,14 +28,16 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+
 public class AfficherReponseController {
 
     private static final SimpleDateFormat DF = new SimpleDateFormat("MMM d, yyyy  ·  HH:mm", Locale.ENGLISH);
 
     @FXML
-    private TableView<Reponse> tableReponses;
+    private VBox commentsFeed;
     @FXML
     private Label labTitle;
     @FXML
@@ -45,162 +47,99 @@ public class AfficherReponseController {
     private String topicTitle = "";
     private final ReponseServices reponseServices = new ReponseServices();
     private final NotificationService notificationService = NotificationService.getInstance();
-    private boolean columnsReady;
 
     public void initForTopic(Topic topic) {
         this.topicId = topic.getId();
         this.topicTitle = topic.getTitle() != null ? topic.getTitle() : "";
-        labTitle.setText("Thread");
+        labTitle.setText("Conversation");
         labSubtitle.setText("Topic · " + (this.topicTitle.isEmpty() ? "(no title)" : this.topicTitle));
-        if (!columnsReady) {
-            buildColumns();
-            columnsReady = true;
-        }
         refresh();
     }
 
+    private VBox buildCommentCard(Reponse r) {
+        VBox card = new VBox(12);
+        card.getStyleClass().add("card-reponse-feed-v2");
 
-    private void buildColumns() {
-        TableColumn<Reponse, String> fromCol = new TableColumn<>("From");
-        fromCol.setPrefWidth(150);
-        fromCol.setMinWidth(130);
-        fromCol.setCellValueFactory(c -> new SimpleStringProperty(""));
-        fromCol.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(String v, boolean empty) {
-                super.updateItem(v, empty);
-                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
-                    setGraphic(null);
-                } else {
-                    Label av = new Label(initialFromUser());
-                    av.getStyleClass().add("avatar-chip");
-                    av.setAlignment(Pos.CENTER);
-                    Label name = new Label(AppConstants.FORUM_USER_DISPLAY_NAME);
-                    name.getStyleClass().add("member-name");
-                    Label hint = new Label("Forum member");
-                    hint.getStyleClass().add("member-hint");
-                    VBox text = new VBox(2, name, hint);
-                    HBox row = new HBox(12, av, text);
-                    row.setAlignment(Pos.CENTER_LEFT);
-                    setGraphic(row);
-                }
-            }
-        });
+        // --- EN-TÊTE DU COMMENTAIRE ---
+        HBox header = new HBox(12);
+        header.setAlignment(Pos.CENTER_LEFT);
 
-        TableColumn<Reponse, String> msgCol = new TableColumn<>("Message");
-        msgCol.setPrefWidth(260);
-        msgCol.setCellValueFactory(c -> {
-            String t = preview(c.getValue());
-            return new SimpleStringProperty(t);
-        });
-        msgCol.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(String text, boolean empty) {
-                super.updateItem(text, empty);
-                if (empty) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    Label l = new Label(text);
-                    l.getStyleClass().add("col-message");
-                    l.setWrapText(true);
-                    l.setMaxWidth(480);
-                    setGraphic(l);
-                }
-            }
-        });
+        Label avatar = new Label(initialFromUser());
+        avatar.getStyleClass().add("avatar-chip");
 
-        TableColumn<Reponse, String> postedCol = new TableColumn<>("Posted");
-        postedCol.setPrefWidth(120);
-        postedCol.setCellValueFactory(c ->
-                new SimpleStringProperty(formatDate(c.getValue().getCreated_at())));
-        postedCol.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(String t, boolean empty) {
-                super.updateItem(t, empty);
-                setText(empty ? null : t);
-                if (!empty) {
-                    getStyleClass().removeAll("col-date", "col-date-muted");
-                    getStyleClass().add("col-date");
-                }
-            }
-        });
+        VBox authorInfo = new VBox(2);
+        Label nameLabel = new Label(AppConstants.FORUM_USER_DISPLAY_NAME);
+        nameLabel.getStyleClass().add("member-name");
+        
+        HBox dateBox = new HBox(6);
+        dateBox.setAlignment(Pos.CENTER_LEFT);
+        Label dateLabel = new Label(formatDate(r.getCreated_at()));
+        dateLabel.getStyleClass().add("col-date");
+        
+        dateBox.getChildren().add(dateLabel);
+        
+        if (r.getUpdated_at() != null) {
+            Label editedBadge = new Label(" (modifié)");
+            editedBadge.getStyleClass().add("col-date-muted");
+            dateBox.getChildren().add(editedBadge);
+        }
 
-        TableColumn<Reponse, String> editedCol = new TableColumn<>("Last edit");
-        editedCol.setPrefWidth(130);
-        editedCol.setCellValueFactory(c -> {
-            Date u = c.getValue().getUpdated_at();
-            return new SimpleStringProperty(u == null ? "—  Not edited yet" : formatDate(u));
-        });
-        editedCol.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(String t, boolean empty) {
-                super.updateItem(t, empty);
-                setText(empty ? null : t);
-                if (!empty) {
-                    getStyleClass().removeAll("col-date", "col-date-muted");
-                    if (t != null && t.startsWith("—")) {
-                        getStyleClass().add("col-date-muted");
-                    } else {
-                        getStyleClass().add("col-date");
-                    }
-                }
-            }
-        });
+        authorInfo.getChildren().addAll(nameLabel, dateBox);
 
-        TableColumn<Reponse, Void> actionsCol = new TableColumn<>("Actions");
-        actionsCol.setPrefWidth(420);
-        actionsCol.setMinWidth(400);
-        actionsCol.setMaxWidth(520);
-        actionsCol.setResizable(false);
-        actionsCol.setSortable(false);
-        actionsCol.setCellFactory(ac -> new TableCell<>() {
-            private final Button btnLike = new Button();
-            private final Button btnDislike = new Button();
-            private final Button btnReply = new Button("Reply");
-            private final Button btnDetails = new Button("View");
-            private final Button btnEdit = new Button("Edit");
-            private final Button btnDelete = new Button("Delete");
-            private final HBox box = new HBox(8, btnLike, btnDislike, btnReply, btnDetails, btnEdit, btnDelete);
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
-            {
-                box.setAlignment(Pos.CENTER_LEFT);
-                btnLike.getStyleClass().add("btn-reaction-like");
-                btnDislike.getStyleClass().add("btn-reaction-dislike");
-                btnReply.getStyleClass().add("btn-reaction-reply");
-                btnDetails.getStyleClass().add("btn-feed-action");
-                btnEdit.getStyleClass().add("btn-feed-action");
-                btnDelete.getStyleClass().add("btn-feed-action");
-                btnLike.setMinWidth(62);
-                btnDislike.setMinWidth(62);
-                btnReply.setMinWidth(66);
-                btnDetails.setMinWidth(56);
-                btnEdit.setMinWidth(52);
-                btnDelete.setMinWidth(62);
-            }
+        // Options du commentaire
+        MenuButton btnOptions = new MenuButton("⚙ Options");
+        btnOptions.getStyleClass().add("topic-menu-button");
 
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
-                    setGraphic(null);
-                } else {
-                    Reponse r = getTableRow().getItem();
-                    btnLike.setText("👍 " + r.getLikeCount());
-                    btnDislike.setText("👎 " + r.getDislikeCount());
-                    btnLike.setOnAction(e -> reactToReply(r, true));
-                    btnDislike.setOnAction(e -> reactToReply(r, false));
-                    btnReply.setOnAction(e -> openAddReplyWithPrefill(r));
-                    btnDetails.setOnAction(e -> openDetail(r));
-                    btnEdit.setOnAction(e -> openEdit(r));
-                    btnDelete.setOnAction(e -> openDelete(r));
-                    setGraphic(box);
-                }
-            }
-        });
+        MenuItem viewItem = new MenuItem("👁 Voir en détail");
+        viewItem.setOnAction(e -> openDetail(r));
 
-        tableReponses.getColumns().setAll(fromCol, msgCol, postedCol, editedCol, actionsCol);
-        tableReponses.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        MenuItem editItem = new MenuItem("✏ Modifier");
+        editItem.setOnAction(e -> openEdit(r));
+
+        MenuItem deleteItem = new MenuItem("🗑 Supprimer");
+        deleteItem.getStyleClass().add("menu-item-delete");
+        deleteItem.setOnAction(e -> openDelete(r));
+
+        btnOptions.getItems().addAll(viewItem, editItem, new SeparatorMenuItem(), deleteItem);
+
+        header.getChildren().addAll(avatar, authorInfo, spacer, btnOptions);
+
+        // --- TEXTE DU COMMENTAIRE ---
+        Label content = new Label(r.getContent() != null ? r.getContent() : "");
+        content.getStyleClass().add("col-message");
+        content.setWrapText(true);
+
+        // --- ACTIONS SOCIALES ---
+        HBox actions = new HBox(12);
+        actions.setAlignment(Pos.CENTER_LEFT);
+        actions.setPadding(new javafx.geometry.Insets(8, 0, 0, 0));
+
+        Button btnLike = new Button("👍 " + r.getLikeCount());
+        btnLike.getStyleClass().add("btn-reaction-like");
+        btnLike.setOnAction(e -> reactToReply(r, true));
+
+        Button btnDislike = new Button("👎 " + r.getDislikeCount());
+        btnDislike.getStyleClass().add("btn-reaction-dislike");
+        btnDislike.setOnAction(e -> reactToReply(r, false));
+
+        Button btnReply = new Button("💬 Répondre");
+        btnReply.getStyleClass().add("btn-reaction-reply");
+        btnReply.setOnAction(e -> openAddReplyWithPrefill(r));
+
+        actions.getChildren().addAll(btnLike, btnDislike, btnReply);
+
+        // Hover animations
+        try {
+            org.example.utils.UIAnimator.addHoverScaleEffect(btnLike);
+            org.example.utils.UIAnimator.addHoverScaleEffect(btnDislike);
+            org.example.utils.UIAnimator.addHoverScaleEffect(btnReply);
+        } catch(Exception ignored){}
+
+        card.getChildren().addAll(header, content, actions);
+        return card;
     }
 
     private static String initialFromUser() {
@@ -231,7 +170,7 @@ public class AfficherReponseController {
     }
 
     private Stage ownerStage() {
-        return (Stage) tableReponses.getScene().getWindow();
+        return (Stage) commentsFeed.getScene().getWindow();
     }
 
     private void setSceneOnCurrentStage(Parent root, String title) {
@@ -322,7 +261,7 @@ public class AfficherReponseController {
                 } else {
                     reply.setDislikeCount(reply.getDislikeCount() + 1);
                 }
-                tableReponses.refresh();
+                refresh();
             } else {
                 Alert a = new Alert(Alert.AlertType.ERROR);
                 a.setTitle("API error");
@@ -338,7 +277,6 @@ public class AfficherReponseController {
             a.showAndWait();
         }
     }
-    //appel like and dislike
 
     private boolean sendReplyReactionToRestApi(int replyId, boolean like) throws IOException {
         String endpoint = like ? "like" : "dislike";
@@ -347,6 +285,7 @@ public class AfficherReponseController {
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
         connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+        connection.setRequestProperty("X-API-KEY", AppConstants.REST_API_SECRET_KEY);
         String payload = "{\"replyId\":" + replyId + "}";
         byte[] body = payload.getBytes(java.nio.charset.StandardCharsets.UTF_8);
         try (OutputStream os = connection.getOutputStream()) {
@@ -357,11 +296,24 @@ public class AfficherReponseController {
         return status >= 200 && status < 300;
     }
 
-
     @FXML
     void refresh() {
         try {
-            tableReponses.getItems().setAll(reponseServices.afficherParTopic(topicId));
+            List<Reponse> reponses = reponseServices.afficherParTopic(topicId);
+            commentsFeed.getChildren().clear();
+            if (reponses.isEmpty()) {
+                Label emptyLabel = new Label("Aucun message. Soyez le premier à répondre !");
+                emptyLabel.setStyle("-fx-text-fill: #94A3B8; -fx-font-style: italic; -fx-padding: 20px;");
+                commentsFeed.getChildren().add(emptyLabel);
+            } else {
+                for (int i = 0; i < reponses.size(); i++) {
+                    VBox card = buildCommentCard(reponses.get(i));
+                    commentsFeed.getChildren().add(card);
+                    try {
+                        org.example.utils.UIAnimator.animateEntrance(card, i * 100);
+                    } catch(Exception ignored){}
+                }
+            }
         } catch (Exception e) {
             Alert a = new Alert(Alert.AlertType.ERROR);
             a.setTitle("Error");
@@ -383,13 +335,14 @@ public class AfficherReponseController {
         }
     }
 
-    private void showError(IOException ex) {
+    private void showError(Exception ex) {
         Alert a = new Alert(Alert.AlertType.ERROR);
         a.setTitle("Error");
-        a.setHeaderText("Could not open this window");
+        a.setHeaderText("An error occurred");
         a.setContentText(ex.getMessage());
         a.showAndWait();
     }
+
     public void addNotificationForNewReply(String replyContent) {
         notificationService.publishReply("Membre", topicTitle, topicId);
     }

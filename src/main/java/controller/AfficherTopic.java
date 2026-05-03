@@ -234,6 +234,7 @@ public class AfficherTopic implements Initializable {
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
         connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+        connection.setRequestProperty("X-API-KEY", org.example.utils.AppConstants.REST_API_SECRET_KEY);
         String payload = "{\"topicId\":" + topicId + ",\"username\":\"Membre\"}";
         byte[] body = payload.getBytes(java.nio.charset.StandardCharsets.UTF_8);
         try (OutputStream os = connection.getOutputStream()) {
@@ -519,20 +520,32 @@ public class AfficherTopic implements Initializable {
                 }
             }
         }
+        
+        int delay = 0;
         if (pinnedTopic != null) {
-            topicsFeedBox.getChildren().add(buildTopicCard(pinnedTopic));
+            javafx.scene.layout.VBox card = buildTopicCard(pinnedTopic);
+            topicsFeedBox.getChildren().add(card);
+            org.example.utils.UIAnimator.animateEntrance(card, delay);
+            delay += 80;
         }
         for (Topic t : topics) {
             if (pinnedTopic != null && t.getId() == pinnedTopic.getId()) {
                 continue;
             }
-            topicsFeedBox.getChildren().add(buildTopicCard(t));
+            javafx.scene.layout.VBox card = buildTopicCard(t);
+            topicsFeedBox.getChildren().add(card);
+            org.example.utils.UIAnimator.animateEntrance(card, delay);
+            delay += 80;
         }
     }
 
     private VBox buildTopicCard(Topic topic) {
         VBox card = new VBox(12);
         card.getStyleClass().add("topic-card");
+
+        // --- EN-TÊTE (Header) ---
+        HBox topBar = new HBox();
+        topBar.setAlignment(Pos.CENTER_LEFT);
 
         HBox tags = new HBox(8);
         tags.setAlignment(Pos.CENTER_LEFT);
@@ -554,6 +567,33 @@ public class AfficherTopic implements Initializable {
         meta.getStyleClass().add("topic-meta");
         tags.getChildren().addAll(categoryBadge, statusBadge, meta);
 
+        Region topSpacer = new Region();
+        HBox.setHgrow(topSpacer, javafx.scene.layout.Priority.ALWAYS);
+
+        // NOUVEAU: Menu déroulant (Options)
+        javafx.scene.control.MenuButton btnOptions = new javafx.scene.control.MenuButton("⚙ Options");
+        btnOptions.getStyleClass().add("topic-menu-button");
+        
+        javafx.scene.control.MenuItem viewItem = new javafx.scene.control.MenuItem("👁 Voir les détails");
+        viewItem.setOnAction(e -> openDetailsWindow(topic));
+        
+        javafx.scene.control.MenuItem editItem = new javafx.scene.control.MenuItem("✏ Modifier");
+        editItem.setOnAction(e -> openEditWindow(topic));
+        
+        javafx.scene.control.MenuItem saveItem = new javafx.scene.control.MenuItem(savedTopicIds.contains(topic.getId()) ? "⭐ Retirer des favoris" : "⭐ Sauvegarder");
+        saveItem.setOnAction(e -> {
+            toggleSavedTopic(topic.getId());
+            appliquerFiltres();
+        });
+        
+        javafx.scene.control.MenuItem deleteItem = new javafx.scene.control.MenuItem("🗑 Supprimer");
+        deleteItem.getStyleClass().add("menu-item-delete");
+        deleteItem.setOnAction(e -> openDeleteWindow(topic));
+        
+        btnOptions.getItems().addAll(viewItem, saveItem, editItem, new javafx.scene.control.SeparatorMenuItem(), deleteItem);
+        topBar.getChildren().addAll(tags, topSpacer, btnOptions);
+
+        // --- CONTENU (Content) ---
         Label title = new Label(nullToEmpty(topic.getTitle()));
         title.getStyleClass().add("topic-card-title");
         title.setWrapText(true);
@@ -578,6 +618,7 @@ public class AfficherTopic implements Initializable {
             }
         }
 
+        // --- PIED DE PAGE (Footer) ---
         HBox footer = new HBox(10);
         footer.setAlignment(Pos.CENTER_LEFT);
 
@@ -593,39 +634,43 @@ public class AfficherTopic implements Initializable {
         btnReply.getStyleClass().add("btn-reaction-reply");
         btnReply.setOnAction(e -> openRepliesWindow(topic));
 
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+        Region bottomSpacer = new Region();
+        HBox.setHgrow(bottomSpacer, javafx.scene.layout.Priority.ALWAYS);
 
-        Button btnView = new Button("👁 View");
-        btnView.getStyleClass().add("btn-action-view");
-        btnView.setOnAction(e -> openDetailsWindow(topic));
+        Button btnTranslate = new Button("🌍 Traduire");
+        btnTranslate.getStyleClass().add("btn-action-view");
+        btnTranslate.setOnAction(e -> {
+            btnTranslate.setDisable(true);
+            btnTranslate.setText("⏳...");
+            new Thread(() -> {
+                String translatedTitle = org.example.integrations.translation.TranslationService.translate(topic.getTitle(), "fr");
+                String translatedContent = org.example.integrations.translation.TranslationService.translate(topic.getContent(), "fr");
+                javafx.application.Platform.runLater(() -> {
+                    title.setText(translatedTitle);
+                    content.setText(truncate(translatedContent, 220));
+                    btnTranslate.setText("✅");
+                });
+            }).start();
+        });
 
-        Button btnEdit = new Button("✏ Edit");
-        btnEdit.getStyleClass().add("btn-action-edit");
-        btnEdit.setOnAction(e -> openEditWindow(topic));
-
-        Button btnDelete = new Button("🗑 Delete");
-        btnDelete.getStyleClass().add("btn-action-delete");
-        btnDelete.setOnAction(e -> openDeleteWindow(topic));
-
-        Button btnShare = new Button("🔗 Share");
+        Button btnShare = new Button("🔗 Partager");
         btnShare.getStyleClass().add("btn-action-view");
         btnShare.setOnAction(e -> shareTopic(topic));
 
-        Button btnSave = new Button(savedTopicIds.contains(topic.getId()) ? "⭐ Saved" : "⭐ Save");
-        btnSave.getStyleClass().add("btn-action-edit");
-        btnSave.setOnAction(e -> {
-            toggleSavedTopic(topic.getId());
-            appliquerFiltres();
-        });
-
         HBox actionButtons = new HBox(8);
         actionButtons.setAlignment(Pos.CENTER_RIGHT);
-        actionButtons.getChildren().addAll(btnShare, btnSave, btnView, btnEdit, btnDelete);
+        actionButtons.getChildren().addAll(btnTranslate, btnShare);
 
-        footer.getChildren().addAll(btnLike, btnDislike, btnReply, spacer, actionButtons);
+        footer.getChildren().addAll(btnLike, btnDislike, btnReply, bottomSpacer, actionButtons);
 
-        card.getChildren().addAll(tags, title);
+        // Add hover animations
+        org.example.utils.UIAnimator.addHoverScaleEffect(btnLike);
+        org.example.utils.UIAnimator.addHoverScaleEffect(btnDislike);
+        org.example.utils.UIAnimator.addHoverScaleEffect(btnReply);
+        org.example.utils.UIAnimator.addHoverScaleEffect(btnTranslate);
+        org.example.utils.UIAnimator.addHoverScaleEffect(btnShare);
+
+        card.getChildren().addAll(topBar, title);
         if (topicImageView != null) {
             card.getChildren().add(topicImageView);
         }
