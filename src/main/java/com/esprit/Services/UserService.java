@@ -1,5 +1,6 @@
 package com.esprit.services;
 
+import com.esprit.entities.AppUser;
 import com.esprit.entities.User;
 import org.mindrot.jbcrypt.BCrypt;
 import com.esprit.utils.MyDataBase;
@@ -17,6 +18,91 @@ public class UserService {
     private final MyDataBase dataBase = MyDataBase.getInstance();
     private final CompreFaceFaceIdService faceIdService = new CompreFaceFaceIdService();
 
+    // ========== Login Result ==========
+
+    public static class LoginResult {
+        private final User adminUser;
+        private final AppUser appUser;
+
+        private LoginResult(User adminUser, AppUser appUser) {
+            this.adminUser = adminUser;
+            this.appUser = appUser;
+        }
+
+        public static LoginResult admin(User user) {
+            return new LoginResult(user, null);
+        }
+
+        public static LoginResult user(AppUser appUser) {
+            return new LoginResult(null, appUser);
+        }
+
+        public boolean isAdmin() {
+            return adminUser != null;
+        }
+
+        public boolean isAppUser() {
+            return appUser != null;
+        }
+
+        public User getAdminUser() {
+            return adminUser;
+        }
+
+        public AppUser getAppUser() {
+            return appUser;
+        }
+    }
+
+    // ========== Unified Login ==========
+
+    public LoginResult loginUnified(String email, String password) {
+        if (isBlank(email) || isBlank(password)) {
+            return null;
+        }
+
+        // Try admin tables first
+        User adminUser = dataBase.findByEmail(email);
+        if (adminUser != null) {
+            String storedPassword = adminUser.getPasswordHash();
+            if (verifyPassword(password, storedPassword)) {
+                return LoginResult.admin(adminUser);
+            }
+            if (password.equals(storedPassword)) {
+                String migratedHash = hashPassword(password);
+                boolean migrated = dataBase.updateUserCredentials(adminUser.getAdminType(), adminUser.getEmail(), adminUser.getEmail(), migratedHash);
+                if (migrated) {
+                    User updated = new User(adminUser.getId(), adminUser.getFirstName(), adminUser.getLastName(), adminUser.getEmail(), migratedHash, adminUser.getAdminType());
+                    return LoginResult.admin(updated);
+                }
+            }
+        }
+
+        // Try users table
+        AppUser appUser = dataBase.findAppUserByEmail(email.trim().toLowerCase());
+        if (appUser != null) {
+            String storedPassword = appUser.getPasswordHash();
+            if (verifyPassword(password, storedPassword)) {
+                return LoginResult.user(appUser);
+            }
+            if (password.equals(storedPassword)) {
+                String migratedHash = hashPassword(password);
+                boolean migrated = dataBase.updateAppUserProfile(
+                        appUser.getEmail(), appUser.getFirstName(), appUser.getLastName(),
+                        appUser.getEmail(), migratedHash, appUser.getUserType());
+                if (migrated) {
+                    AppUser updated = new AppUser(appUser.getId(), appUser.getFirstName(), appUser.getLastName(),
+                            appUser.getEmail(), migratedHash, appUser.getUserType(), appUser.getCreatedAt(), appUser.getCreatedByAdmin());
+                    return LoginResult.user(updated);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    // ========== Existing Admin Methods ==========
+
     public User findByEmail(String email) {
         if (isBlank(email)) {
             return null;
@@ -32,7 +118,30 @@ public class UserService {
         if (isBlank(email)) {
             return null;
         }
-        return dataBase.findByEmail(email);
+        // Check admin tables first
+        User adminUser = dataBase.findByEmail(email);
+        if (adminUser != null) {
+            return adminUser;
+        }
+        return null;
+    }
+
+    public AppUser findAppUserByFaceSubject(String faceSubject) {
+        if (isBlank(faceSubject)) {
+            return null;
+        }
+        String email = dataBase.findEmailByFaceSubject(faceSubject.trim());
+        if (isBlank(email)) {
+            return null;
+        }
+        return dataBase.findAppUserByEmail(email);
+    }
+
+    public AppUser findAppUserByEmail(String email) {
+        if (isBlank(email)) {
+            return null;
+        }
+        return dataBase.findAppUserByEmail(email.trim().toLowerCase());
     }
 
     public String getOrCreateFaceSubject(String email) {
@@ -72,13 +181,16 @@ public class UserService {
             return "CompreFace n'est pas configure.";
         }
 
-        User targetUser = findByEmail(targetEmail);
-        if (targetUser == null) {
+        // Check both admin and app user tables
+        String email = targetEmail.trim().toLowerCase();
+        User adminUser = dataBase.findByEmail(email);
+        AppUser appUser = dataBase.findAppUserByEmail(email);
+        if (adminUser == null && appUser == null) {
             return "Target account not found.";
         }
 
-        boolean hadFaceId = hasFaceId(targetUser.getEmail());
-        String subject = getOrCreateFaceSubject(targetUser.getEmail());
+        boolean hadFaceId = hasFaceId(email);
+        String subject = getOrCreateFaceSubject(email);
         if (isBlank(subject)) {
             return "Impossible de preparer le subject Face ID.";
         }
@@ -89,8 +201,8 @@ public class UserService {
         }
 
         return hadFaceId
-                ? "Face ID mis a jour avec succes pour " + targetUser.getEmail() + "."
-                : "Face ID ajoute avec succes pour " + targetUser.getEmail() + ".";
+                ? "Face ID mis a jour avec succes pour " + email + "."
+                : "Face ID ajoute avec succes pour " + email + ".";
     }
 
     public String deleteFaceIdByAdmin(User.AdminType currentRole, String targetEmail) {
@@ -101,16 +213,18 @@ public class UserService {
             return "Target email is required.";
         }
 
-        User targetUser = findByEmail(targetEmail);
-        if (targetUser == null) {
+        String email = targetEmail.trim().toLowerCase();
+        User adminUser = dataBase.findByEmail(email);
+        AppUser appUser = dataBase.findAppUserByEmail(email);
+        if (adminUser == null && appUser == null) {
             return "Target account not found.";
         }
 
-        boolean removed = dataBase.removeFaceProfileByEmail(targetUser.getEmail());
+        boolean removed = dataBase.removeFaceProfileByEmail(email);
         if (!removed) {
             return "Aucun Face ID actif a supprimer pour cet utilisateur.";
         }
-        return "Face ID supprime pour " + targetUser.getEmail() + ".";
+        return "Face ID supprime pour " + email + ".";
     }
 
     public User login(String email, String password) {
@@ -169,6 +283,104 @@ public class UserService {
 
         return "SUCCESS";
     }
+
+    // ========== AppUser CRUD ==========
+
+    public String createAppUser(User.AdminType currentRole,
+                                String firstName,
+                                String lastName,
+                                String email,
+                                String password,
+                                AppUser.UserType userType) {
+        if (currentRole != User.AdminType.ADMIN_ACCOUNT) {
+            return "Only admin accounts can create new accounts.";
+        }
+        if (isBlank(firstName) || isBlank(lastName) || isBlank(email) || isBlank(password) || userType == null) {
+            return "All fields are required.";
+        }
+        if (!EMAIL_PATTERN.matcher(email.trim()).matches()) {
+            return "Invalid email format.";
+        }
+        if (!hasMinLength(firstName, MIN_NAME_LENGTH) || !hasMinLength(lastName, MIN_NAME_LENGTH)) {
+            return "First name and last name must be at least 3 characters.";
+        }
+        if (!hasMinLength(password, MIN_PASSWORD_LENGTH)) {
+            return "Password must be at least 8 characters.";
+        }
+
+        String passwordHash = hashPassword(password);
+        String adminEmail = utils.UserSession.getCurrentUserEmail();
+        AppUser appUser = new AppUser(0, firstName.trim(), lastName.trim(), email.trim().toLowerCase(),
+                passwordHash, userType, null, adminEmail);
+        boolean saved = dataBase.addAppUser(appUser);
+        if (!saved) {
+            return "Email already exists.";
+        }
+
+        return "SUCCESS";
+    }
+
+    public String updateAppUserByAdmin(User.AdminType currentRole,
+                                       String targetCurrentEmail,
+                                       String newFirstName,
+                                       String newLastName,
+                                       String newEmail,
+                                       String newPassword,
+                                       AppUser.UserType newUserType) {
+        if (currentRole != User.AdminType.ADMIN_ACCOUNT) {
+            return "Only admin can modify credentials.";
+        }
+        if (newUserType == null
+                || isBlank(targetCurrentEmail)
+                || isBlank(newFirstName)
+                || isBlank(newLastName)
+                || isBlank(newEmail)) {
+            return "All fields are required.";
+        }
+        if (!EMAIL_PATTERN.matcher(newEmail.trim()).matches()) {
+            return "Invalid email format.";
+        }
+        if (!hasMinLength(newFirstName, MIN_NAME_LENGTH) || !hasMinLength(newLastName, MIN_NAME_LENGTH)) {
+            return "First name and last name must be at least 3 characters.";
+        }
+
+        if (!isBlank(newPassword) && !hasMinLength(newPassword, MIN_PASSWORD_LENGTH)) {
+            return "Password must be at least 8 characters.";
+        }
+
+        AppUser targetUser = dataBase.findAppUserByEmail(targetCurrentEmail);
+        if (targetUser == null) {
+            return "Target account not found.";
+        }
+
+        String passwordToStore = isBlank(newPassword) ? targetUser.getPasswordHash() : hashPassword(newPassword);
+
+        boolean updated = dataBase.updateAppUserProfile(
+                targetCurrentEmail,
+                newFirstName,
+                newLastName,
+                newEmail,
+                passwordToStore,
+                newUserType
+        );
+        if (!updated) {
+            return "Unable to update profile.";
+        }
+        return "SUCCESS";
+    }
+
+    public boolean deleteAppUserByAdmin(String targetEmail) {
+        if (isBlank(targetEmail)) {
+            return false;
+        }
+        return dataBase.deleteAppUserByEmail(targetEmail);
+    }
+
+    public List<AppUser> getAllAppUsers() {
+        return dataBase.findAllAppUsers();
+    }
+
+    // ========== Existing Admin Methods (continued) ==========
 
     public String updateCredentials(User.AdminType role, String currentEmail, String newEmail, String newPassword) {
         if (role == null || isBlank(currentEmail) || isBlank(newEmail) || isBlank(newPassword)) {
@@ -293,7 +505,7 @@ public class UserService {
         return value != null && value.trim().length() >= minLength;
     }
 
-    private String hashPassword(String plainPassword) {
+    public String hashPassword(String plainPassword) {
         return BCrypt.hashpw(plainPassword, BCrypt.gensalt());
     }
 

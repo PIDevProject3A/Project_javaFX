@@ -2,6 +2,7 @@ package com.esprit.controllers;
 
 import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.WebcamResolution;
+import com.esprit.entities.AppUser;
 import com.esprit.entities.User;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
@@ -88,23 +89,39 @@ public class LoginController {
             return;
         }
 
-        User user = userService.login(emailField.getText(), passwordField.getText());
-        if (user == null) {
+        UserService.LoginResult result = userService.loginUnified(emailField.getText(), passwordField.getText());
+        if (result == null) {
             showError("Invalid email or password.");
             return;
         }
-        UserSession.setCurrentUserEmail(user.getEmail());
-        UserSession.setCurrentUserRole(user.getAdminType());
-        
-        // Log login to database
-        int logId = MyDataBase.getInstance().insertLoginLog(user.getId(), user.getAdminType().name());
-        UserSession.setCurrentLoginLogId(logId);
 
-        notifyAdmins(user, "Connexion");
-        if (user.getAdminType() == User.AdminType.EVENT_MANAGER) {
-            switchScene("/com/esprit/EventAdmin.fxml");
+        if (result.isAdmin()) {
+            User user = result.getAdminUser();
+            UserSession.setCurrentUserEmail(user.getEmail());
+            UserSession.setCurrentUserRole(user.getAdminType());
+            UserSession.setIsAppUser(false);
+
+            int logId = MyDataBase.getInstance().insertLoginLog(user.getId(), user.getAdminType().name());
+            UserSession.setCurrentLoginLogId(logId);
+
+            notifyAdminsForAdmin(user, "Connexion");
+            if (user.getAdminType() == User.AdminType.EVENT_MANAGER) {
+                switchScene("/com/esprit/EventAdmin.fxml");
+            } else {
+                switchScene("/Dashboard.fxml");
+            }
         } else {
-            switchScene("/Dashboard.fxml");
+            AppUser appUser = result.getAppUser();
+            UserSession.setCurrentUserEmail(appUser.getEmail());
+            UserSession.setIsAppUser(true);
+            UserSession.setCurrentAppUserType(appUser.getUserType());
+            UserSession.setCurrentUserRole(null);
+
+            int logId = MyDataBase.getInstance().insertLoginLog(appUser.getId(), appUser.getUserType().name());
+            UserSession.setCurrentLoginLogId(logId);
+
+            notifyAdminsForAppUser(appUser, "Connexion");
+            switchScene("/UserDashboard.fxml");
         }
     }
 
@@ -142,32 +159,45 @@ public class LoginController {
             return;
         }
 
-        User user = userService.findByFaceSubject(recognitionResult.subject());
-        if (user == null) {
-            showError("Visage reconnu, mais aucun compte local n'est associe.");
+        // Try admin tables first
+        User adminUser = userService.findByFaceSubject(recognitionResult.subject());
+        if (adminUser != null) {
+            UserSession.setCurrentUserEmail(adminUser.getEmail());
+            UserSession.setCurrentUserRole(adminUser.getAdminType());
+            UserSession.setIsAppUser(false);
+
+            int logId = MyDataBase.getInstance().insertLoginLog(adminUser.getId(), adminUser.getAdminType().name());
+            UserSession.setCurrentLoginLogId(logId);
+
+            notifyAdminsForAdmin(adminUser, "Connexion (Face ID)");
+            switchScene("/Dashboard.fxml");
             return;
         }
 
-        UserSession.setCurrentUserEmail(user.getEmail());
-        UserSession.setCurrentUserRole(user.getAdminType());
-        
-        // Log login to database
-        int logId = MyDataBase.getInstance().insertLoginLog(user.getId(), user.getAdminType().name());
-        UserSession.setCurrentLoginLogId(logId);
+        // Try users table
+        AppUser appUser = userService.findAppUserByFaceSubject(recognitionResult.subject());
+        if (appUser != null) {
+            UserSession.setCurrentUserEmail(appUser.getEmail());
+            UserSession.setIsAppUser(true);
+            UserSession.setCurrentAppUserType(appUser.getUserType());
+            UserSession.setCurrentUserRole(null);
 
-        notifyAdmins(user, "Connexion (Face ID)");
-        if (user.getAdminType() == User.AdminType.EVENT_MANAGER) {
-            switchScene("/com/esprit/EventAdmin.fxml");
-        } else {
-            switchScene("/Dashboard.fxml");
+            int logId = MyDataBase.getInstance().insertLoginLog(appUser.getId(), appUser.getUserType().name());
+            UserSession.setCurrentLoginLogId(logId);
+
+            notifyAdminsForAppUser(appUser, "Connexion (Face ID)");
+            switchScene("/UserDashboard.fxml");
+            return;
         }
+
+        showError("Visage reconnu, mais aucun compte local n'est associe.");
     }
 
     private void switchScene(String fxml) {
         SceneNavigator.navigate(emailField, fxml, this::showError);
     }
 
-    private void notifyAdmins(User user, String actionType) {
+    private void notifyAdminsForAdmin(User user, String actionType) {
         String subject = actionType + " utilisateur";
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         
@@ -181,6 +211,24 @@ public class LoginController {
         );
 
         // Run in background to avoid blocking UI
+        new Thread(() -> emailService.sendEmailToAdmins(subject, message)).start();
+    }
+
+    private void notifyAdminsForAppUser(AppUser appUser, String actionType) {
+        String subject = actionType + " utilisateur";
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+        String message = String.format(
+            "Un utilisateur s'est connecte.\n\n" +
+            "Nom : %s %s\n" +
+            "Email : %s\n" +
+            "Role : %s\n" +
+            "Date et heure : %s\n" +
+            "Type d'action : %s",
+            appUser.getFirstName(), appUser.getLastName(), appUser.getEmail(),
+            appUser.getUserType().name(), now, actionType
+        );
+
         new Thread(() -> emailService.sendEmailToAdmins(subject, message)).start();
     }
 
@@ -347,6 +395,4 @@ public class LoginController {
         }
     }
 }
-
-
 
