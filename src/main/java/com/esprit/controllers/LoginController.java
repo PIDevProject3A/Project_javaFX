@@ -77,6 +77,7 @@ public class LoginController {
             return;
         }
 
+        /* TEMPORARY BYPASS FOR DEV:
         String recaptchaToken = readTokenFromWidget();
         if (recaptchaToken.isBlank()) {
             showError("Veuillez valider le reCAPTCHA avant de vous connecter.");
@@ -88,6 +89,7 @@ public class LoginController {
             resetCaptcha();
             return;
         }
+        */
 
         UserService.LoginResult result = userService.loginUnified(emailField.getText(), passwordField.getText());
         if (result == null) {
