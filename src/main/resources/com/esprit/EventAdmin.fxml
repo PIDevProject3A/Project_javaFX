@@ -6,7 +6,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ListView?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" stylesheets="@bledna-theme.css, @../style.css" fx:controller="com.esprit.controllers.EventAdminController" prefWidth="1150" prefHeight="760" styleClass="app-shell">
+<BorderPane xmlns:fx="http://javafx.com/fxml" stylesheets="@bledna-theme.css" fx:controller="com.esprit.controllers.EventAdminController" prefWidth="1150" prefHeight="760" styleClass="app-shell">
     <left>
         <VBox styleClass="sidebar">
             <Label text="BLADNA" styleClass="sidebar-title"/>
