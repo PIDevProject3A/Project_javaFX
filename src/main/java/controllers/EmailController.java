@@ -39,9 +39,14 @@ public class EmailController {
         statusLabel.visibleProperty().bind(statusLabel.textProperty().isNotEmpty());
         statusLabel.managedProperty().bind(statusLabel.visibleProperty());
         emailService = new EmailService();
+
+        // Check for admin User context first, then AppUser context
         if (utils.UserSession.getUserToEdit() != null) {
             toField.setText(utils.UserSession.getUserToEdit().getEmail());
-            utils.UserSession.setUserToEdit(null); // Clear after use so it doesn't persist
+            utils.UserSession.setUserToEdit(null);
+        } else if (utils.UserSession.getAppUserToEdit() != null) {
+            toField.setText(utils.UserSession.getAppUserToEdit().getEmail());
+            utils.UserSession.setAppUserToEdit(null);
         }
     }
 
@@ -118,6 +123,6 @@ public class EmailController {
 
     @FXML
     private void goBack() {
-        SceneNavigator.navigate(sendButton, "/Dashboard.fxml", msg -> showStatusMessage(msg, false));
+        SceneNavigator.navigate(sendButton, "/AdminDashboard.fxml", msg -> showStatusMessage(msg, false));
     }
 }

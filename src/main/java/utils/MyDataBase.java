@@ -1,5 +1,6 @@
 package utils;
 
+import entities.AppUser;
 import entities.User;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -16,8 +17,8 @@ public class MyDataBase {
 
     private static final String DEFAULT_ADMIN_FIRST_NAME = "Default";
     private static final String DEFAULT_ADMIN_LAST_NAME = "Admin";
-    private static final String DEFAULT_ADMIN_EMAIL = "admin@bladna.local";
-    private static final String DEFAULT_ADMIN_PASSWORD = "Admin123!";
+    private static final String DEFAULT_ADMIN_EMAIL = "admin@bladna.tn";
+    private static final String DEFAULT_ADMIN_PASSWORD = "123456789";
 
     private MyDataBase() {
         ensureTablesExist();
@@ -53,6 +54,19 @@ public class MyDataBase {
                     "face_subject VARCHAR(255) NOT NULL," +
                     "is_enabled BOOLEAN DEFAULT TRUE," +
                     "enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                    ")");
+
+            // Users Table (Collector / Buyer / Donator)
+            statement.execute("CREATE TABLE IF NOT EXISTS users (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY," +
+                    "first_name VARCHAR(100) NOT NULL," +
+                    "last_name VARCHAR(100) NOT NULL," +
+                    "email VARCHAR(150) NOT NULL," +
+                    "password VARCHAR(255) NOT NULL," +
+                    "user_type ENUM('Collector', 'Buyer', 'Donator') NOT NULL," +
+                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                    "created_by_admin VARCHAR(150) NULL," +
+                    "UNIQUE KEY uq_users_email (email)" +
                     ")");
         } catch (SQLException e) {
             throw new RuntimeException("Unable to ensure tables exist.", e);
@@ -95,6 +109,121 @@ public class MyDataBase {
         }
 
         return findByEmailInTable(normalizedEmail, "finance_manager", User.AdminType.FINANCE_MANAGER);
+    }
+
+    public synchronized AppUser findAppUserByEmail(String email) {
+        String normalizedEmail = normalizeEmail(email);
+        String sql = "SELECT id, first_name, last_name, email, password, user_type, created_at, created_by_admin FROM users WHERE email = ?";
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, normalizedEmail);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return mapAppUser(rs);
+                }
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to find app user by email.", e);
+        }
+    }
+
+    public synchronized boolean addAppUser(AppUser appUser) {
+        String email = normalizeEmail(appUser.getEmail());
+        // Check uniqueness across ALL tables
+        if (findByEmail(email) != null || findAppUserByEmail(email) != null) {
+            return false;
+        }
+
+        String sql = "INSERT INTO users (first_name, last_name, email, password, user_type, created_by_admin) VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, appUser.getFirstName());
+            statement.setString(2, appUser.getLastName());
+            statement.setString(3, email);
+            statement.setString(4, appUser.getPasswordHash());
+            statement.setString(5, appUser.getUserType().name());
+            statement.setString(6, appUser.getCreatedByAdmin());
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to insert app user.", e);
+        }
+    }
+
+    public synchronized List<AppUser> findAllAppUsers() {
+        String sql = "SELECT id, first_name, last_name, email, password, user_type, created_at, created_by_admin FROM users ORDER BY email";
+        List<AppUser> users = new ArrayList<>();
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet rs = statement.executeQuery()) {
+            while (rs.next()) {
+                users.add(mapAppUser(rs));
+            }
+            return users;
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to fetch all app users.", e);
+        }
+    }
+
+    public synchronized boolean updateAppUserProfile(String currentEmail,
+                                                      String newFirstName,
+                                                      String newLastName,
+                                                      String newEmail,
+                                                      String newPassword,
+                                                      AppUser.UserType newUserType) {
+        String normalizedCurrentEmail = normalizeEmail(currentEmail);
+        String normalizedNewEmail = normalizeEmail(newEmail);
+
+        if (!normalizedCurrentEmail.equals(normalizedNewEmail)) {
+            if (findByEmail(normalizedNewEmail) != null || findAppUserByEmail(normalizedNewEmail) != null) {
+                return false;
+            }
+        }
+
+        String sql = "UPDATE users SET first_name = ?, last_name = ?, email = ?, password = ?, user_type = ? WHERE email = ?";
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, newFirstName == null ? "" : newFirstName.trim());
+            statement.setString(2, newLastName == null ? "" : newLastName.trim());
+            statement.setString(3, normalizedNewEmail);
+            statement.setString(4, newPassword);
+            statement.setString(5, newUserType.name());
+            statement.setString(6, normalizedCurrentEmail);
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to update app user profile.", e);
+        }
+    }
+
+    public synchronized boolean deleteAppUserByEmail(String email) {
+        String normalizedEmail = normalizeEmail(email);
+        String sql = "DELETE FROM users WHERE email = ?";
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, normalizedEmail);
+            boolean deleted = statement.executeUpdate() > 0;
+            if (deleted) {
+                removeFaceProfileByEmail(normalizedEmail);
+            }
+            return deleted;
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to delete app user.", e);
+        }
+    }
+
+    private AppUser mapAppUser(ResultSet rs) throws SQLException {
+        Timestamp ts = rs.getTimestamp("created_at");
+        LocalDateTime createdAt = ts != null ? ts.toLocalDateTime() : null;
+        return new AppUser(
+                rs.getInt("id"),
+                rs.getString("first_name"),
+                rs.getString("last_name"),
+                rs.getString("email"),
+                rs.getString("password"),
+                AppUser.UserType.valueOf(rs.getString("user_type")),
+                createdAt,
+                rs.getString("created_by_admin")
+        );
     }
 
     public synchronized List<User> findAllUsers() {
@@ -329,7 +458,7 @@ public class MyDataBase {
 
     public synchronized int getTotalUsersCount() {
         int count = 0;
-        String[] tables = {"admin_accounts", "event_manager", "finance_manager"};
+        String[] tables = {"admin_accounts", "event_manager", "finance_manager", "users"};
         try (Connection connection = getConnection()) {
             for (String table : tables) {
                 try (PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM " + table);
@@ -389,6 +518,14 @@ public class MyDataBase {
                 try (PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM " + tables[i]);
                      ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) data.put(roles[i], rs.getInt(1));
+                }
+            }
+            // Include user types from users table
+            try (PreparedStatement ps = connection.prepareStatement(
+                    "SELECT user_type, COUNT(*) as cnt FROM users GROUP BY user_type");
+                 ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    data.put(rs.getString("user_type"), rs.getInt("cnt"));
                 }
             }
         } catch (SQLException e) {
@@ -480,22 +617,44 @@ public class MyDataBase {
     }
 
     private void ensureDefaultAdmin() {
-        String checkSql = "SELECT COUNT(*) FROM admin_accounts";
+        String oldEmail = "admin@bladna.local";
+        String checkOldSql = "SELECT COUNT(*) FROM admin_accounts WHERE email = ?";
+        String updateSql = "UPDATE admin_accounts SET email = ?, password = ? WHERE email = ?";
+        String checkAnySql = "SELECT COUNT(*) FROM admin_accounts";
         String insertSql = "INSERT INTO admin_accounts (first_name, last_name, email, password) VALUES (?, ?, ?, ?)";
 
-        try (Connection connection = getConnection();
-             PreparedStatement checkStatement = connection.prepareStatement(checkSql);
-             ResultSet resultSet = checkStatement.executeQuery()) {
-            if (resultSet.next() && resultSet.getInt(1) > 0) {
-                return;
+        try (Connection connection = getConnection()) {
+            // 1. Check if old admin exists and update it
+            try (PreparedStatement checkOldStmt = connection.prepareStatement(checkOldSql)) {
+                checkOldStmt.setString(1, oldEmail);
+                try (ResultSet rs = checkOldStmt.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        try (PreparedStatement updateStmt = connection.prepareStatement(updateSql)) {
+                            updateStmt.setString(1, DEFAULT_ADMIN_EMAIL);
+                            updateStmt.setString(2, BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, BCrypt.gensalt()));
+                            updateStmt.setString(3, oldEmail);
+                            updateStmt.executeUpdate();
+                            return; // Migration complete
+                        }
+                    }
+                }
             }
 
-            try (PreparedStatement insertStatement = connection.prepareStatement(insertSql)) {
-                insertStatement.setString(1, DEFAULT_ADMIN_FIRST_NAME);
-                insertStatement.setString(2, DEFAULT_ADMIN_LAST_NAME);
-                insertStatement.setString(3, DEFAULT_ADMIN_EMAIL);
-                insertStatement.setString(4, BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, BCrypt.gensalt()));
-                insertStatement.executeUpdate();
+            // 2. If no old admin, check if ANY admin exists
+            try (PreparedStatement checkAnyStmt = connection.prepareStatement(checkAnySql);
+                 ResultSet rs = checkAnyStmt.executeQuery()) {
+                if (rs.next() && rs.getInt(1) > 0) {
+                    return; // At least one admin exists (maybe already updated or manually created)
+                }
+            }
+
+            // 3. If no admin exists at all, insert the new default
+            try (PreparedStatement insertStmt = connection.prepareStatement(insertSql)) {
+                insertStmt.setString(1, DEFAULT_ADMIN_FIRST_NAME);
+                insertStmt.setString(2, DEFAULT_ADMIN_LAST_NAME);
+                insertStmt.setString(3, DEFAULT_ADMIN_EMAIL);
+                insertStmt.setString(4, BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, BCrypt.gensalt()));
+                insertStmt.executeUpdate();
             }
         } catch (SQLException e) {
             throw new RuntimeException("Unable to ensure default admin.", e);

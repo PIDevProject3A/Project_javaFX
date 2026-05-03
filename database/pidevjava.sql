@@ -31,6 +31,18 @@ CREATE TABLE IF NOT EXISTS finance_manager (
     UNIQUE KEY uq_finance_manager_email (email)
 );
 
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    user_type ENUM('Collector', 'Buyer', 'Donator') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by_admin VARCHAR(150) NULL,
+    UNIQUE KEY uq_users_email (email)
+);
+
 -- Default admin account is created by the application with a BCrypt-hashed password.
 
 CREATE TABLE IF NOT EXISTS login_history (

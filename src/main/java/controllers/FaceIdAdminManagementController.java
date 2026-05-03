@@ -2,6 +2,7 @@ package controllers;
 
 import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.WebcamResolution;
+import entities.AppUser;
 import entities.User;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -13,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -27,18 +29,52 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
 
+/**
+ * Wrapper for the ComboBox to hold both admin Users and AppUsers.
+ */
+class FaceIdTarget {
+    private final User adminUser;
+    private final AppUser appUser;
+
+    FaceIdTarget(User user) {
+        this.adminUser = user;
+        this.appUser = null;
+    }
+
+    FaceIdTarget(AppUser appUser) {
+        this.adminUser = null;
+        this.appUser = appUser;
+    }
+
+    String getEmail() {
+        return adminUser != null ? adminUser.getEmail() : appUser.getEmail();
+    }
+
+    String getDisplayName() {
+        if (adminUser != null) {
+            return adminUser.getEmail() + " (" + adminUser.getAdminType() + ")";
+        } else {
+            return appUser.getEmail() + " (" + appUser.getUserType() + ")";
+        }
+    }
+
+    @Override
+    public String toString() {
+        return getDisplayName();
+    }
+}
+
 public class FaceIdAdminManagementController {
     @FXML
-    private ComboBox<User> userBox;
+    private ComboBox<FaceIdTarget> userBox;
 
     @FXML
     private Label faceIdStatusLabel;
-
-
 
     @FXML
     private Button addFaceIdBtn;
@@ -62,23 +98,61 @@ public class FaceIdAdminManagementController {
             return;
         }
 
-        List<User> users = userService.getUsersEditableByCurrentUser(UserSession.getCurrentUserRole());
-        userBox.setItems(FXCollections.observableArrayList(users));
-        userBox.getSelectionModel().selectedItemProperty()
-                .addListener((obs, oldUser, newUser) -> refreshFaceStatus(newUser));
+        // Build unified list of targets
+        List<FaceIdTarget> targets = new ArrayList<>();
+        List<User> adminUsers = userService.getUsersEditableByCurrentUser(UserSession.getCurrentUserRole());
+        for (User u : adminUsers) {
+            targets.add(new FaceIdTarget(u));
+        }
+        List<AppUser> appUsers = userService.getAllAppUsers();
+        for (AppUser au : appUsers) {
+            targets.add(new FaceIdTarget(au));
+        }
 
+        userBox.setItems(FXCollections.observableArrayList(targets));
+
+        // Custom cell factory to display nicely
+        userBox.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(FaceIdTarget item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getDisplayName());
+            }
+        });
+        userBox.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(FaceIdTarget item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getDisplayName());
+            }
+        });
+
+        userBox.getSelectionModel().selectedItemProperty()
+                .addListener((obs, oldTarget, newTarget) -> refreshFaceStatus(newTarget));
+
+        // Check if a user was pre-selected from context
         User sessionUser = UserSession.getUserToEdit();
+        AppUser sessionAppUser = UserSession.getAppUserToEdit();
+        String preselectedEmail = null;
+
         if (sessionUser != null) {
-            // Find the user in the list by email
-            users.stream()
-                .filter(u -> u.getEmail().equalsIgnoreCase(sessionUser.getEmail()))
+            preselectedEmail = sessionUser.getEmail();
+            UserSession.setUserToEdit(null);
+        } else if (sessionAppUser != null) {
+            preselectedEmail = sessionAppUser.getEmail();
+            UserSession.setAppUserToEdit(null);
+        }
+
+        if (preselectedEmail != null) {
+            String finalEmail = preselectedEmail;
+            targets.stream()
+                .filter(t -> t.getEmail().equalsIgnoreCase(finalEmail))
                 .findFirst()
-                .ifPresent(u -> {
-                    userBox.getSelectionModel().select(u);
-                    userBox.setDisable(true); // Lock selection to the context provided
+                .ifPresent(t -> {
+                    userBox.getSelectionModel().select(t);
+                    userBox.setDisable(true);
                 });
-            UserSession.setUserToEdit(null); // Clear context
-        } else if (!users.isEmpty()) {
+        } else if (!targets.isEmpty()) {
             userBox.getSelectionModel().selectFirst();
         } else {
             faceIdStatusLabel.setText("Aucun utilisateur disponible.");
@@ -88,8 +162,8 @@ public class FaceIdAdminManagementController {
 
     @FXML
     private void handleAddFaceId() {
-        User targetUser = userBox.getValue();
-        if (targetUser == null) {
+        FaceIdTarget target = userBox.getValue();
+        if (target == null) {
             setMessage("Veuillez selectionner un utilisateur.", false);
             return;
         }
@@ -99,12 +173,12 @@ public class FaceIdAdminManagementController {
             if (captured != null) {
                 String result = userService.addOrUpdateFaceIdByAdmin(
                         UserSession.getCurrentUserRole(),
-                        targetUser.getEmail(),
+                        target.getEmail(),
                         captured);
                 
                 boolean success = result.startsWith("Face ID ajoute") || result.startsWith("Face ID mis a jour");
                 setMessage(result, success);
-                refreshFaceStatus(targetUser);
+                refreshFaceStatus(target);
 
                 // Clean up capture
                 try {
@@ -118,24 +192,22 @@ public class FaceIdAdminManagementController {
 
     @FXML
     private void handleDeleteFaceId() {
-        User targetUser = userBox.getValue();
-        if (targetUser == null) {
+        FaceIdTarget target = userBox.getValue();
+        if (target == null) {
             setMessage("Veuillez selectionner un utilisateur.", false);
             return;
         }
 
-        String result = userService.deleteFaceIdByAdmin(UserSession.getCurrentUserRole(), targetUser.getEmail());
+        String result = userService.deleteFaceIdByAdmin(UserSession.getCurrentUserRole(), target.getEmail());
         boolean success = result.startsWith("Face ID supprime");
         setMessage(result, success);
-        refreshFaceStatus(targetUser);
+        refreshFaceStatus(target);
     }
 
     @FXML
     private void goBack() {
-        SceneNavigator.navigate(userBox, "/Dashboard.fxml", message -> setMessage(message, false));
+        SceneNavigator.navigate(userBox, "/AdminDashboard.fxml", message -> setMessage(message, false));
     }
-
-
 
     /**
      * Ouvre une fenêtre modale avec le preview webcam en direct.
@@ -254,8 +326,8 @@ public class FaceIdAdminManagementController {
         return capturedPath[0];
     }
 
-    private void refreshFaceStatus(User user) {
-        if (user == null) {
+    private void refreshFaceStatus(FaceIdTarget target) {
+        if (target == null) {
             faceIdStatusLabel.setText("Aucun utilisateur selectionne.");
             addFaceIdBtn.setVisible(false);
             addFaceIdBtn.setManaged(false);
@@ -264,9 +336,9 @@ public class FaceIdAdminManagementController {
             return;
         }
 
-        boolean hasFaceId = userService.hasFaceId(user.getEmail());
+        boolean hasFaceId = userService.hasFaceId(target.getEmail());
         String status = hasFaceId ? "ACTIVE" : "NON CONFIGURE";
-        faceIdStatusLabel.setText("Face ID: " + status + " | " + user.getEmail() + " (" + user.getAdminType() + ")");
+        faceIdStatusLabel.setText("Face ID: " + status + " | " + target.getDisplayName());
 
         // Toggle buttons visibility
         addFaceIdBtn.setVisible(!hasFaceId);

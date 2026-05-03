@@ -1,9 +1,12 @@
 package controllers;
 
+import entities.AppUser;
 import entities.User;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -54,33 +57,61 @@ public class UpdateUserController {
     @FXML
     private Label subtitleLabel;
 
+    @FXML
+    private ComboBox<String> userTypeBox;
+
     private final UserService userService = new UserService();
-    private User selectedUser;
+    private User selectedAdminUser;
+    private AppUser selectedAppUser;
+    private boolean isEditingAppUser = false;
 
     @FXML
     private void initialize() {
         messageLabel.visibleProperty().bind(messageLabel.textProperty().isNotEmpty());
         messageLabel.managedProperty().bind(messageLabel.visibleProperty());
-        selectedUser = UserSession.getUserToEdit();
-        if (selectedUser == null) {
+
+        selectedAdminUser = UserSession.getUserToEdit();
+        selectedAppUser = UserSession.getAppUserToEdit();
+
+        if (selectedAdminUser == null && selectedAppUser == null) {
             setMessage("Error: No user selected.", false);
             setEditingEnabled(false);
             return;
         }
 
-        subtitleLabel.setText("Editing user: " + selectedUser.getEmail());
+        isEditingAppUser = (selectedAppUser != null);
+
+        if (isEditingAppUser) {
+            subtitleLabel.setText("Editing user: " + selectedAppUser.getEmail());
+            // Show user type selector for AppUsers
+            userTypeBox.setVisible(true);
+            userTypeBox.setManaged(true);
+            userTypeBox.setItems(FXCollections.observableArrayList("Collector", "Buyer", "Donator"));
+            userTypeBox.setValue(selectedAppUser.getUserType().name());
+        } else {
+            subtitleLabel.setText("Editing user: " + selectedAdminUser.getEmail());
+            // Hide user type selector for admin users
+            userTypeBox.setVisible(false);
+            userTypeBox.setManaged(false);
+        }
 
         setupPasswordVisibilityToggle();
         setupLiveValidation();
-        
         loadUserData();
     }
 
     private void loadUserData() {
-        firstNameField.setText(selectedUser.getFirstName());
-        lastNameField.setText(selectedUser.getLastName());
-        emailField.setText(selectedUser.getEmail());
-        storedPasswordField.setText(resolveStoredPasswordForAdmin(selectedUser));
+        if (isEditingAppUser) {
+            firstNameField.setText(selectedAppUser.getFirstName());
+            lastNameField.setText(selectedAppUser.getLastName());
+            emailField.setText(selectedAppUser.getEmail());
+            storedPasswordField.setText(resolveStoredPassword(selectedAppUser.getPasswordHash()));
+        } else {
+            firstNameField.setText(selectedAdminUser.getFirstName());
+            lastNameField.setText(selectedAdminUser.getLastName());
+            emailField.setText(selectedAdminUser.getEmail());
+            storedPasswordField.setText(resolveStoredPassword(selectedAdminUser.getPasswordHash()));
+        }
         newPasswordField.clear();
         showPasswordCheckBox.setSelected(false);
         updateValidationState();
@@ -88,27 +119,37 @@ public class UpdateUserController {
 
     @FXML
     private void handleSave() {
-        if (selectedUser == null) return;
-        
         if (!isFormValid()) {
             setMessage("Please fix invalid fields before submitting.", false);
             return;
         }
 
-        String result = userService.updateCredentialsByAdmin(
-                UserSession.getCurrentUserRole(),
-                selectedUser.getEmail(),
-                selectedUser.getAdminType(),
-                firstNameField.getText(),
-                lastNameField.getText(),
-                emailField.getText(),
-                newPasswordField.getText()
-        );
-        
+        String result;
+        if (isEditingAppUser) {
+            AppUser.UserType newType = AppUser.UserType.valueOf(userTypeBox.getValue());
+            result = userService.updateAppUserByAdmin(
+                    UserSession.getCurrentUserRole(),
+                    selectedAppUser.getEmail(),
+                    firstNameField.getText(),
+                    lastNameField.getText(),
+                    emailField.getText(),
+                    newPasswordField.getText(),
+                    newType
+            );
+        } else {
+            result = userService.updateCredentialsByAdmin(
+                    UserSession.getCurrentUserRole(),
+                    selectedAdminUser.getEmail(),
+                    selectedAdminUser.getAdminType(),
+                    firstNameField.getText(),
+                    lastNameField.getText(),
+                    emailField.getText(),
+                    newPasswordField.getText()
+            );
+        }
+
         if ("SUCCESS".equals(result)) {
             setMessage("Profile updated successfully.", true);
-            // Optionally clear the session user to avoid leaks, but we can also just go back
-            // UserSession.setUserToEdit(null);
             goBack();
         } else {
             setMessage(result, false);
@@ -118,6 +159,7 @@ public class UpdateUserController {
     @FXML
     private void goBack() {
         UserSession.setUserToEdit(null);
+        UserSession.setAppUserToEdit(null);
         switchScene("/AdminDashboard.fxml");
     }
 
@@ -196,12 +238,10 @@ public class UpdateUserController {
         messageLabel.setText(message);
     }
 
-    private String resolveStoredPasswordForAdmin(User user) {
-        if (user == null) return "";
-        String storedPassword = user.getPasswordHash();
-        if (isBlank(storedPassword)) return "";
-        if (isBcryptHash(storedPassword)) return "[encrypted bcrypt hash - cannot decrypt]";
-        return storedPassword;
+    private String resolveStoredPassword(String passwordHash) {
+        if (isBlank(passwordHash)) return "";
+        if (isBcryptHash(passwordHash)) return "[encrypted bcrypt hash - cannot decrypt]";
+        return passwordHash;
     }
 
     private boolean isBcryptHash(String value) {
