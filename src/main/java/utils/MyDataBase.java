@@ -119,68 +119,6 @@ public class MyDataBase {
             try {
                 statement.execute("ALTER TABLE prevue_collection ADD COLUMN collector_id INT DEFAULT 1");
             } catch (SQLException ignored) {}
-
-            // Recycling Buyers Table
-            statement.execute("""
-            CREATE TABLE IF NOT EXISTS recycling_buyers (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                buyer_name VARCHAR(120) NOT NULL,
-                recycling_type VARCHAR(50) NOT NULL,
-                address VARCHAR(200) NOT NULL,
-                city VARCHAR(100) NOT NULL,
-                latitude DECIMAL(9,6) NOT NULL,
-                longitude DECIMAL(9,6) NOT NULL,
-                contact_phone VARCHAR(40) NULL,
-                status VARCHAR(40) NOT NULL,
-                notes TEXT NULL,
-                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                CONSTRAINT chk_buyer_latitude_range CHECK (latitude >= -90 AND latitude <= 90),
-                CONSTRAINT chk_buyer_longitude_range CHECK (longitude >= -180 AND longitude <= 180)
-            )
-            """);
-
-            // Donations Table
-            statement.execute("""
-            CREATE TABLE IF NOT EXISTS donations (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                donor_name VARCHAR(120) NOT NULL,
-                donation_type VARCHAR(50) NOT NULL,
-                amount DECIMAL(12,3) NOT NULL DEFAULT 0,
-                payment_method VARCHAR(60) NOT NULL,
-                donation_date DATE NOT NULL,
-                status VARCHAR(30) NOT NULL,
-                notes TEXT NULL,
-                tree_count INT NULL,
-                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                CONSTRAINT chk_amount_non_negative CHECK (amount >= 0),
-                CONSTRAINT chk_tree_count_non_negative CHECK (tree_count IS NULL OR tree_count >= 0)
-            )
-            """);
-
-            // Transactions Table
-            statement.execute("""
-            CREATE TABLE IF NOT EXISTS transactions (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                reference_code VARCHAR(40) NOT NULL,
-                transaction_type VARCHAR(30) NOT NULL,
-                source_type VARCHAR(50) NOT NULL,
-                purpose VARCHAR(80) NOT NULL,
-                amount DECIMAL(12,3) NOT NULL,
-                impact_unit VARCHAR(30) NOT NULL,
-                impact_quantity INT NULL,
-                transaction_date DATE NOT NULL,
-                status VARCHAR(30) NOT NULL,
-                notes TEXT NULL,
-                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                UNIQUE KEY uk_transactions_reference_code (reference_code),
-                CONSTRAINT chk_txn_amount_positive CHECK (amount > 0),
-                CONSTRAINT chk_txn_impact_qty_non_negative CHECK (impact_quantity IS NULL OR impact_quantity >= 0)
-            )
-            """);
-
         } catch (SQLException e) {
             throw new RuntimeException("Unable to ensure tables exist.", e);
         }
@@ -804,7 +742,7 @@ public class MyDataBase {
         }
     }
 
-    public Connection getConnection() throws SQLException {
+    private Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USERNAME, PASSWORD);
     }
 
