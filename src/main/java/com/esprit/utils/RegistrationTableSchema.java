@@ -162,5 +162,17 @@ public final class RegistrationTableSchema {
     public boolean hasRegistrationDate() {
         return has("registration_date");
     }
+
+    public String isPaidColumn() {
+        if (has("is_paid")) return "is_paid";
+        if (has("ispaid")) return "isPaid";
+        return null;
+    }
+
+    public String paymentDateColumn() {
+        if (has("payment_date")) return "payment_date";
+        if (has("paymentdate")) return "paymentDate";
+        return null;
+    }
 }
 

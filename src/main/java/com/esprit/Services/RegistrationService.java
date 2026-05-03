@@ -136,8 +136,9 @@ public class RegistrationService implements ICrud<Registration> {
             vals.add(r.getBudget());
         }
 
-        if (s.has("is_paid")) {
-            cols.add("is_paid");
+        String isPaidCol = s.isPaidColumn();
+        if (isPaidCol != null) {
+            cols.add(isPaidCol);
             vals.add(r.isPaid() ? 1 : 0);
         }
 
@@ -410,13 +411,15 @@ public class RegistrationService implements ICrud<Registration> {
             vals.add(r.getBudget());
         }
 
-        if (s.has("is_paid")) {
-            sets.add("is_paid = ?");
+        String isPaidCol = s.isPaidColumn();
+        if (isPaidCol != null) {
+            sets.add(isPaidCol + " = ?");
             vals.add(r.isPaid() ? 1 : 0);
         }
 
-        if (s.has("payment_date") && r.getPaymentDate() != null) {
-            sets.add("payment_date = ?");
+        String pDateCol = s.paymentDateColumn();
+        if (pDateCol != null && r.getPaymentDate() != null) {
+            sets.add(pDateCol + " = ?");
             vals.add(Timestamp.valueOf(r.getPaymentDate()));
         }
 
@@ -450,12 +453,14 @@ public class RegistrationService implements ICrud<Registration> {
 
     // ========================= VÉRIFIER SI LE BUDGET EST PAYÉ =========================
     public boolean isBudgetPaid(int registrationId) throws SQLException {
-        String sql = "SELECT is_paid FROM registrations WHERE id = ?";
+        String isPaidCol = schema().isPaidColumn();
+        if (isPaidCol == null) return false;
+        String sql = "SELECT " + isPaidCol + " FROM registrations WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, registrationId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getBoolean("is_paid");
+                    return rs.getBoolean(1);
                 }
             }
         }
@@ -466,11 +471,13 @@ public class RegistrationService implements ICrud<Registration> {
     public void effectuerPaiement(int registrationId) throws SQLException {
         RegistrationTableSchema s = schema();
         List<String> sets = new ArrayList<>();
-        if (s.has("is_paid")) {
-            sets.add("is_paid = TRUE");
+        String isPaidCol = s.isPaidColumn();
+        if (isPaidCol != null) {
+            sets.add(isPaidCol + " = TRUE");
         }
-        if (s.has("payment_date")) {
-            sets.add("payment_date = NOW()");
+        String pDateCol = s.paymentDateColumn();
+        if (pDateCol != null) {
+            sets.add(pDateCol + " = NOW()");
         }
         if (s.has("payment_status")) {
             sets.add("payment_status = 'PAID'");
@@ -529,13 +536,26 @@ public class RegistrationService implements ICrud<Registration> {
                     int maxPlaces = rs.getInt("maxPlaces");
                     if (maxPlaces <= 0) return true; // Places illimitées
 
-                    // Compter les inscrits payés
-                    String countSql = "SELECT COUNT(*) FROM registrations WHERE event_id = ? AND is_paid = TRUE";
-                    try (PreparedStatement ps2 = conn.prepareStatement(countSql)) {
-                        ps2.setInt(1, eventId);
-                        try (ResultSet rs2 = ps2.executeQuery()) {
-                            if (rs2.next()) {
-                                return rs2.getInt(1) < maxPlaces;
+                    String isPaidCol = schema().isPaidColumn();
+                    if (isPaidCol == null) {
+                        String countSql = "SELECT COUNT(*) FROM registrations WHERE event_id = ?";
+                        try (PreparedStatement ps2 = conn.prepareStatement(countSql)) {
+                            ps2.setInt(1, eventId);
+                            try (ResultSet rs2 = ps2.executeQuery()) {
+                                if (rs2.next()) {
+                                    return rs2.getInt(1) < maxPlaces;
+                                }
+                            }
+                        }
+                    } else {
+                        // Compter les inscrits payés
+                        String countSql = "SELECT COUNT(*) FROM registrations WHERE event_id = ? AND " + isPaidCol + " = TRUE";
+                        try (PreparedStatement ps2 = conn.prepareStatement(countSql)) {
+                            ps2.setInt(1, eventId);
+                            try (ResultSet rs2 = ps2.executeQuery()) {
+                                if (rs2.next()) {
+                                    return rs2.getInt(1) < maxPlaces;
+                                }
                             }
                         }
                     }
@@ -622,8 +642,8 @@ public class RegistrationService implements ICrud<Registration> {
                 case "reg_email" -> r.setEmail(rs.getString(i));
                 case "amount" -> r.setAmount(rs.getDouble(i));
                 case "budget" -> r.setBudget(rs.getDouble(i));
-                case "is_paid" -> r.setPaid(rs.getBoolean(i));
-                case "payment_date" -> {
+                case "is_paid", "ispaid" -> r.setPaid(rs.getBoolean(i));
+                case "payment_date", "paymentdate" -> {
                     Timestamp ts = rs.getTimestamp(i);
                     if (ts != null) {
                         r.setPaymentDate(ts.toLocalDateTime());
