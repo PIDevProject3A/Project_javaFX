@@ -30,7 +30,6 @@ public final class SceneNavigator {
 
             if (scene == null) {
                 stage.setScene(new Scene(newRoot));
-                System.out.println("[Navigation] Redirected to: " + fxmlPath);
                 return;
             }
 
@@ -53,13 +52,10 @@ public final class SceneNavigator {
                 slideIn.setToX(0);
 
                 new ParallelTransition(fadeIn, slideIn).play();
-                System.out.println("[Navigation] Redirected to: " + fxmlPath);
             });
 
             fadeOut.play();
         } catch (IOException e) {
-            System.err.println("[Navigation Error] Failed to load FXML: " + fxmlPath);
-            e.printStackTrace();
             if (errorHandler != null) {
                 errorHandler.accept("Unable to open page.");
             }
