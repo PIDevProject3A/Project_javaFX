@@ -218,8 +218,8 @@ public class AdminDashboardController {
     }
 
     @FXML
-    private void goToEvents() {
-        switchScene("/com/esprit/EventAdmin.fxml");
+    private void goToEventRegistrations() {
+        switchScene("/com/esprit/RegistrationList.fxml");
     }
 
     @FXML

@@ -33,6 +33,11 @@
                     <Label text="&#x1F465;" styleClass="icon-label"/>
                 </graphic>
             </Button>
+            <Button fx:id="eventRegistrationButton" text="Event Registration" onAction="#goToEventRegistrations" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F4CB;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
             <Button fx:id="settingsButton" text="Settings" onAction="#goToSettings" styleClass="nav-button">
                 <graphic>
                     <Label text="&#x2699;" styleClass="icon-label"/>

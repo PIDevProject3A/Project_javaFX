@@ -39,6 +39,8 @@ public class DashboardController {
     @FXML
     private Button manageAccountsButton;
     @FXML
+    private Button eventRegistrationButton;
+    @FXML
     private Button settingsButton;
 
     @FXML
@@ -58,6 +60,10 @@ public class DashboardController {
         // Sidebar visibility
         manageAccountsButton.setVisible(isAdmin);
         manageAccountsButton.setManaged(isAdmin);
+        if (eventRegistrationButton != null) {
+            eventRegistrationButton.setVisible(isAdmin);
+            eventRegistrationButton.setManaged(isAdmin);
+        }
         // User said "don't show settings for other roles than admin"
         settingsButton.setVisible(isAdmin);
         settingsButton.setManaged(isAdmin);
@@ -129,6 +135,14 @@ public class DashboardController {
             return;
         }
         switchScene("/AdminDashboard.fxml");
+    }
+
+    @FXML
+    private void goToEventRegistrations() {
+        if (UserSession.getCurrentUserRole() != User.AdminType.ADMIN_ACCOUNT) {
+            return;
+        }
+        switchScene("/com/esprit/RegistrationList.fxml");
     }
 
     @FXML
