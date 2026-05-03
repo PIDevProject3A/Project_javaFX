@@ -23,9 +23,14 @@
             
             <Region prefHeight="20"/>
             
-            <Button text="Dashboard" styleClass="nav-button, nav-button-active">
+            <Button fx:id="dashboardNavButton" text="Dashboard" onAction="#showDashboardView" styleClass="nav-button, nav-button-active">
                 <graphic>
                     <Label text="&#x1F3E0;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button fx:id="communityNavButton" text="Community" onAction="#showCommunityView" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F4AC;" styleClass="icon-label"/>
                 </graphic>
             </Button>
             <Button fx:id="manageAccountsButton" text="Manage Accounts" onAction="#goToManageAccounts" styleClass="nav-button">
@@ -51,7 +56,7 @@
 
     <center>
         <StackPane styleClass="content-area">
-            <VBox spacing="20">
+            <VBox fx:id="mainDashboardContent" spacing="20">
                 <!-- Header -->
                 <VBox>
                     <Label text="Executive Overview" styleClass="title"/>
@@ -115,6 +120,9 @@
                     </VBox>
                 </GridPane>
             </VBox>
+
+            <!-- Full screen forum container -->
+            <VBox fx:id="forumContainer" visible="false" managed="false" VBox.vgrow="ALWAYS" />
         </StackPane>
     </center>
 </BorderPane>

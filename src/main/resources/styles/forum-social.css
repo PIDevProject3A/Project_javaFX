@@ -6,10 +6,10 @@
 }
 
 .social-hero {
-    -fx-background-color: #1E1B4B; /* Very Dark Indigo */
+    -fx-background-color: linear-gradient(to right, #2E7D32, #1B5E20);
     -fx-background-radius: 12;
     -fx-padding: 24 32;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 15, 0, 0, 5);
+    -fx-effect: dropshadow(gaussian, rgba(46, 125, 50, 0.3), 15, 0, 0, 5);
 }
 
 .social-hero-emoji {
@@ -24,7 +24,7 @@
 }
 
 .social-hero-sub, .social-hero-meta {
-    -fx-text-fill: #A5B4FC; /* Indigo 300 */
+    -fx-text-fill: #A5D6A7; /* Indigo 300 */
     -fx-font-size: 14px;
     -fx-wrap-text: true;
 }
@@ -71,8 +71,8 @@
 }
 
 .table-feed .table-row-cell:selected {
-    -fx-background-color: #EEF2FF; /* Indigo 50 */
-    -fx-border-color: #C7D2FE; /* Indigo 200 */
+    -fx-background-color: #F1F8E9; /* Indigo 50 */
+    -fx-border-color: #cce2c7; /* Indigo 200 */
 }
 
 .table-feed .table-cell {
@@ -81,7 +81,7 @@
 }
 
 .table-feed .table-view:focused .table-row-cell:selected {
-    -fx-background-color: #E0E7FF; /* Indigo 100 */
+    -fx-background-color: #d8f0d9; /* Indigo 100 */
 }
 
 /* Avatar chip */
@@ -91,7 +91,7 @@
     -fx-max-width: 40px;
     -fx-max-height: 40px;
     -fx-alignment: center;
-    -fx-background-color: #4F46E5; /* Indigo 600 */
+    -fx-background-color: #2E7D32; /* Indigo 600 */
     -fx-background-radius: 50%;
     -fx-text-fill: #FFFFFF;
     -fx-font-size: 16px;

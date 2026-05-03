@@ -6,7 +6,7 @@
 }
 
 .social-post-topbar {
-    -fx-background-color: #1E1B4B; /* Very Dark Indigo */
+    -fx-background-color: #1B5E20; /* Very Dark Indigo */
     -fx-padding: 16 24;
     -fx-alignment: center-left;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 4);
@@ -72,7 +72,7 @@
     -fx-max-width: 48px;
     -fx-max-height: 48px;
     -fx-alignment: center;
-    -fx-background-color: #4F46E5; /* Indigo 600 */
+    -fx-background-color: #2E7D32; /* Indigo 600 */
     -fx-background-radius: 50%;
 }
 
@@ -149,7 +149,7 @@
 }
 
 .sm-btn-foot-primary {
-    -fx-background-color: #4F46E5;
+    -fx-background-color: #2E7D32;
     -fx-text-fill: #FFFFFF;
     -fx-font-weight: 700;
     -fx-font-size: 14px;
@@ -160,12 +160,12 @@
 }
 
 .sm-btn-foot-primary:hover {
-    -fx-background-color: #4338CA;
+    -fx-background-color: #256b2a;
 }
 
 /* Social Hero V2 */
 .social-hero-v2 {
-    -fx-background-color: #1E1B4B;
+    -fx-background-color: #1B5E20;
     -fx-background-radius: 12;
     -fx-padding: 24 32;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 15, 0, 0, 5);

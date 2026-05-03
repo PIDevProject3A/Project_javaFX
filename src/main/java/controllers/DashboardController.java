@@ -7,6 +7,9 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.Node;
+import javafx.fxml.FXMLLoader;
 import services.DashboardService;
 import utils.SceneNavigator;
 import utils.UserSession;
@@ -47,6 +50,20 @@ public class DashboardController {
     private PieChart roleDistributionChart;
     @FXML
     private BarChart<String, Number> dailyActivityChart;
+
+    @FXML
+    private VBox mainDashboardContent;
+    
+    @FXML
+    private VBox forumContainer;
+    
+    @FXML
+    private Button dashboardNavButton;
+    
+    @FXML
+    private Button communityNavButton;
+
+    private boolean isForumLoaded = false;
 
     private final DashboardService dashboardService = new DashboardService();
 
@@ -149,6 +166,47 @@ public class DashboardController {
         }
         UserSession.clear();
         switchScene("/Login.fxml");
+    }
+
+    @FXML
+    private void showDashboardView() {
+        mainDashboardContent.setVisible(true);
+        mainDashboardContent.setManaged(true);
+        forumContainer.setVisible(false);
+        forumContainer.setManaged(false);
+
+        if (!dashboardNavButton.getStyleClass().contains("nav-button-active")) {
+            dashboardNavButton.getStyleClass().add("nav-button-active");
+        }
+        communityNavButton.getStyleClass().remove("nav-button-active");
+    }
+
+    @FXML
+    private void showCommunityView() {
+        mainDashboardContent.setVisible(false);
+        mainDashboardContent.setManaged(false);
+        forumContainer.setVisible(true);
+        forumContainer.setManaged(true);
+
+        dashboardNavButton.getStyleClass().remove("nav-button-active");
+        if (!communityNavButton.getStyleClass().contains("nav-button-active")) {
+            communityNavButton.getStyleClass().add("nav-button-active");
+        }
+
+        if (!isForumLoaded) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherTopic.fxml"));
+                Node forumNode = loader.load();
+                
+                // Allow it to grow
+                VBox.setVgrow(forumNode, javafx.scene.layout.Priority.ALWAYS);
+                
+                forumContainer.getChildren().add(forumNode);
+                isForumLoaded = true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void switchScene(String fxml) {

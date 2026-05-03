@@ -8,7 +8,7 @@
 .dialog-accent-bar {
     -fx-min-height: 5;
     -fx-max-height: 5;
-    -fx-background-color: #4F46E5; /* Indigo 600 */
+    -fx-background-color: #2E7D32; /* Indigo 600 */
 }
 
 .dialog-scroll {
@@ -100,7 +100,7 @@
 }
 
 .text-field-social:focused, .text-area-social:focused, .combo-social:focused {
-    -fx-border-color: #4F46E5;
+    -fx-border-color: #2E7D32;
     -fx-background-color: #FFFFFF;
     -fx-border-width: 1.5;
 }
@@ -128,7 +128,7 @@
 }
 
 .btn-primary {
-    -fx-background-color: #4F46E5;
+    -fx-background-color: #2E7D32;
     -fx-text-fill: #FFFFFF;
     -fx-font-weight: 700;
     -fx-font-size: 14px;
@@ -139,7 +139,7 @@
 }
 
 .btn-primary:hover {
-    -fx-background-color: #4338CA;
+    -fx-background-color: #256b2a;
 }
 
 .btn-secondary {

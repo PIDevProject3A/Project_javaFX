@@ -71,20 +71,9 @@ public class LoginController {
 
     @FXML
     private void handleLogin() {
-        if (!RecaptchaConfig.isConfigured()) {
-            showError("reCAPTCHA n'est pas configure.");
-            return;
-        }
-
-        String recaptchaToken = readTokenFromWidget();
-        if (recaptchaToken.isBlank()) {
-            showError("Veuillez valider le reCAPTCHA avant de vous connecter.");
-            return;
-        }
-
-        if (!recaptchaService.verifyToken(recaptchaToken)) {
-            showError("Verification reCAPTCHA echouee. Reessayez.");
-            resetCaptcha();
+        if (emailField.getText() == null || emailField.getText().trim().isEmpty() ||
+            passwordField.getText() == null || passwordField.getText().trim().isEmpty()) {
+            showError("Veuillez remplir tous les champs avant de vous connecter.");
             return;
         }
 

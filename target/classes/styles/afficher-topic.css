@@ -9,10 +9,10 @@
 
 /* ========== HERO HEADER ========== */
 .topics-hero {
-    -fx-background-color: #1E1B4B; /* Very Dark Indigo */
+    -fx-background-color: linear-gradient(to right, #2E7D32, #1B5E20);
     -fx-background-radius: 16;
     -fx-padding: 24 32;
-    -fx-effect: dropshadow(gaussian, rgba(30, 27, 75, 0.15), 20, 0.2, 0, 8);
+    -fx-effect: dropshadow(gaussian, rgba(46, 125, 50, 0.3), 20, 0.2, 0, 8);
     -fx-max-width: Infinity;
 }
 
@@ -29,25 +29,26 @@
 }
 
 .topics-hero-sub {
-    -fx-text-fill: #A5B4FC; /* Indigo 300 */
+    -fx-text-fill: #A5D6A7; /* Indigo 300 */
     -fx-font-size: 14px;
     -fx-wrap-text: true;
     -fx-line-spacing: 4px;
 }
 
 /* ========== MAIN BUTTONS ========== */
-.btn-nav-accent { /* New Topic Button */
-    -fx-background-color: #4F46E5; /* Indigo 600 */
-    -fx-text-fill: #FFFFFF;
+.btn-nav-accent {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #2E7D32;
     -fx-font-weight: bold;
     -fx-padding: 10 24;
     -fx-background-radius: 8;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(79, 70, 229, 0.3), 10, 0.2, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0.2, 0, 4);
 }
 
 .btn-nav-accent:hover {
-    -fx-background-color: #4338CA; /* Indigo 700 */
+    -fx-background-color: #F1F8E9;
+    -fx-text-fill: #1B5E20;
 }
 
 .btn-refresh {
@@ -120,7 +121,7 @@
 }
 
 .search-input:focused {
-    -fx-border-color: #4F46E5;
+    -fx-border-color: #2E7D32;
     -fx-background-color: #FFFFFF;
     -fx-border-width: 1.5;
 }
@@ -158,8 +159,8 @@
 }
 
 .search-count-badge {
-    -fx-background-color: #EEF2FF; /* Light Indigo */
-    -fx-text-fill: #4F46E5;
+    -fx-background-color: #E8F5E9;
+    -fx-text-fill: #2E7D32;
     -fx-font-size: 13px;
     -fx-font-weight: bold;
     -fx-padding: 8 16;
@@ -302,7 +303,7 @@
 }
 
 .btn-reaction-like { -fx-text-fill: #475569; }
-.btn-reaction-like:hover { -fx-background-color: #EEF2FF; -fx-text-fill: #4F46E5; }
+.btn-reaction-like:hover { -fx-background-color: #F1F8E9; -fx-text-fill: #2E7D32; }
 
 .btn-reaction-dislike { -fx-text-fill: #475569; }
 .btn-reaction-dislike:hover { -fx-background-color: #FEF2F2; -fx-text-fill: #DC2626; }

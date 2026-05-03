@@ -10,7 +10,7 @@ import java.util.*;
 
 public class MyDataBase {
     private static final MyDataBase INSTANCE = new MyDataBase();
-    private static final String URL = "jdbc:mysql://localhost:3306/pidevjava?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+    private static final String URL = "jdbc:mysql://localhost:3306/bledna?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     private static final String USERNAME = "root";
     private static final String PASSWORD = "";
 
@@ -28,6 +28,30 @@ public class MyDataBase {
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement()) {
             
+            statement.execute("CREATE TABLE IF NOT EXISTS admin_accounts (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY," +
+                    "first_name VARCHAR(100)," +
+                    "last_name VARCHAR(100)," +
+                    "email VARCHAR(150) UNIQUE NOT NULL," +
+                    "password VARCHAR(255) NOT NULL" +
+                    ")");
+
+            statement.execute("CREATE TABLE IF NOT EXISTS event_manager (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY," +
+                    "first_name VARCHAR(100)," +
+                    "last_name VARCHAR(100)," +
+                    "email VARCHAR(150) UNIQUE NOT NULL," +
+                    "password VARCHAR(255) NOT NULL" +
+                    ")");
+
+            statement.execute("CREATE TABLE IF NOT EXISTS finance_manager (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY," +
+                    "first_name VARCHAR(100)," +
+                    "last_name VARCHAR(100)," +
+                    "email VARCHAR(150) UNIQUE NOT NULL," +
+                    "password VARCHAR(255) NOT NULL" +
+                    ")");
+
             // Login History Table
             statement.execute("CREATE TABLE IF NOT EXISTS login_history (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
