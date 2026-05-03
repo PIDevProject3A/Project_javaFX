@@ -42,7 +42,9 @@ public class RegistrationService implements ICrud<Registration> {
                 "ALTER TABLE registrations ADD COLUMN first_name VARCHAR(80) NOT NULL DEFAULT ''",
                 "ALTER TABLE registrations ADD COLUMN last_name VARCHAR(80) NOT NULL DEFAULT ''",
                 "ALTER TABLE registrations ADD COLUMN email VARCHAR(180) NULL",
-                "ALTER TABLE registrations ADD COLUMN registration_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"
+                "ALTER TABLE registrations ADD COLUMN registration_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP",
+                "ALTER TABLE registrations ADD COLUMN checked_in TINYINT(1) NOT NULL DEFAULT 0",
+                "ALTER TABLE registrations ADD COLUMN check_in_time DATETIME NULL"
         };
         for (String sql : ddl) {
             try (Statement st = conn.createStatement()) {
@@ -713,6 +715,119 @@ public class RegistrationService implements ICrud<Registration> {
         ps.executeUpdate();
         }
     }
+
+    public Map<Integer, Integer> loadRegistrantCountsByEvent() throws SQLException {
+        RegistrationTableSchema s = schema();
+        Map<Integer, Integer> map = new HashMap<>();
+        String where = s.hasStatus() ? " WHERE r.status IN ('REGISTERED', 'PAID', 'PENDING_PAYMENT') " : "";
+        String sql = "SELECT r.event_id, COUNT(*) AS cnt FROM registrations r " + where + " GROUP BY r.event_id";
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                map.put(rs.getInt("event_id"), rs.getInt("cnt"));
+            }
+        }
+        return map;
+    }
+
+    public List<RegistrantExportRow> listRegistrantsForEvent(int eventId) throws SQLException {
+        RegistrationTableSchema s = schema();
+        String fCol = s.firstNameColumn();
+        String lCol = s.lastNameColumn();
+        String pCol = s.participantNameColumn();
+        String eCol = s.emailColumn();
+
+        StringBuilder sql = new StringBuilder("SELECT ");
+        List<String> cols = new ArrayList<>();
+        cols.add("r.id AS registration_id");
+        cols.add((fCol != null ? "r." + fCol : "''") + " AS first_name");
+        cols.add((lCol != null ? "r." + lCol : "''") + " AS last_name");
+        cols.add((pCol != null ? "r." + pCol : "''") + " AS participant_name");
+        cols.add((eCol != null ? "r." + eCol : "''") + " AS email");
+        cols.add((s.has("checked_in") ? "r.checked_in" : "0") + " AS checked_in");
+        sql.append(String.join(", ", cols));
+        sql.append(" FROM registrations r WHERE r.event_id = ? ");
+        if (s.hasStatus()) {
+            sql.append(" AND r.status IN ('REGISTERED', 'PAID', 'PENDING_PAYMENT') ");
+        }
+        sql.append(" ORDER BY r.id ASC ");
+
+        List<RegistrantExportRow> out = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            ps.setInt(1, eventId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int registrationId = rs.getInt("registration_id");
+                    String first = safe(rs.getString("first_name"));
+                    String last = safe(rs.getString("last_name"));
+                    String participant = safe(rs.getString("participant_name"));
+                    String email = safe(rs.getString("email"));
+                    boolean checkedIn = rs.getInt("checked_in") == 1;
+
+                    if ((first.isBlank() || last.isBlank()) && !participant.isBlank()) {
+                        String[] parts = participant.trim().split("\\s+", 2);
+                        if (first.isBlank()) first = parts[0];
+                        if (last.isBlank()) last = parts.length > 1 ? parts[1] : "";
+                    }
+                    out.add(new RegistrantExportRow(registrationId, first, last, email, checkedIn));
+                }
+            }
+        }
+        return out;
+    }
+
+    public boolean markCheckedInFromReceiptCode(int eventId, String rawScan) throws SQLException {
+        String code = extractReceiptCode(rawScan);
+        if (code == null || code.isBlank()) {
+            return false;
+        }
+        Integer registrationId = parseRegistrationId(code);
+        if (registrationId == null) {
+            return false;
+        }
+        String sql = "UPDATE registrations SET checked_in = 1, check_in_time = NOW() WHERE id = ? AND event_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, registrationId);
+            ps.setInt(2, eventId);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    private static String extractReceiptCode(String raw) {
+        if (raw == null) {
+            return null;
+        }
+        String t = raw.trim();
+        if (t.isEmpty()) {
+            return null;
+        }
+        if (t.contains("receipt=")) {
+            for (String part : t.split("\\|")) {
+                String p = part.trim();
+                if (p.startsWith("receipt=")) {
+                    return p.substring("receipt=".length()).trim();
+                }
+            }
+        }
+        return t;
+    }
+
+    private static Integer parseRegistrationId(String code) {
+        String prefix = "BLD-REG-";
+        if (!code.toUpperCase(Locale.ROOT).startsWith(prefix)) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(code.substring(prefix.length()).trim());
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private static String safe(String s) {
+        return s == null ? "" : s.trim();
+    }
+
+    public record RegistrantExportRow(int registrationId, String firstName, String lastName, String email, boolean checkedIn) {}
 
     /**
      * Retourne les notifications "événement demain" pour l'utilisateur.
