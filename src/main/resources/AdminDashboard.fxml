@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AdminDashboardController" stylesheets="@style.css">
+    <left>
+        <VBox styleClass="sidebar">
+            <Label text="BLADNA" styleClass="sidebar-title"/>
+            <Label text="Admin Dashboard" styleClass="sidebar-subtitle"/>
+            
+            <Region prefHeight="20"/>
+            
+            <Button text="Dashboard" onAction="#goToOverview" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F3E0;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button text="Manage Accounts" onAction="#refreshTable" styleClass="nav-button, nav-button-active">
+                <graphic>
+                    <Label text="&#x1F465;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button text="Settings" onAction="#goToSettings" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x2699;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            
+            <Region VBox.vgrow="ALWAYS"/>
+            
+            <Button text="Logout" onAction="#logout" styleClass="nav-button, nav-button-logout">
+                <graphic>
+                    <Label text="&#x2B05;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+        </VBox>
+    </left>
+
+    <center>
+        <StackPane styleClass="content-area">
+            <VBox styleClass="page-card" VBox.vgrow="ALWAYS">
+                <HBox alignment="CENTER_LEFT" spacing="15">
+                    <VBox HBox.hgrow="ALWAYS">
+                        <Label text="Accounts Management" styleClass="title"/>
+                        <Label text="View, search, and manage other user accounts." styleClass="subtitle" wrapText="true"/>
+                    </VBox>
+                    <TextField fx:id="searchField" promptText="Search users..." styleClass="search-field" prefWidth="200"/>
+                    <Button text="Create Account" onAction="#goToCreateAccount" styleClass="primary-button">
+                        <graphic>
+                            <Label text="&#x2795;" styleClass="icon-label"/>
+                        </graphic>
+                    </Button>
+                </HBox>
+
+                <TableView fx:id="accountsTable" VBox.vgrow="ALWAYS" styleClass="table-view">
+                    <columns>
+                        <TableColumn fx:id="nameColumn" text="Name" prefWidth="180"/>
+                        <TableColumn fx:id="emailColumn" text="Email" prefWidth="220"/>
+                        <TableColumn fx:id="roleColumn" text="Role" prefWidth="130"/>
+                        <TableColumn fx:id="typeColumn" text="Type" prefWidth="80"/>
+                    </columns>
+                </TableView>
+
+                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="action-bar">
+                    <Label text="Actions for selected user:" styleClass="action-label"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="editButton" text="Edit" onAction="#handleEditUser" styleClass="secondary-button" disable="true">
+                        <graphic>
+                            <Label text="&#x270F;" styleClass="icon-label"/>
+                        </graphic>
+                    </Button>
+                    <Button fx:id="emailButton" text="Email" onAction="#handleEmailUser" styleClass="secondary-button" disable="true">
+                        <graphic>
+                            <Label text="&#x2709;" styleClass="icon-label"/>
+                        </graphic>
+                    </Button>
+                    <Button fx:id="faceIdButton" text="Face ID" onAction="#handleFaceId" styleClass="secondary-button" disable="true">
+                        <graphic>
+                            <Label text="&#x1F4F7;" styleClass="icon-label"/>
+                        </graphic>
+                    </Button>
+                    <Button fx:id="deleteButton" text="Delete" onAction="#handleDeleteUser" styleClass="danger-button" disable="true">
+                        <graphic>
+                            <Label text="&#x1F5D1;" styleClass="icon-label"/>
+                        </graphic>
+                    </Button>
+                </HBox>
+
+                <Label fx:id="messageLabel" styleClass="status-message" wrapText="true" visible="false" managed="false"/>
+            </VBox>
+        </StackPane>
+    </center>
+</BorderPane>

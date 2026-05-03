@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
+
+<StackPane styleClass="login-background" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LoginController" stylesheets="@style.css">
+    <VBox alignment="CENTER" spacing="40" maxWidth="1000">
+        <padding>
+            <Insets top="40" right="40" bottom="40" left="40"/>
+        </padding>
+
+        <VBox alignment="CENTER" spacing="8">
+            <Label text="BLADNA" styleClass="brand-title"/>
+            <Label text="Une interface plus claire, sécurisée et rapide pour gérer vos comptes." styleClass="brand-subtitle" wrapText="true" alignment="CENTER" textAlignment="CENTER" maxWidth="500"/>
+        </VBox>
+
+        <VBox styleClass="login-card" spacing="20" maxWidth="420" minWidth="380">
+            <VBox spacing="8">
+                <Label text="Connexion" styleClass="title"/>
+                <Label text="Connectez-vous pour accéder au tableau de bord" styleClass="subtitle" wrapText="true"/>
+            </VBox>
+
+            <VBox spacing="10">
+                <VBox spacing="6">
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label text="✉" styleClass="icon-label"/>
+                        <Label text="Email" styleClass="form-label"/>
+                    </HBox>
+                    <TextField fx:id="emailField" promptText="name@domain.com"/>
+                </VBox>
+
+                <VBox spacing="6">
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label text="🔒" styleClass="icon-label"/>
+                        <Label text="Mot de passe" styleClass="form-label"/>
+                    </HBox>
+                    <PasswordField fx:id="passwordField" promptText="Votre mot de passe"/>
+                </VBox>
+
+                <VBox spacing="6">
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label text="🛡" styleClass="icon-label"/>
+                        <Label text="Vérification" styleClass="form-label"/>
+                    </HBox>
+                    <WebView fx:id="recaptchaView" prefHeight="112" minHeight="112" maxHeight="112"/>
+                </VBox>
+            </VBox>
+
+            <VBox spacing="12">
+                <Button text="Se connecter" onAction="#handleLogin" styleClass="primary-button" maxWidth="Infinity"/>
+                <HBox alignment="CENTER" spacing="10">
+                    <Label text="ou" styleClass="subtitle"/>
+                </HBox>
+                <Button text="Connexion avec Face ID" onAction="#handleFaceLogin" styleClass="secondary-button" maxWidth="Infinity">
+                    <graphic>
+                        <Label text="📷" styleClass="icon-label"/>
+                    </graphic>
+                </Button>
+            </VBox>
+            
+            <Label fx:id="messageLabel" styleClass="status-message" wrapText="true" visible="false" managed="false" alignment="CENTER" maxWidth="Infinity"/>
+        </VBox>
+    </VBox>
+</StackPane>

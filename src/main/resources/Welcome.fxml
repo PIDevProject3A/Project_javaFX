@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WelcomeController" stylesheets="@style.css">
+    <left>
+        <VBox styleClass="sidebar">
+            <Label text="BLADNA" styleClass="sidebar-title"/>
+            <Label text="Navigation" styleClass="sidebar-subtitle"/>
+
+            <Region prefHeight="20"/>
+
+            <Button text="Dashboard" styleClass="nav-button, nav-button-active">
+                <graphic>
+                    <Label text="&#x1F3E0;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button fx:id="manageAccountsNavButton" text="Manage Accounts" onAction="#goToManageAccounts" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F465;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button fx:id="settingsNavButton" text="Settings" onAction="#goToSettings" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x2699;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+
+            <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Logout" onAction="#logout" styleClass="nav-button, nav-button-logout">
+                <graphic>
+                    <Label text="&#x2B05;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+        </VBox>
+    </left>
+
+    <center>
+        <StackPane styleClass="content-area">
+            <VBox styleClass="page-card" maxWidth="680" alignment="CENTER_LEFT">
+                <Label text="Welcome" styleClass="title"/>
+                <Label fx:id="messageLabel" styleClass="subtitle" wrapText="true"/>
+
+                <HBox spacing="15" styleClass="action-bar">
+                    <Button fx:id="manageAccountsShortcutButton" text="Manage Accounts" onAction="#goToManageAccounts" styleClass="primary-button">
+                        <graphic>
+                            <Label text="&#x1F465;" styleClass="icon-label"/>
+                        </graphic>
+                    </Button>
+                    <Button fx:id="settingsShortcutButton" text="Settings" onAction="#goToSettings" styleClass="secondary-button">
+                        <graphic>
+                            <Label text="&#x2699;" styleClass="icon-label"/>
+                        </graphic>
+                    </Button>
+                </HBox>
+
+                <Label text="Quick Actions" styleClass="section-title"/>
+                <Label text="Use the navigation bar or shortcuts above to manage users or configure your own settings." styleClass="subtitle" wrapText="true"/>
+            </VBox>
+        </StackPane>
+    </center>
+</BorderPane>
