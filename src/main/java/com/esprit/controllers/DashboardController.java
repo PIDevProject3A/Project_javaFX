@@ -142,7 +142,7 @@ public class DashboardController {
         if (UserSession.getCurrentUserRole() != User.AdminType.ADMIN_ACCOUNT) {
             return;
         }
-        switchScene("/com/esprit/RegistrationList.fxml");
+        switchScene("/com/esprit/EventCatalog.fxml");
     }
 
     @FXML
