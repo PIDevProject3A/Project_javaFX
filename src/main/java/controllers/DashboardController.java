@@ -142,6 +142,21 @@ public class DashboardController {
     }
 
     @FXML
+    private void goToDonation() {
+        switchScene(welcomeLabel, "/donation.fxml");
+    }
+
+    @FXML
+    private void goToGps() {
+        switchScene(welcomeLabel, "/gps.fxml");
+    }
+
+    @FXML
+    private void goToTransaction() {
+        switchScene(welcomeLabel, "/transaction.fxml");
+    }
+
+    @FXML
     private void logout() {
         int logId = UserSession.getCurrentLoginLogId();
         if (logId != -1) {

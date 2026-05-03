@@ -38,6 +38,21 @@
                     <Label text="&#x2699;" styleClass="icon-label"/>
                 </graphic>
             </Button>
+            <Button text="Donation" onAction="#goToDonation" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F4B0;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button text="GPS" onAction="#goToGps" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F4CD;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button text="Transaction" onAction="#goToTransaction" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F4C4;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
             
             <Region VBox.vgrow="ALWAYS"/>
             

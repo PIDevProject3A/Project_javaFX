@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
+
+<BorderPane prefHeight="740.0" prefWidth="1200.0" style="-fx-background-color: linear-gradient(to bottom, #f0fdf4, #dcfce7);" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.GpsController">
+    <top>
+        <VBox spacing="10.0" style="-fx-background-color: linear-gradient(to right, #14532d, #166534); -fx-border-color: #064e3b; -fx-border-width: 0 0 1 0;">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                    <children>
+                        <VBox spacing="2.0">
+                            <children>
+                                <Label text="BLEDNA CONTROL CENTER" style="-fx-text-fill: #bbf7d0; -fx-font-size: 11px; -fx-font-weight: bold; -fx-letter-spacing: 1.2px;" />
+                                <Label text="GPS Operations" style="-fx-text-fill: #ffffff; -fx-font-size: 23px; -fx-font-weight: bold;" />
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <HBox alignment="CENTER_RIGHT" spacing="8.0">
+                            <children>
+                                <Button onAction="#openDashboardTab" style="-fx-background-color: #14532d; -fx-text-fill: #dcfce7; -fx-font-size: 12px; -fx-font-weight: bold; -fx-border-color: #86efac; -fx-border-width: 1; -fx-border-radius: 99; -fx-background-radius: 99; -fx-padding: 7 14 7 14;" text="Dashboard" />
+                                <Button onAction="#openDonationTab" style="-fx-background-color: #14532d; -fx-text-fill: #dcfce7; -fx-font-size: 12px; -fx-font-weight: bold; -fx-border-color: #86efac; -fx-border-width: 1; -fx-border-radius: 99; -fx-background-radius: 99; -fx-padding: 7 14 7 14;" text="Donation" />
+                                <Button onAction="#openTransactionTab" style="-fx-background-color: #14532d; -fx-text-fill: #dcfce7; -fx-font-size: 12px; -fx-font-weight: bold; -fx-border-color: #86efac; -fx-border-width: 1; -fx-border-radius: 99; -fx-background-radius: 99; -fx-padding: 7 14 7 14;" text="Transaction" />
+                                <Label text="GPS" style="-fx-background-color: #ffffff; -fx-text-fill: #14532d; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 99; -fx-padding: 7 14 7 14;" />
+                            </children>
+                        </HBox>
+                    </children>
+                </HBox>
+                <Label text="Map recycling buyers, plan routes, and track local weather conditions." style="-fx-text-fill: #d1fae5; -fx-font-size: 12px;" />
+                <Label fx:id="summaryLabel" text="Buyers: 0 | Active: 0 | Cities covered: 0" style="-fx-text-fill: #dcfce7; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-color: rgba(20,83,45,0.45); -fx-background-radius: 8; -fx-padding: 7 10 7 10;" />
+            </children>
+            <padding>
+                <Insets bottom="14.0" left="16.0" right="16.0" top="14.0" />
+            </padding>
+        </VBox>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.62">
+            <items>
+                <VBox spacing="10.0">
+                    <children>
+                        <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #14532d;" text="Recycling Buyers Map (Azure Maps)" />
+                        <WebView fx:id="mapWebView" prefHeight="340.0" prefWidth="760.0" />
+
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                            <children>
+                                <Label style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #14532d;" text="Buyer Locations" />
+                                <Button onAction="#reloadFromDatabase" style="-fx-background-color: #d1fae5; -fx-text-fill: #14532d; -fx-font-weight: bold;" text="Reload" />
+                            </children>
+                        </HBox>
+
+                        <TableView fx:id="buyerTable" prefHeight="280.0" style="-fx-background-color: #ffffff; -fx-border-color: #86efac; -fx-border-width: 1;">
+                            <columns>
+                                <TableColumn fx:id="idColumn" prefWidth="55.0" text="ID" />
+                                <TableColumn fx:id="buyerNameColumn" prefWidth="180.0" text="Buyer" />
+                                <TableColumn fx:id="recyclingTypeColumn" prefWidth="120.0" text="Type" />
+                                <TableColumn fx:id="cityColumn" prefWidth="120.0" text="City" />
+                                <TableColumn fx:id="coordinatesColumn" prefWidth="180.0" text="Coordinates" />
+                                <TableColumn fx:id="statusColumn" prefWidth="120.0" text="Status" />
+                            </columns>
+                        </TableView>
+                    </children>
+                    <padding>
+                        <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+                    </padding>
+                </VBox>
+
+                <VBox prefWidth="420.0" spacing="14.0" style="-fx-background-color: #f0fdf4; -fx-border-color: #86efac; -fx-border-width: 0 0 0 1;">
+                    <children>
+                        <VBox spacing="10.0" style="-fx-background-color: #ffffff; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #86efac; -fx-border-width: 1;">
+                            <children>
+                                <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #14532d;" text="📍 Buyer Location Form" />
+
+                                <GridPane hgap="10.0" vgap="10.0">
+                                    <children>
+                                        <Label text="Buyer name" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                        <TextField fx:id="buyerNameField" promptText="Ex: Green Metal Tunis" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                        <Label text="Recycling type" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                        <ComboBox fx:id="recyclingTypeCombo" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                        <Label text="Address" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                        <TextField fx:id="addressField" promptText="Street + district" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                                        <Label text="City" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                                        <TextField fx:id="cityField" promptText="Ex: Sousse" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                                        <Label text="Map point" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                                        <Label fx:id="selectedLocationLabel" text="No point selected yet. Click on map to pin location." wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+                                        <Label text="Phone" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                                        <TextField fx:id="phoneField" promptText="Optional" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+
+                                        <Label text="Status" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                                        <ComboBox fx:id="statusCombo" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+
+                                        <Label text="Notes" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+                                        <TextArea fx:id="notesArea" prefRowCount="4" promptText="Optional details" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                                    </children>
+                                    <columnConstraints>
+                                        <ColumnConstraints minWidth="110.0" prefWidth="120.0" />
+                                        <ColumnConstraints hgrow="ALWAYS" />
+                                    </columnConstraints>
+                                </GridPane>
+
+                                <HBox spacing="8.0">
+                                    <children>
+                                        <Button onAction="#createBuyer" style="-fx-background-color: #16a34a; -fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Create" />
+                                        <Button onAction="#updateBuyer" style="-fx-background-color: #15803d; -fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Update" />
+                                        <Button onAction="#deleteBuyer" style="-fx-background-color: #b91c1c; -fx-text-fill: #ffffff; -fx-font-weight: bold;" text="Delete" />
+                                        <Button onAction="#clearForm" style="-fx-background-color: #d1fae5; -fx-text-fill: #14532d; -fx-font-weight: bold;" text="Clear" />
+                                    </children>
+                                </HBox>
+
+                                <Label fx:id="formStatusLabel" style="-fx-text-fill: #166534; -fx-font-size: 12px; -fx-font-weight: bold;" text="Fill the form then click Create." />
+                            </children>
+                            <padding>
+                                <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                            </padding>
+                        </VBox>
+
+                        <VBox spacing="10.0" style="-fx-background-color: #ffffff; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #86efac; -fx-border-width: 1;">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                    <children>
+                                        <Label fx:id="weatherHeaderLabel" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #14532d;" text="Weather Conditions" />
+                                        <Button onAction="#refreshWeatherFromSelectedPoint" style="-fx-background-color: #dcfce7; -fx-text-fill: #14532d; -fx-font-weight: bold; -fx-background-radius: 8;" text="Refresh" />
+                                    </children>
+                                </HBox>
+
+                                <Label fx:id="weatherMetaLabel" style="-fx-text-fill: #4b5563; -fx-font-size: 12px;" text="Select a map point to fetch weather." wrapText="true" />
+
+                                <GridPane hgap="8.0" vgap="8.0">
+                                    <children>
+                                        <VBox spacing="4.0" style="-fx-background-color: #f8fafc; -fx-border-color: #dbeafe; -fx-border-width: 1; -fx-border-radius: 10; -fx-background-radius: 10;" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                            <children>
+                                                <Label style="-fx-text-fill: #334155; -fx-font-size: 11px; -fx-font-weight: bold;" text="TEMPERATURE" />
+                                                <Label fx:id="weatherTempLabel" style="-fx-text-fill: #0f172a; -fx-font-size: 20px; -fx-font-weight: bold;" text="--" />
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                            </padding>
+                                        </VBox>
+
+                                        <VBox spacing="4.0" style="-fx-background-color: #f8fafc; -fx-border-color: #dbeafe; -fx-border-width: 1; -fx-border-radius: 10; -fx-background-radius: 10;" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                            <children>
+                                                <Label style="-fx-text-fill: #334155; -fx-font-size: 11px; -fx-font-weight: bold;" text="WIND" />
+                                                <Label fx:id="weatherWindLabel" style="-fx-text-fill: #0f172a; -fx-font-size: 20px; -fx-font-weight: bold;" text="--" />
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                            </padding>
+                                        </VBox>
+
+                                        <VBox spacing="4.0" style="-fx-background-color: #f8fafc; -fx-border-color: #dbeafe; -fx-border-width: 1; -fx-border-radius: 10; -fx-background-radius: 10;" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2">
+                                            <children>
+                                                <Label style="-fx-text-fill: #334155; -fx-font-size: 11px; -fx-font-weight: bold;" text="RAIN" />
+                                                <Label fx:id="weatherRainLabel" style="-fx-text-fill: #0f172a; -fx-font-size: 20px; -fx-font-weight: bold;" text="--" />
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                            </padding>
+                                        </VBox>
+                                    </children>
+                                    <columnConstraints>
+                                        <ColumnConstraints percentWidth="50.0" />
+                                        <ColumnConstraints percentWidth="50.0" />
+                                    </columnConstraints>
+                                </GridPane>
+
+                                <VBox spacing="6.0" style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 10; -fx-background-radius: 10;">
+                                    <children>
+                                        <Label style="-fx-text-fill: #334155; -fx-font-size: 11px; -fx-font-weight: bold;" text="VISUAL SUMMARY" />
+                                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                            <children>
+                                                <Label style="-fx-text-fill: #475569; -fx-font-size: 11px;" text="Comfort" />
+                                                <Label fx:id="weatherComfortValueLabel" style="-fx-text-fill: #0f172a; -fx-font-size: 11px; -fx-font-weight: bold;" text="--" />
+                                            </children>
+                                        </HBox>
+                                        <ProgressBar fx:id="weatherComfortBar" prefWidth="330.0" progress="0.0" />
+                                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                            <children>
+                                                <Label style="-fx-text-fill: #475569; -fx-font-size: 11px;" text="Wind Risk" />
+                                                <Label fx:id="weatherWindRiskValueLabel" style="-fx-text-fill: #0f172a; -fx-font-size: 11px; -fx-font-weight: bold;" text="--" />
+                                            </children>
+                                        </HBox>
+                                        <ProgressBar fx:id="weatherWindRiskBar" prefWidth="330.0" progress="0.0" />
+                                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                            <children>
+                                                <Label style="-fx-text-fill: #475569; -fx-font-size: 11px;" text="Rain Risk" />
+                                                <Label fx:id="weatherRainRiskValueLabel" style="-fx-text-fill: #0f172a; -fx-font-size: 11px; -fx-font-weight: bold;" text="--" />
+                                            </children>
+                                        </HBox>
+                                        <ProgressBar fx:id="weatherRainRiskBar" prefWidth="330.0" progress="0.0" />
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                    </padding>
+                                </VBox>
+
+                                <Label fx:id="weatherStatusLabel" style="-fx-text-fill: #166534; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-color: #dcfce7; -fx-background-radius: 9; -fx-padding: 6 10 6 10;" text="Click on map to load weather" wrapText="true" />
+                            </children>
+                            <padding>
+                                <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                            </padding>
+                        </VBox>
+                    </children>
+                    <padding>
+                        <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+                    </padding>
+                </VBox>
+            </items>
+        </SplitPane>
+    </center>
+</BorderPane>
