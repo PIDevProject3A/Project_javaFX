@@ -219,9 +219,23 @@ public class RegistrationListController {
         loadData();
     }
 
+    private void switchScene(String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            javafx.scene.Parent root = loader.load();
+            Stage stage = (Stage) registrationList.getScene().getWindow();
+            javafx.scene.Scene scene = new Scene(root, 1100, 680);
+            StyleHelper.apply(scene);
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Erreur de navigation : " + e.getMessage());
+        }
+    }
+
     @FXML
     private void handleBack() throws IOException {
-        NavigationManager.navigateTo("EventCatalog.fxml");
+        switchScene("/com/esprit/EventCatalog.fxml");
     }
 
     private void showView(Registration r) {

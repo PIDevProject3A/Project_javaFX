@@ -54,14 +54,32 @@ public class EventCatalogController {
         loadEvents();
     }
 
+    private void switchScene(String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            javafx.scene.Parent root = loader.load();
+            Stage stage = (Stage) eventList.getScene().getWindow();
+            javafx.scene.Scene scene = new Scene(root, 1100, 680);
+            StyleHelper.apply(scene);
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Erreur de navigation : " + e.getMessage());
+        }
+    }
+
     @FXML
     private void handleHome() throws IOException {
-        NavigationManager.navigateTo("Home.fxml");
+        if (com.esprit.utils.UserSession.getCurrentUserRole() == com.esprit.entities.User.AdminType.ADMIN_ACCOUNT) {
+            switchScene("/Dashboard.fxml");
+        } else {
+            switchScene("/UserDashboard.fxml");
+        }
     }
 
     @FXML
     private void handleOpenRegistrations() throws IOException {
-        NavigationManager.navigateTo("RegistrationList.fxml");
+        switchScene("/com/esprit/RegistrationList.fxml");
     }
 
     private void configureListCells() {
