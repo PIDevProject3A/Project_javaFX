@@ -317,12 +317,36 @@ public class ForumServices implements Icrud<Topic> {
         }
     }
 
+    public void unlikeTopic(int topicId) throws SQLException {
+        ensureConnection();
+        if (!hasLikeColumn()) {
+            return;
+        }
+        String sql = "UPDATE topic SET like_count = GREATEST(COALESCE(like_count, 0) - 1, 0) WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, topicId);
+            ps.executeUpdate();
+        }
+    }
+
     public void dislikeTopic(int topicId) throws SQLException {
         ensureConnection();
         if (!hasDislikeColumn()) {
             return;
         }
         String sql = "UPDATE topic SET dislike_count = COALESCE(dislike_count, 0) + 1 WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, topicId);
+            ps.executeUpdate();
+        }
+    }
+
+    public void undislikeTopic(int topicId) throws SQLException {
+        ensureConnection();
+        if (!hasDislikeColumn()) {
+            return;
+        }
+        String sql = "UPDATE topic SET dislike_count = GREATEST(COALESCE(dislike_count, 0) - 1, 0) WHERE id = ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, topicId);
             ps.executeUpdate();

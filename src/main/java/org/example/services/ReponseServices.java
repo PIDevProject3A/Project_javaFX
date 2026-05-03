@@ -244,6 +244,30 @@ public class ReponseServices implements Icrud<Reponse> {
         }
     }
 
+    public void unlikeReponse(int reponseId) throws SQLException {
+        ensureConnection();
+        if (!hasLikeColumn()) {
+            return;
+        }
+        String sql = "UPDATE " + TABLE + " SET like_count = GREATEST(COALESCE(like_count, 0) - 1, 0) WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, reponseId);
+            ps.executeUpdate();
+        }
+    }
+
+    public void undislikeReponse(int reponseId) throws SQLException {
+        ensureConnection();
+        if (!hasDislikeColumn()) {
+            return;
+        }
+        String sql = "UPDATE " + TABLE + " SET dislike_count = GREATEST(COALESCE(dislike_count, 0) - 1, 0) WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, reponseId);
+            ps.executeUpdate();
+        }
+    }
+
     public boolean supportsReactions() throws SQLException {
         ensureConnection();
         return hasLikeColumn() && hasDislikeColumn();

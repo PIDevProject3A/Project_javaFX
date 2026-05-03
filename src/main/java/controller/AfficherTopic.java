@@ -67,6 +67,7 @@ public class AfficherTopic implements Initializable {
     private static final String SORT_MOST_DISCUSSED = "Most discussed";
     public static final ObservableList<Notification> notificationsGlobal = NotificationService.getInstance().getNotifications();
     private static final Set<Integer> savedTopicIds = new HashSet<>();
+    private static final java.util.Map<Integer, String> topicReactions = new java.util.HashMap<>();
 
     @FXML
     private ScrollPane feedScroll;
@@ -203,21 +204,41 @@ public class AfficherTopic implements Initializable {
     }
 
     private void reactToTopic(Topic topic, boolean like) {
+        String currentReaction = topicReactions.get(topic.getId());
+        String newReaction = like ? "LIKE" : "DISLIKE";
+
         try {
-            if (sendReactionToRestApi(topic.getId(), like)) {
-                if (like) {
-                    topic.setLikeCount(topic.getLikeCount() + 1);
-                } else {
-                    topic.setDislikeCount(topic.getDislikeCount() + 1);
+            if (currentReaction == null) {
+                // No reaction yet, so we just add the new one
+                if (sendReactionToRestApi(topic.getId(), like, false)) {
+                    topicReactions.put(topic.getId(), newReaction);
+                    if (like) topic.setLikeCount(topic.getLikeCount() + 1);
+                    else topic.setDislikeCount(topic.getDislikeCount() + 1);
                 }
-                appliquerFiltres();
+            } else if (currentReaction.equals(newReaction)) {
+                // Toggle off (Undo)
+                if (sendReactionToRestApi(topic.getId(), like, true)) {
+                    topicReactions.remove(topic.getId());
+                    if (like) topic.setLikeCount(Math.max(0, topic.getLikeCount() - 1));
+                    else topic.setDislikeCount(Math.max(0, topic.getDislikeCount() - 1));
+                }
             } else {
-                Alert err = new Alert(Alert.AlertType.ERROR);
-                err.setTitle("API error");
-                err.setHeaderText("Could not register reaction");
-                err.setContentText("Like/Dislike must be processed by REST API.");
-                err.showAndWait();
+                // Switch reaction (e.g. from LIKE to DISLIKE)
+                boolean undoOld = sendReactionToRestApi(topic.getId(), !like, true);
+                boolean addNew = sendReactionToRestApi(topic.getId(), like, false);
+                
+                if (undoOld && addNew) {
+                    topicReactions.put(topic.getId(), newReaction);
+                    if (like) {
+                        topic.setLikeCount(topic.getLikeCount() + 1);
+                        topic.setDislikeCount(Math.max(0, topic.getDislikeCount() - 1));
+                    } else {
+                        topic.setDislikeCount(topic.getDislikeCount() + 1);
+                        topic.setLikeCount(Math.max(0, topic.getLikeCount() - 1));
+                    }
+                }
             }
+            appliquerFiltres();
         } catch (IOException ex) {
             Alert err = new Alert(Alert.AlertType.ERROR);
             err.setTitle("API error");
@@ -226,9 +247,14 @@ public class AfficherTopic implements Initializable {
             err.showAndWait();
         }
     }
-    //appel de api like ou dislike
-    private boolean sendReactionToRestApi(int topicId, boolean like) throws IOException {
-        String endpoint = like ? "like" : "dislike";
+
+    private boolean sendReactionToRestApi(int topicId, boolean like, boolean isUndo) throws IOException {
+        String endpoint;
+        if (isUndo) {
+            endpoint = like ? "unlike" : "undislike";
+        } else {
+            endpoint = like ? "like" : "dislike";
+        }
         URL url = new URL("http://localhost:" + notificationService.getApiPort() + "/api/topics/" + endpoint);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");

@@ -2,6 +2,8 @@ org\example\services\FacebookShareService.class
 org\example\services\NotificationService$MarkAllReadHandler.class
 org\example\utils\UIAnimator.class
 org\example\services\NotificationService$PinMostLikedTopicHandler.class
+org\example\services\NotificationService$ReplyUndoReactionHandler.class
+org\example\services\NotificationService$TopicUndoReactionHandler.class
 org\example\services\AiTopicInsightsService$AiResult.class
 org\example\entities\Topic.class
 controller\AjouterReponseController.class

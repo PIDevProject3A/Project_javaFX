@@ -113,8 +113,12 @@ public final class NotificationService {
                 server.createContext("/api/notifications/mark-all-read", new MarkAllReadHandler());
                 server.createContext("/api/topics/like", new TopicReactionHandler(true));
                 server.createContext("/api/topics/dislike", new TopicReactionHandler(false));
+                server.createContext("/api/topics/unlike", new TopicUndoReactionHandler(true));
+                server.createContext("/api/topics/undislike", new TopicUndoReactionHandler(false));
                 server.createContext("/api/replies/like", new ReplyReactionHandler(true));
                 server.createContext("/api/replies/dislike", new ReplyReactionHandler(false));
+                server.createContext("/api/replies/unlike", new ReplyUndoReactionHandler(true));
+                server.createContext("/api/replies/undislike", new ReplyUndoReactionHandler(false));
                 server.createContext("/api/topics/pin-most-liked", new PinMostLikedTopicHandler());
                 server.createContext("/api/topics/pinned", new PinnedTopicHandler());
 
@@ -248,6 +252,48 @@ public final class NotificationService {
         }
     }
 
+    private final class TopicUndoReactionHandler implements HttpHandler {
+        private final boolean like; // true = unlike, false = undislike
+
+        private TopicUndoReactionHandler(boolean like) {
+            this.like = like;
+        }
+
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthorized(exchange)) {
+                return;
+            }
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendJson(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+            String body = readBody(exchange.getRequestBody());
+            int topicId = extractInt(body, "topicId", -1);
+            if (topicId <= 0) {
+                sendJson(exchange, 400, "{\"error\":\"topicId is required\"}");
+                return;
+            }
+            try {
+                if (like) {
+                    forumServices.unlikeTopic(topicId);
+                } else {
+                    forumServices.undislikeTopic(topicId);
+                }
+                refreshPinnedTopic();
+                String response = "{"
+                        + "\"status\":\"ok\","
+                        + "\"topicId\":" + topicId + ","
+                        + "\"reaction\":\"" + (like ? "UNLIKE" : "UNDISLIKE") + "\""
+                        + "}";
+                sendJson(exchange, 200, response);
+            } catch (SQLException ex) {
+                sendJson(exchange, 500, "{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
+            }
+        }
+    }
+
+
     private final class ReplyReactionHandler implements HttpHandler {
         private final boolean like;
 
@@ -283,6 +329,45 @@ public final class NotificationService {
                 // Appel de l'API Externe Pusher (SaaS)
                 org.example.integrations.pusher.PusherIntegrationService.triggerReaction(replyId, like, "reply");
                 
+                sendJson(exchange, 200, "{\"status\":\"ok\",\"replyId\":" + replyId + "}");
+            } catch (SQLException ex) {
+                sendJson(exchange, 500, "{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
+            }
+        }
+    }
+
+    private final class ReplyUndoReactionHandler implements HttpHandler {
+        private final boolean like; // true = unlike, false = undislike
+
+        private ReplyUndoReactionHandler(boolean like) {
+            this.like = like;
+        }
+
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthorized(exchange)) {
+                return;
+            }
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendJson(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+            String body = readBody(exchange.getRequestBody());
+            int replyId = extractInt(body, "replyId", -1);
+            if (replyId <= 0) {
+                sendJson(exchange, 400, "{\"error\":\"replyId is required\"}");
+                return;
+            }
+            try {
+                if (!reponseServices.supportsReactions()) {
+                    sendJson(exchange, 409, "{\"error\":\"Reply reaction columns are missing in database\"}");
+                    return;
+                }
+                if (like) {
+                    reponseServices.unlikeReponse(replyId);
+                } else {
+                    reponseServices.undislikeReponse(replyId);
+                }
                 sendJson(exchange, 200, "{\"status\":\"ok\",\"replyId\":" + replyId + "}");
             } catch (SQLException ex) {
                 sendJson(exchange, 500, "{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");

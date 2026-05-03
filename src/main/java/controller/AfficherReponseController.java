@@ -42,6 +42,8 @@ public class AfficherReponseController {
     private Label labTitle;
     @FXML
     private Label labSubtitle;
+    
+    private static final java.util.Map<Integer, String> replyReactions = new java.util.HashMap<>();
 
     private int topicId;
     private String topicTitle = "";
@@ -254,21 +256,41 @@ public class AfficherReponseController {
     }
 
     private void reactToReply(Reponse reply, boolean like) {
+        String currentReaction = replyReactions.get(reply.getId());
+        String newReaction = like ? "LIKE" : "DISLIKE";
+
         try {
-            if (sendReplyReactionToRestApi(reply.getId(), like)) {
-                if (like) {
-                    reply.setLikeCount(reply.getLikeCount() + 1);
-                } else {
-                    reply.setDislikeCount(reply.getDislikeCount() + 1);
+            if (currentReaction == null) {
+                // No reaction yet
+                if (sendReplyReactionToRestApi(reply.getId(), like, false)) {
+                    replyReactions.put(reply.getId(), newReaction);
+                    if (like) reply.setLikeCount(reply.getLikeCount() + 1);
+                    else reply.setDislikeCount(reply.getDislikeCount() + 1);
                 }
-                refresh();
+            } else if (currentReaction.equals(newReaction)) {
+                // Toggle off
+                if (sendReplyReactionToRestApi(reply.getId(), like, true)) {
+                    replyReactions.remove(reply.getId());
+                    if (like) reply.setLikeCount(Math.max(0, reply.getLikeCount() - 1));
+                    else reply.setDislikeCount(Math.max(0, reply.getDislikeCount() - 1));
+                }
             } else {
-                Alert a = new Alert(Alert.AlertType.ERROR);
-                a.setTitle("API error");
-                a.setHeaderText("Could not register reaction");
-                a.setContentText("Reply like/dislike failed via REST API.");
-                a.showAndWait();
+                // Switch reaction
+                boolean undoOld = sendReplyReactionToRestApi(reply.getId(), !like, true);
+                boolean addNew = sendReplyReactionToRestApi(reply.getId(), like, false);
+                
+                if (undoOld && addNew) {
+                    replyReactions.put(reply.getId(), newReaction);
+                    if (like) {
+                        reply.setLikeCount(reply.getLikeCount() + 1);
+                        reply.setDislikeCount(Math.max(0, reply.getDislikeCount() - 1));
+                    } else {
+                        reply.setDislikeCount(reply.getDislikeCount() + 1);
+                        reply.setLikeCount(Math.max(0, reply.getLikeCount() - 1));
+                    }
+                }
             }
+            refresh();
         } catch (IOException ex) {
             Alert a = new Alert(Alert.AlertType.ERROR);
             a.setTitle("API error");
@@ -278,8 +300,13 @@ public class AfficherReponseController {
         }
     }
 
-    private boolean sendReplyReactionToRestApi(int replyId, boolean like) throws IOException {
-        String endpoint = like ? "like" : "dislike";
+    private boolean sendReplyReactionToRestApi(int replyId, boolean like, boolean isUndo) throws IOException {
+        String endpoint;
+        if (isUndo) {
+            endpoint = like ? "unlike" : "undislike";
+        } else {
+            endpoint = like ? "like" : "dislike";
+        }
         URL url = new URL("http://localhost:" + notificationService.getApiPort() + "/api/replies/" + endpoint);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
