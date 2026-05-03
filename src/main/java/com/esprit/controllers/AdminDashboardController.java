@@ -218,6 +218,11 @@ public class AdminDashboardController {
     }
 
     @FXML
+    private void goToEvents() {
+        switchScene("/com/esprit/EventAdmin.fxml");
+    }
+
+    @FXML
     private void logout() {
         // Update logout time in database
         int logId = UserSession.getCurrentLoginLogId();

@@ -30,6 +30,11 @@
                     <Label text="&#x1F465;" styleClass="icon-label"/>
                 </graphic>
             </Button>
+            <Button text="Manage Events" onAction="#goToEvents" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F4C5;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
             <Button text="Settings" onAction="#goToSettings" styleClass="nav-button">
                 <graphic>
                     <Label text="&#x2699;" styleClass="icon-label"/>
