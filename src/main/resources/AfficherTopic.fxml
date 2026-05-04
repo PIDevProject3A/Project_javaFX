@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="640.0" prefWidth="1024.0" styleClass="root-afficher social-skin" stylesheets="@app.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.AfficherTopic">
+    <children>
+        <VBox spacing="14.0" AnchorPane.bottomAnchor="18.0" AnchorPane.leftAnchor="18.0" AnchorPane.rightAnchor="18.0" AnchorPane.topAnchor="18.0">
+            <padding>
+                <Insets bottom="6.0" left="6.0" right="6.0" top="6.0" />
+            </padding>
+            <children>
+                <!-- Header -->
+                <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="topics-hero">
+                    <children>
+                        <Label styleClass="topics-hero-emoji" text="💬" />
+                        <Label styleClass="topics-hero-title" text="Topics" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#goToDashboard" styleClass="btn-nav-accent" text="🔙 Dashboard" />
+                        <Button mnemonicParsing="false" onAction="#goToAdd" styleClass="btn-nav-accent" text="New topic" />
+                        <Button mnemonicParsing="false" onAction="#refresh" styleClass="btn-refresh" text="Refresh" />
+                    </children>
+                </HBox>
+
+                <!-- SECTION NOTIFICATIONS - Assure-toi que prefHeight est assez grand -->
+                <!-- Au lieu de la grande section notifications, mets juste un bouton -->
+                <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                    <children>
+                        <Button fx:id="btnNotifications" onAction="#showNotificationsWindow" styleClass="btn-notifications">
+                            <graphic>
+                                <HBox alignment="CENTER" spacing="5">
+                                    <Label styleClass="notif-icon" text="🔔" />
+                                    <Label fx:id="notifBadge" styleClass="notif-badge" text="0" />
+                                </HBox>
+                            </graphic>
+                        </Button>
+                    </children>
+                </HBox>
+
+                <!-- Barre recherche -->
+                <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="search-panel">
+                    <children>
+                        <TextField fx:id="searchField" HBox.hgrow="ALWAYS" promptText="Search by title/content/category..." styleClass="search-input" />
+                        <ComboBox fx:id="statusFilter" prefWidth="180.0" styleClass="filter-combo" />
+                        <ComboBox fx:id="sortFilter" prefWidth="170.0" styleClass="filter-combo" />
+                        <Button mnemonicParsing="false" onAction="#resetFilters" styleClass="btn-filter-reset" text="Reset" />
+                    </children>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                    <children>
+                        <Button fx:id="btnAllTopics" mnemonicParsing="false" onAction="#showAllTopics" styleClass="feed-tab" text="All" />
+                        <Button fx:id="btnSavedOnly" mnemonicParsing="false" onAction="#showSavedOnlyTopics" styleClass="feed-tab" text="Saved only" />
+                    </children>
+                </HBox>
+
+                <Label fx:id="lblResultCount" styleClass="search-count-badge" text="0 shown · 0 total" />
+                <Label fx:id="lblEngagement" styleClass="topic-meta" text="0 likes · 0 comments · 0 saved" />
+
+                <!-- Liste des topics -->
+                <ScrollPane fx:id="feedScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="topic-feed-scroll" VBox.vgrow="ALWAYS">
+                    <content>
+                        <VBox fx:id="topicsFeedBox" spacing="14.0" styleClass="topics-feed-list" />
+                    </content>
+                </ScrollPane>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controller.AfficherReponseController"
+            prefWidth="940.0" prefHeight="640.0"
+            styleClass="social-feed-root"
+            stylesheets="@app.css">
+    <children>
+        <VBox spacing="18.0" AnchorPane.bottomAnchor="22.0" AnchorPane.leftAnchor="22.0"
+              AnchorPane.rightAnchor="22.0" AnchorPane.topAnchor="20.0">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="16.0" styleClass="social-hero-v2" maxWidth="Infinity">
+                    <children>
+                        <Label styleClass="social-hero-emoji" text="💬"/>
+                        <VBox spacing="8.0" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                            <children>
+                                <Label fx:id="labTitle" styleClass="social-hero-title" text="Conversation"/>
+                                <Label fx:id="labSubtitle" styleClass="social-hero-sub" wrapText="true" maxWidth="Infinity"/>
+                                <Label styleClass="social-hero-meta"
+                                       text="Read messages and add your reply in one simple screen."/>
+                            </children>
+                        </VBox>
+                        <VBox alignment="CENTER_RIGHT" spacing="10.0">
+                            <children>
+                                <Button mnemonicParsing="false" onAction="#goBackToTopics" styleClass="btn-back-reponse"
+                                        text="Back to topics"/>
+                                <Button mnemonicParsing="false" onAction="#openAddReply" styleClass="btn-add-reponse"
+                                        text="Write a reply"/>
+                                <Button mnemonicParsing="false" onAction="#refresh" styleClass="btn-refresh-reponse"
+                                        text="Refresh"/>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+                <VBox spacing="12.0" styleClass="card-reponse-feed-v2" VBox.vgrow="ALWAYS" maxWidth="Infinity">
+                    <children>
+                        <Label styleClass="feed-section-title-v2" text="Messages in this thread"/>
+                        <ScrollPane fitToWidth="true" styleClass="topic-feed-scroll" VBox.vgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: transparent;">
+                            <content>
+                                <VBox fx:id="commentsFeed" spacing="16.0" style="-fx-padding: 10 10 20 0;"/>
+                            </content>
+                        </ScrollPane>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

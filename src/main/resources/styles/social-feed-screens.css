@@ -1,0 +1,172 @@
+/* PREMIUM SAAS DESIGN SYSTEM - Social Post Detail */
+
+.social-post-root, .sm-modal-shell, .social-feed-root {
+    -fx-background-color: #F8FAFC;
+    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.social-post-topbar {
+    -fx-background-color: #1B5E20; /* Very Dark Indigo */
+    -fx-padding: 16 24;
+    -fx-alignment: center-left;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 4);
+}
+
+.social-post-topbar-title {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 16px;
+    -fx-font-weight: 800;
+}
+
+.sm-topbar-close {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: 700;
+    -fx-font-size: 13px;
+    -fx-padding: 8 16;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.sm-topbar-close:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+.social-post-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 24;
+}
+
+.social-post-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.sm-post-outer {
+    -fx-max-width: 640;
+    -fx-padding: 0 0 16 0;
+}
+
+.sm-post-card, .sm-alert-card, .card-reponse-feed-v2 {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 12;
+    -fx-padding: 24;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 15, 0.1, 0, 4);
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+}
+
+.sm-post-author-row {
+    -fx-spacing: 16;
+    -fx-alignment: top-left;
+    -fx-padding: 0 0 8 0;
+}
+
+.sm-avatar {
+    -fx-min-width: 48px;
+    -fx-min-height: 48px;
+    -fx-max-width: 48px;
+    -fx-max-height: 48px;
+    -fx-alignment: center;
+    -fx-background-color: #2E7D32; /* Indigo 600 */
+    -fx-background-radius: 50%;
+}
+
+.sm-avatar-label {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.sm-kicker {
+    -fx-text-fill: #64748B;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
+.sm-post-headline, .sm-alert-title, .feed-section-title-v2 {
+    -fx-text-fill: #0F172A;
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+    -fx-wrap-text: true;
+    -fx-padding: 4 0 0 0;
+}
+
+.sm-badges-row {
+    -fx-spacing: 8;
+    -fx-padding: 12 0 8 0;
+    -fx-alignment: center-left;
+    -fx-wrap-text: true;
+}
+
+.sm-badge {
+    -fx-background-radius: 6;
+    -fx-padding: 6 12;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
+.sm-badge-pending { -fx-background-color: #FEF3C7; -fx-text-fill: #D97706; }
+.sm-badge-accepted { -fx-background-color: #D1FAE5; -fx-text-fill: #059669; }
+.sm-badge-refused { -fx-background-color: #FEE2E2; -fx-text-fill: #DC2626; }
+.sm-badge-neutral { -fx-background-color: #F1F5F9; -fx-text-fill: #475569; }
+.sm-badge-muted { -fx-background-color: transparent; -fx-text-fill: #94A3B8; -fx-font-style: italic; }
+
+.sm-post-divider {
+    -fx-padding: 16 0 12 0;
+}
+
+.sm-post-body-label {
+    -fx-text-fill: #64748B;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-padding: 0 0 8 0;
+}
+
+.sm-post-textarea {
+    -fx-background-color: #F8FAFC;
+    -fx-control-inner-background: #F8FAFC;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 16;
+    -fx-font-size: 15px;
+    -fx-text-fill: #334155;
+    -fx-line-spacing: 6px;
+}
+
+.sm-post-textarea .content {
+    -fx-background-color: transparent;
+}
+
+.sm-post-footer {
+    -fx-padding: 24 0 0 0;
+    -fx-alignment: center-right;
+}
+
+.sm-btn-foot-primary {
+    -fx-background-color: #2E7D32;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: 700;
+    -fx-font-size: 14px;
+    -fx-padding: 12 32;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(79, 70, 229, 0.25), 8, 0.2, 0, 2);
+}
+
+.sm-btn-foot-primary:hover {
+    -fx-background-color: #256b2a;
+}
+
+/* Social Hero V2 */
+.social-hero-v2 {
+    -fx-background-color: #1B5E20;
+    -fx-background-radius: 12;
+    -fx-padding: 24 32;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 15, 0, 0, 5);
+}

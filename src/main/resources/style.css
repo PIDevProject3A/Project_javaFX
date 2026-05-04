@@ -401,6 +401,47 @@
     -fx-font-size: 11px;
 }
 
+/* Chat Bubble Widget Styles */
+.chat-bubble-btn {
+    -fx-background-color: #2E7D32;
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-background-radius: 50;
+    -fx-min-width: 65px;
+    -fx-min-height: 65px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(46, 125, 50, 0.4), 15, 0.2, 0, 8);
+    -fx-transition: all 0.3s ease;
+}
+
+.chat-bubble-btn:hover {
+    -fx-background-color: #388E3C;
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+    -fx-effect: dropshadow(gaussian, rgba(46, 125, 50, 0.5), 20, 0.3, 0, 10);
+}
+
+.chat-bubble-btn-active {
+    -fx-background-color: #d32f2f;
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(211, 47, 47, 0.4), 15, 0.2, 0, 8);
+}
+
+.chat-bubble-btn-active:hover {
+    -fx-background-color: #ef5350;
+    -fx-effect: dropshadow(gaussian, rgba(211, 47, 47, 0.5), 20, 0.3, 0, 10);
+}
+
+.forum-overlay-panel {
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-border-color: #cce2c7;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 25, 0.1, 0, 10);
+}
+
 /* ==================== User Dashboard Styles ==================== */
 
 .role-badge {

@@ -1,4 +1,4 @@
-package utils;
+package com.esprit.utils;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -36,4 +36,5 @@ class CompreFaceConfigTest {
         assertEquals(0.85, CompreFaceConfig.similarityThreshold());
     }
 }
+
 

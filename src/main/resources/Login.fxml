@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.web.WebView?>
 
-<StackPane styleClass="login-background" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LoginController" stylesheets="@style.css">
+<StackPane styleClass="login-background" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.esprit.controllers.LoginController" stylesheets="@style.css">
     <VBox alignment="CENTER" spacing="40" maxWidth="1000">
         <padding>
             <Insets top="40" right="40" bottom="40" left="40"/>
@@ -69,3 +69,4 @@
         </VBox>
     </VBox>
 </StackPane>
+

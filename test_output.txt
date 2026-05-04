@@ -1,0 +1,134 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------------< org.example:PIJava >-------------------------
+[INFO] Building PIJava 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[WARNING] 6 problems were encountered while building the effective model for org.openjfx:javafx-controls:jar:21.0.2 during dependency collection step for project (use -X to see details)
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ PIJava ---
+[INFO] Deleting C:\Users\yosra\IdeaProjects\PIJAVAyosra\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ PIJava ---
+[INFO] Copying 45 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ PIJava ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 96 source files with javac [debug target 17] to target\classes
+[INFO] /C:/Users/yosra/IdeaProjects/PIJAVAyosra/src/main/java/com/esprit/controllers/EventAdminController.java: C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\com\esprit\controllers\EventAdminController.java uses or overrides a deprecated API.
+[INFO] /C:/Users/yosra/IdeaProjects/PIJAVAyosra/src/main/java/com/esprit/controllers/EventAdminController.java: Recompile with -Xlint:deprecation for details.
+[INFO] /C:/Users/yosra/IdeaProjects/PIJAVAyosra/src/main/java/com/esprit/controllers/EventAdminController.java: C:\Users\yosra\IdeaProjects\PIJAVAyosra\src\main\java\com\esprit\controllers\EventAdminController.java uses unchecked or unsafe operations.
+[INFO] /C:/Users/yosra/IdeaProjects/PIJAVAyosra/src/main/java/com/esprit/controllers/EventAdminController.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ PIJava ---
+mai 04, 2026 12:53:11 AM com.sun.javafx.application.PlatformImpl startup
+WARNING: Unsupported JavaFX configuration: classes were loaded from 'unnamed module @534be625'
+FAILED TO LOAD FXML:
+javafx.fxml.LoadException: 
+/C:/Users/yosra/IdeaProjects/PIJAVAyosra/target/classes/AdminDashboard.fxml
+
+	at javafx.fxml.FXMLLoader.constructLoadException(FXMLLoader.java:2722)
+	at javafx.fxml.FXMLLoader.loadImpl(FXMLLoader.java:2692)
+	at javafx.fxml.FXMLLoader.loadImpl(FXMLLoader.java:2563)
+	at javafx.fxml.FXMLLoader.load(FXMLLoader.java:2531)
+	at com.esprit.TestFxml.start(TestFxml.java:15)
+	at com.sun.javafx.application.LauncherImpl.lambda$launchApplication1$9(LauncherImpl.java:839)
+	at com.sun.javafx.application.PlatformImpl.lambda$runAndWait$12(PlatformImpl.java:483)
+	at com.sun.javafx.application.PlatformImpl.lambda$runLater$10(PlatformImpl.java:456)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:399)
+	at com.sun.javafx.application.PlatformImpl.lambda$runLater$11(PlatformImpl.java:455)
+	at com.sun.glass.ui.InvokeLaterDispatcher$Future.run(InvokeLaterDispatcher.java:95)
+	at com.sun.glass.ui.win.WinApplication._runLoop(Native Method)
+	at com.sun.glass.ui.win.WinApplication.lambda$runLoop$3(WinApplication.java:185)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+Caused by: java.lang.reflect.InvocationTargetException
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at com.sun.javafx.reflect.Trampoline.invoke(MethodUtil.java:72)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at com.sun.javafx.reflect.MethodUtil.invoke(MethodUtil.java:270)
+	at com.sun.javafx.fxml.MethodHelper.invoke(MethodHelper.java:84)
+	at javafx.fxml.FXMLLoader.loadImpl(FXMLLoader.java:2688)
+	... 12 more
+Caused by: java.lang.IllegalArgumentException: No enum constant com.esprit.entities.AppUser.UserType.COLLECTOR
+	at java.base/java.lang.Enum.valueOf(Enum.java:273)
+	at com.esprit.entities.AppUser$UserType.valueOf(AppUser.java:6)
+	at com.esprit.utils.MyDataBase.mapAppUser(MyDataBase.java:326)
+	at com.esprit.utils.MyDataBase.findAllAppUsers(MyDataBase.java:263)
+	at com.esprit.services.UserService.getAllAppUsers(UserService.java:380)
+	at com.esprit.controllers.AdminDashboardController.loadData(AdminDashboardController.java:159)
+	at com.esprit.controllers.AdminDashboardController.initialize(AdminDashboardController.java:136)
+	... 24 more
+CAUSED BY: java.lang.reflect.InvocationTargetException
+java.lang.reflect.InvocationTargetException
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at com.sun.javafx.reflect.Trampoline.invoke(MethodUtil.java:72)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at com.sun.javafx.reflect.MethodUtil.invoke(MethodUtil.java:270)
+	at com.sun.javafx.fxml.MethodHelper.invoke(MethodHelper.java:84)
+	at javafx.fxml.FXMLLoader.loadImpl(FXMLLoader.java:2688)
+	at javafx.fxml.FXMLLoader.loadImpl(FXMLLoader.java:2563)
+	at javafx.fxml.FXMLLoader.load(FXMLLoader.java:2531)
+	at com.esprit.TestFxml.start(TestFxml.java:15)
+	at com.sun.javafx.application.LauncherImpl.lambda$launchApplication1$9(LauncherImpl.java:839)
+	at com.sun.javafx.application.PlatformImpl.lambda$runAndWait$12(PlatformImpl.java:483)
+	at com.sun.javafx.application.PlatformImpl.lambda$runLater$10(PlatformImpl.java:456)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:399)
+	at com.sun.javafx.application.PlatformImpl.lambda$runLater$11(PlatformImpl.java:455)
+	at com.sun.glass.ui.InvokeLaterDispatcher$Future.run(InvokeLaterDispatcher.java:95)
+	at com.sun.glass.ui.win.WinApplication._runLoop(Native Method)
+	at com.sun.glass.ui.win.WinApplication.lambda$runLoop$3(WinApplication.java:185)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+Caused by: java.lang.IllegalArgumentException: No enum constant com.esprit.entities.AppUser.UserType.COLLECTOR
+	at java.base/java.lang.Enum.valueOf(Enum.java:273)
+	at com.esprit.entities.AppUser$UserType.valueOf(AppUser.java:6)
+	at com.esprit.utils.MyDataBase.mapAppUser(MyDataBase.java:326)
+	at com.esprit.utils.MyDataBase.findAllAppUsers(MyDataBase.java:263)
+	at com.esprit.services.UserService.getAllAppUsers(UserService.java:380)
+	at com.esprit.controllers.AdminDashboardController.loadData(AdminDashboardController.java:159)
+	at com.esprit.controllers.AdminDashboardController.initialize(AdminDashboardController.java:136)
+	... 24 more
+CAUSED BY: java.lang.IllegalArgumentException: No enum constant com.esprit.entities.AppUser.UserType.COLLECTOR
+java.lang.IllegalArgumentException: No enum constant com.esprit.entities.AppUser.UserType.COLLECTOR
+	at java.base/java.lang.Enum.valueOf(Enum.java:273)
+	at com.esprit.entities.AppUser$UserType.valueOf(AppUser.java:6)
+	at com.esprit.utils.MyDataBase.mapAppUser(MyDataBase.java:326)
+	at com.esprit.utils.MyDataBase.findAllAppUsers(MyDataBase.java:263)
+	at com.esprit.services.UserService.getAllAppUsers(UserService.java:380)
+	at com.esprit.controllers.AdminDashboardController.loadData(AdminDashboardController.java:159)
+	at com.esprit.controllers.AdminDashboardController.initialize(AdminDashboardController.java:136)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at com.sun.javafx.reflect.Trampoline.invoke(MethodUtil.java:72)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at com.sun.javafx.reflect.MethodUtil.invoke(MethodUtil.java:270)
+	at com.sun.javafx.fxml.MethodHelper.invoke(MethodHelper.java:84)
+	at javafx.fxml.FXMLLoader.loadImpl(FXMLLoader.java:2688)
+	at javafx.fxml.FXMLLoader.loadImpl(FXMLLoader.java:2563)
+	at javafx.fxml.FXMLLoader.load(FXMLLoader.java:2531)
+	at com.esprit.TestFxml.start(TestFxml.java:15)
+	at com.sun.javafx.application.LauncherImpl.lambda$launchApplication1$9(LauncherImpl.java:839)
+	at com.sun.javafx.application.PlatformImpl.lambda$runAndWait$12(PlatformImpl.java:483)
+	at com.sun.javafx.application.PlatformImpl.lambda$runLater$10(PlatformImpl.java:456)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:399)
+	at com.sun.javafx.application.PlatformImpl.lambda$runLater$11(PlatformImpl.java:455)
+	at com.sun.glass.ui.InvokeLaterDispatcher$Future.run(InvokeLaterDispatcher.java:95)
+	at com.sun.glass.ui.win.WinApplication._runLoop(Native Method)
+	at com.sun.glass.ui.win.WinApplication.lambda$runLoop$3(WinApplication.java:185)
+	at java.base/java.lang.Thread.run(Thread.java:842)

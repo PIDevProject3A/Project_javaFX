@@ -1,4 +1,4 @@
-package services;
+package com.esprit.services;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -66,5 +66,6 @@ class CompreFaceFaceIdServiceTest {
         assertEquals(CompreFaceFaceIdService.RecognitionStatus.NO_FACE, result.status());
     }
 }
+
 
 
