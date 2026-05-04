@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.DeleteAccountController" stylesheets="@style.css">
+<BorderPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.esprit.controllers.DeleteAccountController" stylesheets="@style.css">
     <left>
         <VBox styleClass="sidebar">
             <Label text="BLADNA" styleClass="sidebar-title"/>
@@ -50,3 +50,4 @@
         </StackPane>
     </center>
 </BorderPane>
+

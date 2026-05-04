@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AdminDashboardController" stylesheets="@style.css">
+<BorderPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.esprit.controllers.AdminDashboardController" stylesheets="@style.css">
     <left>
         <VBox styleClass="sidebar">
             <Label text="BLADNA" styleClass="sidebar-title"/>
@@ -28,6 +28,11 @@
             <Button text="Manage Accounts" onAction="#refreshTable" styleClass="nav-button, nav-button-active">
                 <graphic>
                     <Label text="&#x1F465;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button text="Event Registration" onAction="#goToEventRegistrations" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F4CB;" styleClass="icon-label"/>
                 </graphic>
             </Button>
             <Button text="Settings" onAction="#goToSettings" styleClass="nav-button">
@@ -64,9 +69,10 @@
 
                 <TableView fx:id="accountsTable" VBox.vgrow="ALWAYS" styleClass="table-view">
                     <columns>
-                        <TableColumn fx:id="nameColumn" text="Name" prefWidth="200"/>
-                        <TableColumn fx:id="emailColumn" text="Email" prefWidth="250"/>
-                        <TableColumn fx:id="roleColumn" text="Role" prefWidth="150"/>
+                        <TableColumn fx:id="nameColumn" text="Name" prefWidth="180"/>
+                        <TableColumn fx:id="emailColumn" text="Email" prefWidth="220"/>
+                        <TableColumn fx:id="roleColumn" text="Role" prefWidth="130"/>
+                        <TableColumn fx:id="typeColumn" text="Type" prefWidth="80"/>
                     </columns>
                 </TableView>
 
@@ -100,3 +106,4 @@
         </StackPane>
     </center>
 </BorderPane>
+

@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.DashboardController" stylesheets="@style.css">
+<BorderPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.esprit.controllers.DashboardController" stylesheets="@style.css">
     <left>
         <VBox styleClass="sidebar">
             <Label text="BLADNA" styleClass="sidebar-title"/>
@@ -36,6 +36,11 @@
             <Button fx:id="manageAccountsButton" text="Manage Accounts" onAction="#goToManageAccounts" styleClass="nav-button">
                 <graphic>
                     <Label text="&#x1F465;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button fx:id="eventRegistrationButton" text="Event Registration" onAction="#goToEventRegistrations" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F4CB;" styleClass="icon-label"/>
                 </graphic>
             </Button>
             <Button fx:id="settingsButton" text="Settings" onAction="#goToSettings" styleClass="nav-button">
@@ -126,3 +131,4 @@
         </StackPane>
     </center>
 </BorderPane>
+

@@ -25,6 +25,7 @@
                         <Label styleClass="topics-hero-emoji" text="💬" />
                         <Label styleClass="topics-hero-title" text="Topics" />
                         <Region HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#goToDashboard" styleClass="btn-nav-accent" text="🔙 Dashboard" />
                         <Button mnemonicParsing="false" onAction="#goToAdd" styleClass="btn-nav-accent" text="New topic" />
                         <Button mnemonicParsing="false" onAction="#refresh" styleClass="btn-refresh" text="Refresh" />
                     </children>

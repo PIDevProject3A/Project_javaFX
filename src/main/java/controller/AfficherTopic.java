@@ -98,6 +98,25 @@ public class AfficherTopic implements Initializable {
     private Integer pinnedTopicId;
     private boolean savedOnlyMode;
 
+    @FXML
+    private void goToDashboard(ActionEvent event) {
+        try {
+            boolean isAdmin = com.esprit.utils.UserSession.getCurrentUserRole() != null;
+            String fxml = isAdmin ? "/Dashboard.fxml" : "/UserDashboard.fxml";
+            Parent root = FXMLLoader.load(getClass().getResource(fxml));
+            Stage stage = ownerStage();
+            stage.setScene(new Scene(root));
+            stage.setTitle(isAdmin ? "Dashboard" : "User Dashboard");
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur");
+            alert.setHeaderText(null);
+            alert.setContentText("Impossible de retourner à l'accueil.");
+            alert.showAndWait();
+        }
+    }
+
     private void updateNotifBadge() {
         if (notifBadge != null) {
             int count = notificationsGlobal.size();
