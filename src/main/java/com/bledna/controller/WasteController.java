@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.io.IOException;
 import com.bledna.util.AIService;
+import com.esprit.utils.UserSession;
 
 import javafx.scene.layout.StackPane;
 import javafx.fxml.FXMLLoader;
@@ -129,7 +130,7 @@ public class WasteController {
     private void loadData() {
         data.clear();
         try {
-            int userId = utils.UserSession.getCurrentUserId();
+            int userId = UserSession.getCurrentUserId();
             if (userId != -1) {
                 data.addAll(dao.getByCollector(userId));
             } else {
@@ -332,7 +333,7 @@ public class WasteController {
         // ── Sauvegarder
         WasteCollection w = isEdit ? existing : new WasteCollection();
         if (!isEdit) {
-            int userId = utils.UserSession.getCurrentUserId();
+            int userId = UserSession.getCurrentUserId();
             w.setCollectorId(userId != -1 ? userId : 1);
         }
         w.setLocationName(locationField.getText().trim());

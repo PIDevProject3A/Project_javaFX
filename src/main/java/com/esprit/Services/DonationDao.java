@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import entities.Donation;
-import utils.MyDataBase;
+import com.esprit.utils.MyDataBase;
 
 public class DonationDao {
     private static final String SELECT_ALL_SQL = """

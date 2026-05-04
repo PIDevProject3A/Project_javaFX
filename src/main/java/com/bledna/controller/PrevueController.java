@@ -19,6 +19,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
+import com.esprit.utils.UserSession;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -48,7 +49,7 @@ public class PrevueController {
     @FXML
     public void initialize() {
         try { 
-            int userId = utils.UserSession.getCurrentUserId();
+            int userId = UserSession.getCurrentUserId();
             if (userId != -1) {
                 wasteList = wasteDAO.getByCollector(userId);
             } else {
@@ -124,7 +125,7 @@ public class PrevueController {
     private void loadData() {
         data.clear();
         try {
-            int userId = utils.UserSession.getCurrentUserId();
+            int userId = UserSession.getCurrentUserId();
             if (userId != -1) {
                 data.addAll(dao.getByCollector(userId));
             } else {
@@ -241,7 +242,7 @@ public class PrevueController {
         // ── Sauvegarder
         PrevueCollection p = isEdit ? existing : new PrevueCollection();
         if (!isEdit) {
-            int userId = utils.UserSession.getCurrentUserId();
+            int userId = UserSession.getCurrentUserId();
             p.setCollectorId(userId != -1 ? userId : 1);
         }
         p.setTypeCollection(typeBox.getValue());

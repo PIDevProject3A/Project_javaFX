@@ -5,9 +5,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
-import utils.MyDataBase;
-import utils.SceneNavigator;
-import utils.UserSession;
+import com.esprit.utils.MyDataBase;
+import com.esprit.utils.SceneNavigator;
+import com.esprit.utils.UserSession;
 
 import java.io.IOException;
 

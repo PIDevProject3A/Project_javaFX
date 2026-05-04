@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import utils.MyDataBase;
-import utils.SceneNavigator;
+import com.esprit.utils.MyDataBase;
+import com.esprit.utils.SceneNavigator;
 import services.DonationDao;
 import entities.Donation;
 

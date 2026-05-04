@@ -13,8 +13,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import utils.MyDataBase;
-import utils.SceneNavigator;
+import com.esprit.utils.MyDataBase;
+import com.esprit.utils.SceneNavigator;
 import services.RecyclingBuyerDao;
 import entities.RecyclingBuyer;
 import entities.WeatherData;

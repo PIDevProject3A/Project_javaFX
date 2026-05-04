@@ -12,6 +12,7 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.layout.StackPane;
+import com.esprit.utils.UserSession;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -35,7 +36,7 @@ public class StatisticsController {
     private void loadStatistics() {
         try {
             // rcuperer les wastes de l'utilisateur connecté depuis la base de données
-            int userId = utils.UserSession.getCurrentUserId();
+            int userId = UserSession.getCurrentUserId();
             List<WasteCollection> collections;
             if (userId != -1) {
                 collections = dao.getByCollector(userId);

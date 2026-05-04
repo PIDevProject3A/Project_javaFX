@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import entities.RecyclingBuyer;
-import utils.MyDataBase;
+import com.esprit.utils.MyDataBase;
 
 public class RecyclingBuyerDao {
     private static final String SELECT_ALL_SQL = """

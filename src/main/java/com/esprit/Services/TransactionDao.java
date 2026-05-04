@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import entities.EcoTransaction;
-import utils.MyDataBase;
+import com.esprit.utils.MyDataBase;
 
 public class TransactionDao {
     private static final String SELECT_ALL_SQL = """
