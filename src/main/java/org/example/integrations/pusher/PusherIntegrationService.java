@@ -10,9 +10,9 @@ public class PusherIntegrationService {
 
     private static synchronized Pusher getPusher() {
         if (pusher == null) {
-            String appId = EnvConfig.getOptional("PUSHER_APP_ID", "votre_app_id");
-            String key = EnvConfig.getOptional("PUSHER_KEY", "votre_key");
-            String secret = EnvConfig.getOptional("PUSHER_SECRET", "votre_secret");
+            String appId = EnvConfig.getOptional("PUSHER_APP_ID", "2149597");
+            String key = EnvConfig.getOptional("PUSHER_KEY", "9256dc0c0445a15cbceb");
+            String secret = EnvConfig.getOptional("PUSHER_SECRET", "29df216f621d112f80e8");
             String cluster = EnvConfig.getOptional("PUSHER_CLUSTER", "eu");
             pusher = new Pusher(appId, key, secret);
             pusher.setCluster(cluster);
