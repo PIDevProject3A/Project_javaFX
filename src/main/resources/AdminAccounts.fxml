@@ -21,9 +21,14 @@
             
             <Region prefHeight="20"/>
 
-            <Button text="Dashboard" onAction="#goBack" styleClass="nav-button">
+            <Button text="Dashboard" onAction="#goToDashboard" styleClass="nav-button">
                 <graphic>
-                    <Label text="&#x2B05;" styleClass="icon-label"/>
+                    <Label text="&#x1F3E0;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button text="Manage Accounts" onAction="#goBack" styleClass="nav-button, nav-button-active">
+                <graphic>
+                    <Label text="&#x1F465;" styleClass="icon-label"/>
                 </graphic>
             </Button>
             <Button text="Manage Face ID" onAction="#goToFaceIdManagement" styleClass="nav-button">
@@ -32,6 +37,11 @@
                 </graphic>
             </Button>
             <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Logout" onAction="#logout" styleClass="nav-button, nav-button-logout">
+                <graphic>
+                    <Label text="&#x2B05;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
         </VBox>
     </left>
 

@@ -10,6 +10,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import com.esprit.services.EmailService;
 import com.esprit.services.UserService;
+import com.esprit.utils.MyDataBase;
 import com.esprit.utils.SceneNavigator;
 import com.esprit.utils.UserSession;
 
@@ -62,68 +63,82 @@ public class AdminAccountsController {
 
     @FXML
     private void handleCreateAccount() {
-        User.AdminType currentRole = UserSession.getCurrentUserRole();
-        if (currentRole != User.AdminType.ADMIN_ACCOUNT) {
-            setMessage("Access denied: admin role required.", false);
-            return;
+        try {
+            User.AdminType currentRole = UserSession.getCurrentUserRole();
+            if (currentRole != User.AdminType.ADMIN_ACCOUNT) {
+                setMessage("Access denied: admin role required.", false);
+                return;
+            }
+
+            String selectedRole = roleBox.getValue();
+            if (selectedRole == null) {
+                setMessage("Please select a role.", false);
+                return;
+            }
+
+            String plainPassword = passwordField.getText();
+            String email = emailField.getText();
+            String firstName = firstNameField.getText();
+            String lastName = lastNameField.getText();
+            String result;
+
+            if (isAdminRole(selectedRole)) {
+                User.AdminType targetAdminType = mapToAdminType(selectedRole);
+                result = userService.createAccountByAdmin(currentRole, firstName, lastName, email, plainPassword, targetAdminType);
+            } else {
+                AppUser.UserType userType = mapToUserType(selectedRole);
+                result = userService.createAppUser(currentRole, firstName, lastName, email, plainPassword, userType);
+            }
+
+            if ("SUCCESS".equals(result)) {
+                setMessage("Account created successfully. Sending welcome email...", true);
+
+                // Send welcome email in background
+                String welcomeEmail = email.trim().toLowerCase();
+                String welcomeName = firstName.trim();
+                String welcomeRole = selectedRole;
+                String welcomePassword = plainPassword;
+
+                new Thread(() -> {
+                    try {
+                        String subject = "Bienvenue sur BLADNA - Votre compte a ete cree";
+                        String message = String.format(
+                                "Bonjour %s,\n\n" +
+                                "Votre compte BLADNA a ete cree avec succes.\n\n" +
+                                "Vos identifiants de connexion :\n" +
+                                "Email : %s\n" +
+                                "Mot de passe : %s\n" +
+                                "Role : %s\n\n" +
+                                "Veuillez vous connecter et changer votre mot de passe des que possible.\n\n" +
+                                "Cordialement,\n" +
+                                "L'equipe BLADNA",
+                                welcomeName, welcomeEmail, welcomePassword, welcomeRole
+                        );
+                        emailService.sendEmail(welcomeEmail, subject, message);
+                    } catch (Exception emailException) {
+                        emailException.printStackTrace();
+                    }
+                }).start();
+
+                clearFields();
+                return;
+            }
+
+            setMessage(result, false);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            setMessage("Unable to create account: " + exception.getMessage(), false);
         }
-
-        String selectedRole = roleBox.getValue();
-        if (selectedRole == null) {
-            setMessage("Please select a role.", false);
-            return;
-        }
-
-        String plainPassword = passwordField.getText();
-        String email = emailField.getText();
-        String firstName = firstNameField.getText();
-        String lastName = lastNameField.getText();
-        String result;
-
-        if (isAdminRole(selectedRole)) {
-            User.AdminType targetAdminType = mapToAdminType(selectedRole);
-            result = userService.createAccountByAdmin(currentRole, firstName, lastName, email, plainPassword, targetAdminType);
-        } else {
-            AppUser.UserType userType = mapToUserType(selectedRole);
-            result = userService.createAppUser(currentRole, firstName, lastName, email, plainPassword, userType);
-        }
-
-        if ("SUCCESS".equals(result)) {
-            setMessage("Account created successfully. Sending welcome email...", true);
-
-            // Send welcome email in background
-            String welcomeEmail = email.trim().toLowerCase();
-            String welcomeName = firstName.trim();
-            String welcomeRole = selectedRole;
-            String welcomePassword = plainPassword;
-
-            new Thread(() -> {
-                String subject = "Bienvenue sur BLADNA - Votre compte a ete cree";
-                String message = String.format(
-                        "Bonjour %s,\n\n" +
-                        "Votre compte BLADNA a ete cree avec succes.\n\n" +
-                        "Vos identifiants de connexion :\n" +
-                        "Email : %s\n" +
-                        "Mot de passe : %s\n" +
-                        "Role : %s\n\n" +
-                        "Veuillez vous connecter et changer votre mot de passe des que possible.\n\n" +
-                        "Cordialement,\n" +
-                        "L'equipe BLADNA",
-                        welcomeName, welcomeEmail, welcomePassword, welcomeRole
-                );
-                emailService.sendEmail(welcomeEmail, subject, message);
-            }).start();
-
-            clearFields();
-            return;
-        }
-
-        setMessage(result, false);
     }
 
     @FXML
     private void goBack() {
         switchScene("/AdminDashboard.fxml");
+    }
+
+    @FXML
+    private void goToDashboard() {
+        switchScene("/Dashboard.fxml");
     }
 
     @FXML
@@ -133,6 +148,16 @@ public class AdminAccountsController {
             return;
         }
         switchScene("/FaceIdAdminManagement.fxml");
+    }
+
+    @FXML
+    private void logout() {
+        int logId = UserSession.getCurrentLoginLogId();
+        if (logId != -1) {
+            MyDataBase.getInstance().updateLogoutTime(logId);
+        }
+        UserSession.clear();
+        switchScene("/Login.fxml");
     }
 
     private boolean isAdminRole(String role) {

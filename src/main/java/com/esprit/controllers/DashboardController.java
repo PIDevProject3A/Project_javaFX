@@ -181,6 +181,21 @@ public class DashboardController {
     }
 
     @FXML
+    private void goToDonation() {
+        switchScene("/donation.fxml");
+    }
+
+    @FXML
+    private void goToGps() {
+        switchScene("/gps.fxml");
+    }
+
+    @FXML
+    private void goToTransaction() {
+        switchScene("/transaction.fxml");
+    }
+
+    @FXML
     private void goToDeleteAccount() {
         switchScene("/DeleteAccount.fxml");
     }

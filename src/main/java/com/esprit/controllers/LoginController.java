@@ -105,9 +105,11 @@ public class LoginController {
 
         if (result.isAdmin()) {
             User user = result.getAdminUser();
+            UserSession.setCurrentUserId(user.getId());
             UserSession.setCurrentUserEmail(user.getEmail());
             UserSession.setCurrentUserRole(user.getAdminType());
             UserSession.setIsAppUser(false);
+            UserSession.setCurrentAppUserType(null);
 
             int logId = MyDataBase.getInstance().insertLoginLog(user.getId(), user.getAdminType().name());
             UserSession.setCurrentLoginLogId(logId);
@@ -120,6 +122,7 @@ public class LoginController {
             }
         } else {
             AppUser appUser = result.getAppUser();
+            UserSession.setCurrentUserId(appUser.getId());
             UserSession.setCurrentUserEmail(appUser.getEmail());
             UserSession.setIsAppUser(true);
             UserSession.setCurrentAppUserType(appUser.getUserType());
@@ -129,7 +132,12 @@ public class LoginController {
             UserSession.setCurrentLoginLogId(logId);
 
             notifyAdminsForAppUser(appUser, "Connexion");
-            switchScene("/UserDashboard.fxml");
+            
+            if (appUser.getUserType() == AppUser.UserType.Collector) {
+                switchScene("/com/bledna/CollectorMain.fxml");
+            } else {
+                switchScene("/UserDashboard.fxml");
+            }
         }
     }
 
@@ -170,6 +178,7 @@ public class LoginController {
         // Try admin tables first
         User adminUser = userService.findByFaceSubject(recognitionResult.subject());
         if (adminUser != null) {
+            UserSession.setCurrentUserId(adminUser.getId());
             UserSession.setCurrentUserEmail(adminUser.getEmail());
             UserSession.setCurrentUserRole(adminUser.getAdminType());
             UserSession.setIsAppUser(false);
@@ -185,6 +194,7 @@ public class LoginController {
         // Try users table
         AppUser appUser = userService.findAppUserByFaceSubject(recognitionResult.subject());
         if (appUser != null) {
+            UserSession.setCurrentUserId(appUser.getId());
             UserSession.setCurrentUserEmail(appUser.getEmail());
             UserSession.setIsAppUser(true);
             UserSession.setCurrentAppUserType(appUser.getUserType());
@@ -194,7 +204,12 @@ public class LoginController {
             UserSession.setCurrentLoginLogId(logId);
 
             notifyAdminsForAppUser(appUser, "Connexion (Face ID)");
-            switchScene("/UserDashboard.fxml");
+            
+            if (appUser.getUserType() == AppUser.UserType.Collector) {
+                switchScene("/com/bledna/CollectorMain.fxml");
+            } else {
+                switchScene("/UserDashboard.fxml");
+            }
             return;
         }
 

@@ -11,7 +11,7 @@ import java.util.*;
 
 public class MyDataBase {
     private static final MyDataBase INSTANCE = new MyDataBase();
-    private static final String DB_NAME = "bledna";
+    private static final String DB_NAME = "pidevjava";
     private static final String JDBC_OPTIONS = "useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     private static final String SERVER_URL = "jdbc:mysql://localhost:3306/?"+ JDBC_OPTIONS;
     private static final String URL = "jdbc:mysql://localhost:3306/" + DB_NAME + "?" + JDBC_OPTIONS;

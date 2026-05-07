@@ -11,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import com.esprit.services.UserService;
+import com.esprit.utils.MyDataBase;
 import com.esprit.utils.SceneNavigator;
 import com.esprit.utils.UserSession;
 
@@ -161,6 +162,21 @@ public class UpdateUserController {
         UserSession.setUserToEdit(null);
         UserSession.setAppUserToEdit(null);
         switchScene("/AdminDashboard.fxml");
+    }
+
+    @FXML
+    private void goToDashboard() {
+        switchScene("/Dashboard.fxml");
+    }
+
+    @FXML
+    private void logout() {
+        int logId = UserSession.getCurrentLoginLogId();
+        if (logId != -1) {
+            MyDataBase.getInstance().updateLogoutTime(logId);
+        }
+        UserSession.clear();
+        switchScene("/Login.fxml");
     }
 
     private void switchScene(String fxml) {
