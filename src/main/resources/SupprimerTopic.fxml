@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controller.SupprimerTopicController"
+            minWidth="400.0" prefWidth="460.0" prefHeight="260.0"
+            styleClass="root-dialog social-dialog sm-modal-shell"
+            stylesheets="@app.css">
+    <children>
+        <VBox spacing="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <Region styleClass="dialog-accent-bar" maxWidth="Infinity"/>
+                <VBox spacing="16.0" styleClass="dialog-scroll" VBox.vgrow="ALWAYS">
+                    <padding>
+                        <Insets bottom="20.0" left="22.0" right="22.0" top="16.0"/>
+                    </padding>
+                    <children>
+                        <VBox spacing="14.0" styleClass="dialog-card delete-confirm-card sm-alert-card" maxWidth="Infinity">
+                            <children>
+                                <Label styleClass="heading-dialog sm-alert-title" text="Delete topic"/>
+                                <Label fx:id="messageLabel" styleClass="value-text delete-confirm-msg" wrapText="true"
+                                       maxWidth="Infinity"/>
+                                <Label styleClass="label-muted" wrapText="true" maxWidth="Infinity"
+                                       text="You cannot undo this. Replies under this topic will be removed too."/>
+                                <HBox alignment="CENTER_RIGHT" spacing="12.0">
+                                    <padding>
+                                        <Insets top="12.0"/>
+                                    </padding>
+                                    <children>
+                                        <Button mnemonicParsing="false" onAction="#cancel" styleClass="btn-secondary"
+                                                text="Cancel"/>
+                                        <Button mnemonicParsing="false" onAction="#confirmDelete" styleClass="btn-danger"
+                                                text="Delete"/>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

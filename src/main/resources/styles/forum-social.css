@@ -1,0 +1,142 @@
+/* PREMIUM SAAS DESIGN SYSTEM - Forum Social Feed */
+
+.root-dialog, .social-feed-root, .root-form.social-skin {
+    -fx-background-color: #F8FAFC;
+    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.social-hero {
+    -fx-background-color: linear-gradient(to bottom right, #2D5A3D 0%, #4A7C59 50%, #87A96B 100%);
+    -fx-background-radius: 12;
+    -fx-padding: 24 32;
+    -fx-effect: dropshadow(gaussian, rgba(45, 90, 61, 0.3), 15, 0, 0, 5);
+}
+
+.social-hero-emoji {
+    -fx-font-size: 32px;
+    -fx-padding: 0 16 0 0;
+}
+
+.social-hero-title {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 24px;
+    -fx-font-weight: 800;
+}
+
+.social-hero-sub, .social-hero-meta {
+    -fx-text-fill: #A5D6A7; /* Indigo 300 */
+    -fx-font-size: 14px;
+    -fx-wrap-text: true;
+}
+
+/* Feed-style tables */
+.table-feed {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.table-feed .column-header-background {
+    -fx-background-color: #F1F5F9; /* Slate 100 */
+    -fx-background-radius: 8 8 0 0;
+}
+
+.table-feed .column-header,
+.table-feed .filler {
+    -fx-size: 44px;
+}
+
+.table-feed .column-header .label {
+    -fx-text-fill: #475569; /* Slate 600 */
+    -fx-font-weight: 700;
+    -fx-font-size: 13px;
+}
+
+.table-feed .table-row-cell {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 8;
+    -fx-background-insets: 2;
+    -fx-border-width: 1;
+    -fx-padding: 4 2;
+}
+
+.table-feed .table-row-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.table-feed .table-row-cell:hover {
+    -fx-background-color: #F8FAFC;
+}
+
+.table-feed .table-row-cell:selected {
+    -fx-background-color: #F1F8E9; /* Indigo 50 */
+    -fx-border-color: #cce2c7; /* Indigo 200 */
+}
+
+.table-feed .table-cell {
+    -fx-padding: 12 14;
+    -fx-border-color: transparent;
+}
+
+.table-feed .table-view:focused .table-row-cell:selected {
+    -fx-background-color: #d8f0d9; /* Indigo 100 */
+}
+
+/* Avatar chip */
+.avatar-chip {
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-alignment: center;
+    -fx-background-color: #2E7D32; /* Indigo 600 */
+    -fx-background-radius: 50%;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.member-block {
+    -fx-spacing: 2;
+}
+
+.member-name {
+    -fx-text-fill: #0F172A;
+    -fx-font-size: 14px;
+    -fx-font-weight: 800;
+}
+
+.member-hint, .col-date-muted {
+    -fx-text-fill: #94A3B8;
+    -fx-font-size: 12px;
+}
+
+.col-message {
+    -fx-text-fill: #334155;
+    -fx-font-size: 14px;
+}
+
+.col-date {
+    -fx-text-fill: #64748B;
+    -fx-font-size: 12px;
+}
+
+.btn-feed-action {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E8F0;
+    -fx-text-fill: #334155;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-padding: 6 14;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-cursor: hand;
+}
+
+.btn-feed-action:hover {
+    -fx-background-color: #F8FAFC;
+    -fx-text-fill: #0F172A;
+    -fx-border-color: #CBD5E1;
+}

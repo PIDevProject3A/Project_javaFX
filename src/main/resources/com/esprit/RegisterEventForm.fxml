@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.DatePicker?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" stylesheets="@bledna-theme.css" fx:controller="com.esprit.controllers.RegisterEventFormController"
+            prefWidth="520" prefHeight="620" styleClass="root">
+    <children>
+        <VBox layoutX="28" layoutY="20" spacing="14" prefWidth="464">
+            <children>
+                <Label text="🌿 Registration (bledna)" styleClass="label-title"/>
+                <Label text="Register for event" styleClass="label-subtitle"/>
+                <Label fx:id="eventTitleLabel" wrapText="true" style="-fx-font-size: 15; -fx-font-weight: bold;"/>
+                <Label fx:id="eventDetailsLabel" wrapText="true" style="-fx-font-size: 13;"/>
+                <Separator/>
+                <Label text="Your details" style="-fx-font-weight: bold; -fx-text-fill: #1b5e20;"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <children>
+                        <Label text="First Name *" prefWidth="100"/>
+                        <TextField fx:id="firstNameField" promptText="First Name" prefWidth="300"/>
+                    </children>
+                </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <children>
+                        <Label text="Last Name *" prefWidth="100"/>
+                        <TextField fx:id="lastNameField" promptText="Last Name" prefWidth="300"/>
+                    </children>
+                </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <children>
+                        <Label text="Email *" prefWidth="100"/>
+                        <TextField fx:id="emailField" promptText="e.g. user@email.com" prefWidth="300"/>
+                    </children>
+                </HBox>
+                <Separator/>
+                <Label text="Registration date and time" style="-fx-font-weight: bold; -fx-text-fill: #1b5e20;"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <children>
+                        <Label text="Date *" prefWidth="100"/>
+                        <DatePicker fx:id="registrationDatePicker" prefWidth="200"/>
+                    </children>
+                </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <children>
+                        <Label text="Time *" prefWidth="100"/>
+                        <TextField fx:id="registrationTimeField" promptText="e.g. 14:30" prefWidth="120"/>
+                    </children>
+                </HBox>
+                <Separator/>
+                <Label text="Pricing (fixed, organizer)" style="-fx-font-weight: bold; -fx-text-fill: #1b5e20;"/>
+                <Label fx:id="fixedAmountLabel" wrapText="true" style="-fx-font-size: 14; -fx-text-fill: #2e7d32; -fx-font-weight: bold;"/>
+                <Label fx:id="fixedPaymentLabel" wrapText="true" style="-fx-text-fill: #37474f;"/>
+                <HBox spacing="12" style="-fx-padding: 18 0 0 0;">
+                    <children>
+                        <Button fx:id="submitBtn" text="✓ Confirm Registration" onAction="#handleSubmit" styleClass="btn-primary"/>
+                        <Button fx:id="cancelBtn" text="Cancel" onAction="#handleCancel" styleClass="btn-secondary"/>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>
+

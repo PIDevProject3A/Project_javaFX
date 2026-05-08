@@ -1,0 +1,7 @@
+/* Single stylesheet entry for all screens — FXML: stylesheets="@app.css" */
+@import url("styles/topic-dialog.css");
+@import url("styles/ajouter-topic.css");
+@import url("styles/afficher-topic.css");
+@import url("styles/reponse-list.css");
+@import url("styles/forum-social.css");
+@import url("styles/social-feed-screens.css");

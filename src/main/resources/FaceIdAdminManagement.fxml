@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.esprit.controllers.FaceIdAdminManagementController" stylesheets="@style.css">
+    <left>
+        <VBox styleClass="sidebar">
+            <Label text="BLADNA" styleClass="sidebar-title"/>
+            <Label text="Face ID Admin" styleClass="sidebar-subtitle"/>
+            
+            <Region prefHeight="20"/>
+
+            <Button text="Dashboard" onAction="#goBack" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x2B05;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Region VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </left>
+
+    <center>
+        <StackPane styleClass="content-area">
+            <VBox styleClass="page-card" maxWidth="760" spacing="12">
+                <Label text="Face ID Management" styleClass="title"/>
+                <Label text="Select a user to add, modify, or delete their Face ID." styleClass="subtitle" wrapText="true"/>
+
+                <Label text="User" styleClass="form-label"/>
+                <ComboBox fx:id="userBox" promptText="Select a user" maxWidth="Infinity"/>
+
+                <Label text="Status" styleClass="form-label"/>
+                <Label fx:id="faceIdStatusLabel" styleClass="subtitle" text="No user selected."/>
+
+                <HBox spacing="10">
+                    <Button fx:id="addFaceIdBtn" text="Add Face ID" onAction="#handleAddFaceId" styleClass="primary-button">
+                        <graphic>
+                            <Label text="&#x1F4F7;" styleClass="icon-label"/>
+                        </graphic>
+                    </Button>
+                    <Button fx:id="deleteFaceIdBtn" text="Delete Face ID" onAction="#handleDeleteFaceId" styleClass="danger-button">
+                        <graphic>
+                            <Label text="&#x1F5D1;" styleClass="icon-label"/>
+                        </graphic>
+                    </Button>
+                </HBox>
+
+                <Label fx:id="messageLabel" styleClass="status-message" wrapText="true" visible="false" managed="false"/>
+            </VBox>
+            <padding>
+                <Insets top="6" right="6" bottom="6" left="6"/>
+            </padding>
+        </StackPane>
+    </center>
+</BorderPane>
+

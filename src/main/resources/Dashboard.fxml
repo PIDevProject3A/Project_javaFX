@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.esprit.controllers.DashboardController" stylesheets="@style.css">
+    <left>
+        <VBox styleClass="sidebar">
+            <Label fx:id="sidebarTitle" text="%sidebar.title" styleClass="sidebar-title"/>
+            <Label fx:id="sidebarSubtitle" text="%sidebar.subtitle" styleClass="sidebar-subtitle"/>
+            
+            <Region prefHeight="20"/>
+            
+            <Button fx:id="dashboardNavButton" text="%nav.dashboard" onAction="#showDashboardView" styleClass="nav-button, nav-button-active">
+                <graphic>
+                    <Label text="&#x1F3E0;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button fx:id="communityNavButton" text="%nav.community" onAction="#showCommunityView" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F4AC;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button fx:id="manageAccountsButton" text="%nav.accounts" onAction="#goToManageAccounts" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F465;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button fx:id="eventRegistrationButton" text="%nav.events" onAction="#goToEventRegistrations" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F4CB;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button fx:id="settingsButton" text="%nav.settings" onAction="#goToSettings" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x2699;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button fx:id="donationButton" text="%nav.donation" onAction="#goToDonation" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F4B0;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button fx:id="gpsButton" text="%nav.gps" onAction="#goToGps" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F4CD;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            <Button fx:id="transactionButton" text="%nav.transaction" onAction="#goToTransaction" styleClass="nav-button">
+                <graphic>
+                    <Label text="&#x1F4C4;" styleClass="icon-label"/>
+                </graphic>
+            </Button>
+            
+            <!-- Appearance & Session Controls -->
+            <VBox spacing="10" style="-fx-padding: 15 0 0 0; -fx-border-color: rgba(255,255,255,0.1) transparent transparent transparent;">
+                <HBox spacing="8" alignment="CENTER" styleClass="appearance-box">
+                    <Button fx:id="btnEn" text="EN" onAction="#setEnglish" styleClass="lang-button, lang-button-active"/>
+                    <Button fx:id="btnFr" text="FR" onAction="#setFrench" styleClass="lang-button"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="themeToggleButton" onAction="#toggleTheme" styleClass="theme-button">
+                        <graphic>
+                            <Label fx:id="themeIcon" text="&#x1F319;" styleClass="icon-label"/>
+                        </graphic>
+                    </Button>
+                </HBox>
+                
+                <Button fx:id="logoutButton" text="%nav.logout" onAction="#logout" styleClass="nav-button, nav-button-logout">
+                    <graphic>
+                        <Label text="&#x2B05;" styleClass="icon-label"/>
+                    </graphic>
+                </Button>
+            </VBox>
+        </VBox>
+    </left>
+
+    <center>
+        <StackPane fx:id="mainContentStack" styleClass="content-area">
+            <VBox fx:id="mainDashboardContent" spacing="20">
+                <!-- Header -->
+                <VBox>
+                    <Label fx:id="contentTitle" text="%content.title" styleClass="title"/>
+                    <Label fx:id="welcomeLabel" text="%content.subtitle" styleClass="subtitle"/>
+                </VBox>
+
+                <!-- Non-Admin Shortcuts -->
+                <VBox fx:id="nonAdminContainer" spacing="15" styleClass="page-card" visible="false" managed="false">
+                    <Label text="%nonadmin.management" styleClass="section-title"/>
+                    <Label text="%nonadmin.subtitle" styleClass="subtitle"/>
+                    <HBox spacing="10">
+                        <Button text="%btn.delete_account" onAction="#goToDeleteAccount" styleClass="danger-button">
+                            <graphic>
+                                <Label text="&#x1F5D1;" styleClass="icon-label"/>
+                            </graphic>
+                        </Button>
+                    </HBox>
+                </VBox>
+
+                <!-- Stats Cards -->
+                <HBox fx:id="statsCardsContainer" spacing="20">
+                    <VBox styleClass="stat-card, stat-card-green" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="&#x1F465;" styleClass="icon-label" style="-fx-text-fill: rgba(255,255,255,0.6);"/>
+                            <Label fx:id="totalUsersTitle" text="%stats.total_users" styleClass="stat-label"/>
+                        </HBox>
+                        <Label fx:id="totalUsersLabel" text="0" styleClass="stat-value"/>
+                    </VBox>
+                    <VBox styleClass="stat-card, stat-card-blue" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="&#x1F4F1;" styleClass="icon-label" style="-fx-text-fill: rgba(255,255,255,0.6);"/>
+                            <Label fx:id="activeUsersTitle" text="%stats.active_users" styleClass="stat-label"/>
+                        </HBox>
+                        <Label fx:id="activeUsersLabel" text="0" styleClass="stat-value"/>
+                    </VBox>
+                    <VBox styleClass="stat-card, stat-card-orange" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="&#x23F2;" styleClass="icon-label" style="-fx-text-fill: rgba(255,255,255,0.6);"/>
+                            <Label fx:id="todayLoginsTitle" text="%stats.today_logins" styleClass="stat-label"/>
+                        </HBox>
+                        <Label fx:id="todayLoginsLabel" text="0" styleClass="stat-value"/>
+                    </VBox>
+                    <VBox styleClass="stat-card, stat-card-purple" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="&#x2709;" styleClass="icon-label" style="-fx-text-fill: rgba(255,255,255,0.6);"/>
+                            <Label fx:id="emailsSentTitle" text="%stats.emails_sent" styleClass="stat-label"/>
+                        </HBox>
+                        <Label fx:id="emailsSentLabel" text="0" styleClass="stat-value"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Admin Charts Section -->
+                <GridPane fx:id="chartsContainer" hgap="20" vgap="20" VBox.vgrow="ALWAYS">
+                    <VBox styleClass="chart-container" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2">
+                        <Label fx:id="loginChartTitle" text="%chart.evolution" styleClass="section-title"/>
+                        <LineChart fx:id="loginEvolutionChart" createSymbols="true" prefHeight="350">
+                            <xAxis><CategoryAxis side="BOTTOM" /></xAxis>
+                            <yAxis><NumberAxis side="LEFT" /></yAxis>
+                        </LineChart>
+                    </VBox>
+                    
+                    <VBox styleClass="chart-container" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                        <Label fx:id="rolesChartTitle" text="%chart.roles" styleClass="section-title"/>
+                        <PieChart fx:id="roleDistributionChart" legendSide="BOTTOM" prefHeight="300" />
+                    </VBox>
+ 
+                    <VBox styleClass="chart-container" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <Label fx:id="activityChartTitle" text="%chart.activity" styleClass="section-title"/>
+                        <BarChart fx:id="dailyActivityChart" prefHeight="300">
+                            <xAxis><CategoryAxis side="BOTTOM" /></xAxis>
+                            <yAxis><NumberAxis side="LEFT" /></yAxis>
+                        </BarChart>
+                    </VBox>
+                </GridPane>
+
+                <!-- Event Manager Section -->
+                <VBox fx:id="eventManagerDashboard" spacing="20" visible="false" managed="false">
+                    <HBox spacing="20">
+                        <VBox styleClass="stat-card, stat-card-green" HBox.hgrow="ALWAYS">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Label text="&#x1F4CB;" styleClass="icon-label" style="-fx-text-fill: rgba(255,255,255,0.6);"/>
+                                <Label fx:id="totalEventsTitle" text="%stats.total_events" styleClass="stat-label"/>
+                            </HBox>
+                            <Label fx:id="totalEventsLabel" text="0" styleClass="stat-value"/>
+                        </VBox>
+                        <VBox styleClass="stat-card, stat-card-purple" HBox.hgrow="ALWAYS">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Label text="&#x1F3AB;" styleClass="icon-label" style="-fx-text-fill: rgba(255,255,255,0.6);"/>
+                                <Label fx:id="totalRegistrationsTitle" text="%stats.total_registrations" styleClass="stat-label"/>
+                            </HBox>
+                            <Label fx:id="totalRegistrationsLabel" text="0" styleClass="stat-value"/>
+                        </VBox>
+                    </HBox>
+                    
+                    <VBox styleClass="chart-container" VBox.vgrow="ALWAYS">
+                        <Label fx:id="eventActivityTitle" text="%chart.event_activity" styleClass="section-title"/>
+                        <BarChart fx:id="eventActivityChart" prefHeight="400">
+                            <xAxis><CategoryAxis side="BOTTOM" /></xAxis>
+                            <yAxis><NumberAxis side="LEFT" /></yAxis>
+                        </BarChart>
+                    </VBox>
+                </VBox>
+            </VBox>
+
+            <!-- Full screen forum container -->
+            <VBox fx:id="forumContainer" visible="false" managed="false" VBox.vgrow="ALWAYS" />
+        </StackPane>
+    </center>
+</BorderPane>
+

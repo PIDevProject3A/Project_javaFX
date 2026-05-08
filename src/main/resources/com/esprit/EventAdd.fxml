@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" stylesheets="@bledna-theme.css" fx:controller="com.esprit.controllers.EventAddController" prefWidth="1000" prefHeight="700">
+    <children>
+        <VBox layoutX="100" layoutY="30" prefWidth="800" spacing="25" style="-fx-padding: 20;">
+            <children>
+                <!-- Title -->
+                <Label text="➕ Add New Event" styleClass="label-title" style="-fx-font-size: 28;" />
+
+                <!-- Form in a premium card -->
+                <VBox spacing="20" styleClass="bledna-card">
+                    <children>
+                        <!-- Name -->
+                        <VBox spacing="8">
+                            <children>
+                                <Label text="Event Name *" styleClass="label-subtitle" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+                                <TextField fx:id="nameField" promptText="Enter event name" styleClass="text-field" />
+                            </children>
+                        </VBox>
+
+                        <!-- Description -->
+                        <VBox spacing="8">
+                            <children>
+                                <Label text="Description *" styleClass="label-subtitle" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+                                <TextArea fx:id="descriptionField" promptText="Enter event description" wrapText="true" prefRowCount="3" styleClass="text-area" />
+                            </children>
+                        </VBox>
+
+                        <!-- Date and Location -->
+                        <HBox spacing="20">
+                            <children>
+                                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Event Date *" styleClass="label-subtitle" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+                                        <DatePicker fx:id="eventDatePicker" maxWidth="Infinity" styleClass="date-picker" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Location *" styleClass="label-subtitle" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+                                        <TextField fx:id="locationField" promptText="Enter location" styleClass="text-field" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <!-- Price and Type -->
+                        <HBox spacing="20">
+                            <children>
+                                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Price (TND) *" styleClass="label-subtitle" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+                                        <TextField fx:id="priceField" promptText="Ex: 50.0" styleClass="text-field" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Event Type *" styleClass="label-subtitle" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+                                        <ComboBox fx:id="typeCombo" promptText="Choose..." maxWidth="Infinity" styleClass="combo-box" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <!-- Capacity -->
+                        <VBox spacing="8">
+                            <children>
+                                <Label text="Max Capacity *" styleClass="label-subtitle" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+                                <TextField fx:id="maxPlacesField" promptText="100" styleClass="text-field" />
+                            </children>
+                        </VBox>
+
+                        <!-- Validation Message -->
+                        <Label fx:id="inputMessageLabel" text="" style="-fx-text-fill: #e53935; -fx-font-weight: bold;" />
+                    </children>
+                </VBox>
+
+                <!-- Action Buttons -->
+                <HBox spacing="20" style="-fx-alignment: CENTER_RIGHT;">
+                    <children>
+                        <Button text="❌ Cancel" fx:id="cancelBtn" onAction="#handleCancel" styleClass="btn-secondary" />
+                        <Button text="✅ Create Event" fx:id="createBtn" onAction="#handleCreate" styleClass="btn-primary" />
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>
+

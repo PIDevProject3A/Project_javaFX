@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controller.DetailReponseController"
+            minWidth="500.0" minHeight="480.0" prefWidth="560.0" prefHeight="600.0"
+            styleClass="social-post-root"
+            stylesheets="@app.css">
+    <children>
+        <VBox spacing="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="social-post-topbar" maxWidth="Infinity">
+                    <children>
+                        <Label styleClass="social-post-topbar-title" text="PREVIEW · REPLY"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button mnemonicParsing="false" onAction="#close" styleClass="sm-topbar-close" text="Close"/>
+                    </children>
+                </HBox>
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="social-post-scroll"
+                            vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS">
+                    <content>
+                        <VBox alignment="TOP_CENTER" maxWidth="Infinity" styleClass="sm-post-outer">
+                            <children>
+                                <VBox spacing="0.0" styleClass="sm-post-card" maxWidth="Infinity">
+                                    <children>
+                                        <HBox alignment="TOP_LEFT" spacing="14.0" styleClass="sm-post-author-row"
+                                              maxWidth="Infinity">
+                                            <children>
+                                                <StackPane styleClass="sm-avatar">
+                                                    <children>
+                                                        <Label fx:id="labAvatar" styleClass="sm-avatar-label" text="?"/>
+                                                    </children>
+                                                </StackPane>
+                                                <VBox spacing="4.0" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                                                    <children>
+                                                        <Label styleClass="sm-kicker" text="Reply in this topic"/>
+                                                        <Label fx:id="labTopic" styleClass="sm-post-headline"
+                                                               wrapText="true" maxWidth="Infinity"/>
+                                                        <Label fx:id="labAuthor" styleClass="label-muted"
+                                                               wrapText="true" maxWidth="Infinity"/>
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </HBox>
+                                        <FlowPane hgap="8.0" vgap="8.0" styleClass="sm-badges-row" maxWidth="Infinity">
+                                            <children>
+                                                <Label fx:id="labCreated" styleClass="sm-badge sm-badge-neutral"
+                                                       text="—"/>
+                                                <Label fx:id="labUpdated" styleClass="sm-badge sm-badge-muted"
+                                                       text="—"/>
+                                            </children>
+                                        </FlowPane>
+                                        <Separator styleClass="sm-post-divider"/>
+                                        <Label styleClass="sm-post-body-label" text="Message"/>
+                                        <TextArea fx:id="areaContent" editable="false" maxWidth="Infinity"
+                                                  minHeight="200.0" prefRowCount="10" styleClass="sm-post-textarea"
+                                                  wrapText="true"/>
+                                        <HBox alignment="CENTER_RIGHT" styleClass="sm-post-footer" maxWidth="Infinity">
+                                            <children>
+                                                <Button mnemonicParsing="false" onAction="#close"
+                                                        styleClass="sm-btn-foot-primary" text="Close window"/>
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

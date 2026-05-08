@@ -1,0 +1,220 @@
+/* bledna — Premium Emerald Theme */
+
+.root {
+    -fx-font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    -fx-font-size: 14px;
+    -fx-background-color: #F9FAFB;
+}
+
+/* --- Pages listes (inscriptions, etc.) --- */
+.page-registrations {
+    -fx-background-color: linear-gradient(to bottom, #ECFDF5 0%, #F9FAFB 100%);
+}
+
+/* Barre titre type appli mobile */
+.top-bar-page {
+    -fx-background-color: linear-gradient(to right, #064E3B, #059669);
+    -fx-padding: 24 32;
+    -fx-spacing: 18;
+    -fx-alignment: center-left;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 30, 0, 0, 10);
+    -fx-background-radius: 0 0 35 35;
+}
+
+.top-bar-page-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: 900;
+    -fx-text-fill: white;
+    -fx-letter-spacing: -1px;
+}
+
+.top-bar-page .label {
+    -fx-text-fill: white;
+}
+
+.hint-banner {
+    -fx-text-fill: #4B5563;
+    -fx-font-size: 14px;
+    -fx-padding: 8 0;
+    -fx-wrap-text: true;
+    -fx-max-width: 1000;
+}
+
+/* Carte filtres */
+.filter-card {
+    -fx-background-color: white;
+    -fx-background-radius: 24;
+    -fx-padding: 24 28;
+    -fx-spacing: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 40, 0, 0, 15);
+    -fx-border-color: #E5E7EB;
+    -fx-border-width: 1;
+    -fx-border-radius: 24;
+}
+
+.filter-card .label {
+    -fx-text-fill: #1F2937;
+    -fx-font-weight: 700;
+}
+
+/* Liste : fond transparent, espacement entre cartes */
+.list-view-registration {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 10 0;
+}
+
+.list-view-registration .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 20 0;
+}
+
+.list-view-registration .list-cell:filled:selected,
+.list-view-registration .list-cell:filled:selected:focused {
+    -fx-background-color: transparent;
+}
+
+/* Carte d’une ligne (inscription / événement) */
+.bledna-card {
+    -fx-background-color: white;
+    -fx-background-radius: 28;
+    -fx-padding: 28 32;
+    -fx-spacing: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 50, 0, 0, 20);
+    -fx-border-color: #F3F4F6;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 28;
+}
+
+.bledna-card:hover {
+    -fx-translate-y: -4px;
+    -fx-border-color: #10B981;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.15), 60, 0, 0, 25);
+}
+
+.reg-event-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #065F46;
+    -fx-letter-spacing: -0.5px;
+}
+
+.reg-meta-line {
+    -fx-text-fill: #6B7280;
+    -fx-font-size: 14px;
+    -fx-wrap-text: true;
+}
+
+.badge {
+    -fx-background-radius: 12;
+    -fx-padding: 6 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-text-transform: uppercase;
+}
+
+.badge-date {
+    -fx-background-color: #DBEAFE;
+    -fx-text-fill: #1E40AF;
+}
+
+.badge-amount {
+    -fx-background-color: #FEF3C7;
+    -fx-text-fill: #92400E;
+}
+
+.badge-pay-cash {
+    -fx-background-color: #D1FAE5;
+    -fx-text-fill: #065F46;
+}
+
+.badge-pay-card {
+    -fx-background-color: #F3E8FF;
+    -fx-text-fill: #6B21A8;
+}
+
+/* Boutons d’action carte */
+.action-buttons {
+    -fx-spacing: 12;
+    -fx-alignment: center-right;
+}
+
+.btn-action-view, .btn-action-edit, .btn-action-delete {
+    -fx-background-radius: 14;
+    -fx-padding: 10 18;
+    -fx-cursor: hand;
+    -fx-font-weight: 800;
+    -fx-font-size: 13px;
+    -fx-background-color: #F3F4F6;
+    -fx-text-fill: #374151;
+}
+
+.btn-action-view:hover { -fx-background-color: #DBEAFE; -fx-text-fill: #1E40AF; }
+.btn-action-edit:hover { -fx-background-color: #D1FAE5; -fx-text-fill: #065F46; }
+.btn-action-delete:hover { -fx-background-color: #FEE2E2; -fx-text-fill: #991B1B; }
+
+/* Boutons d'inscription */
+.btn-register {
+    -fx-background-color: linear-gradient(to bottom right, #059669, #10B981);
+    -fx-text-fill: white;
+    -fx-background-radius: 16;
+    -fx-padding: 12 24;
+    -fx-font-weight: 800;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.3), 15, 0, 0, 5);
+}
+
+.btn-register-alt {
+    -fx-background-color: linear-gradient(to bottom right, #047857, #059669);
+    -fx-text-fill: white;
+    -fx-background-radius: 16;
+    -fx-padding: 12 24;
+    -fx-font-weight: 800;
+}
+
+.btn-primary {
+    -fx-background-color: #10B981;
+    -fx-text-fill: white;
+    -fx-background-radius: 14;
+    -fx-padding: 12 24;
+    -fx-font-weight: 800;
+}
+
+.btn-secondary {
+    -fx-background-color: white;
+    -fx-text-fill: #059669;
+    -fx-border-color: #10B981;
+    -fx-border-radius: 14;
+    -fx-background-radius: 14;
+    -fx-padding: 12 24;
+    -fx-font-weight: 800;
+}
+
+.btn-outline {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-text-fill: white;
+    -fx-border-color: rgba(255, 255, 255, 0.5);
+    -fx-border-radius: 14;
+    -fx-background-radius: 14;
+    -fx-padding: 10 20;
+    -fx-font-weight: 700;
+}
+
+.btn-outline:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Global Impact Component */
+.impact-globe-container {
+    -fx-background-color: linear-gradient(to bottom right, #064E3B, #059669);
+    -fx-background-radius: 40;
+    -fx-padding: 10 24;
+    -fx-spacing: 12;
+    -fx-effect: dropshadow(gaussian, rgba(5, 150, 105, 0.4), 20, 0, 0, 8);
+}
+
+.impact-globe-text {
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 13px;
+    -fx-letter-spacing: 1px;
+}
