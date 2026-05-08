@@ -13,29 +13,26 @@ import java.util.*;
 
 public class RegistrationService implements ICrud<Registration> {
 
-    private final Connection conn;
-
     public RegistrationService() {
-        this(MyDataBase.getInstance().getConnection());
+        ensureIdentityColumns();
     }
 
-    public RegistrationService(Connection connection) {
-        this.conn = connection;
-        ensureIdentityColumns();
+    private Connection getConn() {
+        return MyDataBase.getInstance().getSharedConnection();
     }
 
     private RegistrationTableSchema schema;
 
     private RegistrationTableSchema schema() throws SQLException {
         if (schema == null) {
-            schema = new RegistrationTableSchema(conn);
+            schema = new RegistrationTableSchema(getConn());
         }
         return schema;
     }
 
     /**
-     * Auto-migration légère pour éviter la perte nom/prénom/email
-     * quand la table registrations est ancienne.
+     * Light auto-migration to prevent data loss (first_name, last_name, email)
+     * when the registrations table is old.
      */
     private void ensureIdentityColumns() {
         String[] ddl = {
@@ -47,10 +44,10 @@ public class RegistrationService implements ICrud<Registration> {
                 "ALTER TABLE registrations ADD COLUMN check_in_time DATETIME NULL"
         };
         for (String sql : ddl) {
-            try (Statement st = conn.createStatement()) {
+            try (Statement st = getConn().createStatement()) {
                 st.executeUpdate(sql);
             } catch (SQLException ignored) {
-                // colonne déjà existante ou droit insuffisant : on continue sans bloquer l'application
+                // Column already exists or insufficient permissions: continue without blocking
             }
         }
         schema = null;
@@ -58,7 +55,7 @@ public class RegistrationService implements ICrud<Registration> {
 
     // ========================= HELPER =========================
     private boolean existsByQuery(String sql, Object... params) throws SQLException {
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConn().prepareStatement(sql)) {
             for (int i = 0; i < params.length; i++) {
                 Object p = params[i];
                 if (p instanceof Integer n) {
@@ -95,7 +92,7 @@ public class RegistrationService implements ICrud<Registration> {
         String fCol = s.firstNameColumn();
         String lCol = s.lastNameColumn();
         String pCol = s.participantNameColumn();
-        String emailCol = s.emailColumn(); // Déclaration unique ici
+        String emailCol = s.emailColumn(); // Unique declaration here
 
         if (fCol != null && lCol != null) {
             cols.add(fCol);
@@ -150,7 +147,7 @@ public class RegistrationService implements ICrud<Registration> {
         String placeholders = String.join(", ", Collections.nCopies(cols.size(), "?"));
         String sql = "INSERT INTO registrations (" + String.join(", ", cols) + ") VALUES (" + placeholders + ")";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConn().prepareStatement(sql)) {
             for (int i = 0; i < vals.size(); i++) {
                 Object v = vals.get(i);
                 if (v instanceof Integer n) ps.setInt(i + 1, n);
@@ -158,16 +155,16 @@ public class RegistrationService implements ICrud<Registration> {
                 else if (v instanceof Timestamp t) ps.setTimestamp(i + 1, t);
                 else ps.setString(i + 1, v != null ? v.toString() : null);
             }
-        ps.executeUpdate();
+            ps.executeUpdate();
         }
     }
 
     // ========================= SUPPRIMER =========================
     @Override
     public void supprimer(int id) throws SQLException {
-        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM registrations WHERE id=?")) {
-        ps.setInt(1, id);
-        ps.executeUpdate();
+        try (PreparedStatement ps = getConn().prepareStatement("DELETE FROM registrations WHERE id=?")) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
         }
     }
 
@@ -177,7 +174,7 @@ public class RegistrationService implements ICrud<Registration> {
         RegistrationTableSchema s = schema();
         String sql = selectFromRegistrationsJoinEvents(s) + orderByRegistration(s);
 
-        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+        try (Statement st = getConn().createStatement(); ResultSet rs = st.executeQuery(sql)) {
             return mapResultSet(rs);
         }
     }
@@ -232,7 +229,7 @@ public class RegistrationService implements ICrud<Registration> {
         }
 
         if (paymentMethodOrNull != null && !paymentMethodOrNull.isBlank()
-                && !"TOUTES".equalsIgnoreCase(paymentMethodOrNull)) {
+                && !"ALL".equalsIgnoreCase(paymentMethodOrNull)) {
             sql.append(and ? " AND " : " WHERE ");
             sql.append(" r.").append(s.paymentColumn()).append(" = ? ");
             params.add(paymentMethodOrNull);
@@ -240,7 +237,7 @@ public class RegistrationService implements ICrud<Registration> {
 
         sql.append(orderByRegistration(s));
 
-        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (PreparedStatement ps = getConn().prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 Object p = params.get(i);
                 if (p instanceof String str) {
@@ -272,13 +269,13 @@ public class RegistrationService implements ICrud<Registration> {
         } else if (pCol != null) {
             expr = "GROUP_CONCAT(TRIM(r." + pCol + ") ORDER BY r.id SEPARATOR ' · ')";
         } else {
-            expr = "CONCAT(COUNT(*), ' inscription(s)')";
+            expr = "CONCAT(COUNT(*), ' registration(s)')";
         }
 
         String where = s.hasStatus() ? " WHERE r.status IN ('REGISTERED', 'PAID', 'PENDING_PAYMENT') " : "";
         String sql = "SELECT r.event_id, " + expr + " AS names FROM registrations r " + where + " GROUP BY r.event_id";
 
-        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+        try (Statement st = getConn().createStatement(); ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 int eid = rs.getInt("event_id");
                 String names = rs.getString("names");
@@ -306,7 +303,7 @@ public class RegistrationService implements ICrud<Registration> {
         if (pCol != null) sql.insert(sql.indexOf("FROM"), ", r." + pCol + " AS reg_participant_name ");
         if (emailCol != null) sql.insert(sql.indexOf("FROM"), ", r." + emailCol + " AS reg_email ");
 
-        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (PreparedStatement ps = getConn().prepareStatement(sql.toString())) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -433,7 +430,7 @@ public class RegistrationService implements ICrud<Registration> {
         sql.append(" WHERE id = ?");
         vals.add(r.getId());
 
-        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (PreparedStatement ps = getConn().prepareStatement(sql.toString())) {
             for (int i = 0; i < vals.size(); i++) {
                 Object v = vals.get(i);
                 int j = i + 1;
@@ -456,7 +453,7 @@ public class RegistrationService implements ICrud<Registration> {
         String isPaidCol = schema().isPaidColumn();
         if (isPaidCol == null) return false;
         String sql = "SELECT " + isPaidCol + " FROM registrations WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConn().prepareStatement(sql)) {
             ps.setInt(1, registrationId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -489,7 +486,7 @@ public class RegistrationService implements ICrud<Registration> {
             return;
         }
         String sql = "UPDATE registrations SET " + String.join(", ", sets) + " WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConn().prepareStatement(sql)) {
             ps.setInt(1, registrationId);
             ps.executeUpdate();
         }
@@ -516,7 +513,7 @@ public class RegistrationService implements ICrud<Registration> {
             return;
         }
         String sql = "UPDATE registrations SET " + String.join(", ", sets) + " WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConn().prepareStatement(sql)) {
             int i = 1;
             for (Object v : vals) {
                 ps.setString(i++, v != null ? v.toString() : null);
@@ -529,17 +526,17 @@ public class RegistrationService implements ICrud<Registration> {
     // ========================= VÉRIFIER SI PEUT S'INSCRIRE (PLACES DISPOS) =========================
     public boolean peutSInscrire(int eventId) throws SQLException {
         String sql = "SELECT maxPlaces FROM events WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConn().prepareStatement(sql)) {
             ps.setInt(1, eventId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     int maxPlaces = rs.getInt("maxPlaces");
-                    if (maxPlaces <= 0) return true; // Places illimitées
+                    if (maxPlaces <= 0) return true; // Unlimited places
 
                     String isPaidCol = schema().isPaidColumn();
                     if (isPaidCol == null) {
                         String countSql = "SELECT COUNT(*) FROM registrations WHERE event_id = ?";
-                        try (PreparedStatement ps2 = conn.prepareStatement(countSql)) {
+                        try (PreparedStatement ps2 = getConn().prepareStatement(countSql)) {
                             ps2.setInt(1, eventId);
                             try (ResultSet rs2 = ps2.executeQuery()) {
                                 if (rs2.next()) {
@@ -548,9 +545,9 @@ public class RegistrationService implements ICrud<Registration> {
                             }
                         }
                     } else {
-                        // Compter les inscrits payés
+                        // Count paid registrations
                         String countSql = "SELECT COUNT(*) FROM registrations WHERE event_id = ? AND " + isPaidCol + " = TRUE";
-                        try (PreparedStatement ps2 = conn.prepareStatement(countSql)) {
+                        try (PreparedStatement ps2 = getConn().prepareStatement(countSql)) {
                             ps2.setInt(1, eventId);
                             try (ResultSet rs2 = ps2.executeQuery()) {
                                 if (rs2.next()) {
@@ -701,7 +698,7 @@ public class RegistrationService implements ICrud<Registration> {
 
         sql.append(" ORDER BY r.id DESC LIMIT 1");
 
-        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (PreparedStatement ps = getConn().prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 Object p = params.get(i);
                 if (p instanceof Integer n) {
@@ -727,12 +724,12 @@ public class RegistrationService implements ICrud<Registration> {
         RegistrationTableSchema s = schema();
         String emailCol = s.emailColumn();
         if (emailCol == null) {
-            return; // Colonne email n'existe pas
+            return; // email column doesn't exist
         }
-        try (PreparedStatement ps = conn.prepareStatement("UPDATE registrations SET " + emailCol + " = ? WHERE id = ?")) {
+        try (PreparedStatement ps = getConn().prepareStatement("UPDATE registrations SET " + emailCol + " = ? WHERE id = ?")) {
             ps.setString(1, newEmail != null ? newEmail.trim() : "");
             ps.setInt(2, registrationId);
-        ps.executeUpdate();
+            ps.executeUpdate();
         }
     }
 
@@ -741,7 +738,7 @@ public class RegistrationService implements ICrud<Registration> {
         Map<Integer, Integer> map = new HashMap<>();
         String where = s.hasStatus() ? " WHERE r.status IN ('REGISTERED', 'PAID', 'PENDING_PAYMENT') " : "";
         String sql = "SELECT r.event_id, COUNT(*) AS cnt FROM registrations r " + where + " GROUP BY r.event_id";
-        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+        try (Statement st = getConn().createStatement(); ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 map.put(rs.getInt("event_id"), rs.getInt("cnt"));
             }
@@ -772,7 +769,7 @@ public class RegistrationService implements ICrud<Registration> {
         sql.append(" ORDER BY r.id ASC ");
 
         List<RegistrantExportRow> out = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (PreparedStatement ps = getConn().prepareStatement(sql.toString())) {
             ps.setInt(1, eventId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -805,7 +802,7 @@ public class RegistrationService implements ICrud<Registration> {
             return false;
         }
         String sql = "UPDATE registrations SET checked_in = 1, check_in_time = NOW() WHERE id = ? AND event_id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConn().prepareStatement(sql)) {
             ps.setInt(1, registrationId);
             ps.setInt(2, eventId);
             return ps.executeUpdate() > 0;
@@ -850,8 +847,8 @@ public class RegistrationService implements ICrud<Registration> {
     public record RegistrantExportRow(int registrationId, String firstName, String lastName, String email, boolean checkedIn) {}
 
     /**
-     * Retourne les notifications "événement demain" pour l'utilisateur.
-     * Affiché pendant toute la journée J-1.
+     * Returns "event tomorrow" notifications for the user.
+     * Displayed throughout the entire day of D-1.
      */
     public List<String> remindersForTomorrow(int userId) throws SQLException {
         RegistrationTableSchema s = schema();
@@ -870,20 +867,20 @@ public class RegistrationService implements ICrud<Registration> {
         params.add(Timestamp.valueOf(end));
 
         if (s.has("user_id")) {
-            // En mode démo, certaines anciennes lignes peuvent avoir user_id NULL.
-            // On garde le filtre utilisateur mais on n'exclut pas les anciennes inscriptions NULL.
+            // In demo mode, some old rows may have NULL user_id.
+            // We keep the user filter but do not exclude old NULL registrations.
             sql.append(" AND (r.user_id = ? OR r.user_id IS NULL) ");
             params.add(userId);
         }
         if (s.hasStatus()) {
-            // Anciennes données peuvent avoir status NULL.
+            // Old data may have NULL status.
             sql.append(" AND (r.status IN ('REGISTERED', 'PAID', 'PENDING_PAYMENT') OR r.status IS NULL) ");
         }
         sql.append(" ORDER BY e.eventDate ASC ");
 
         List<String> out = new ArrayList<>();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (PreparedStatement ps = getConn().prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 Object p = params.get(i);
                 if (p instanceof Timestamp ts) {

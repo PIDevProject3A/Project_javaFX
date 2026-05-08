@@ -1,11 +1,11 @@
-package services;
+package com.esprit.services;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
-import entities.Donation;
+import com.esprit.entities.Donation;
 
 public final class DonationValidator {
     private static final String TYPE_CASH = "Cash";

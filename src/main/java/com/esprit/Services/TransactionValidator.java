@@ -1,11 +1,11 @@
-package services;
+package com.esprit.services;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
-import entities.EcoTransaction;
+import com.esprit.entities.EcoTransaction;
 
 public final class TransactionValidator {
     private static final String TYPE_INCOME = "Income";

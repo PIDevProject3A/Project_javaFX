@@ -14,7 +14,7 @@
 .form-accent-bar {
     -fx-min-height: 5;
     -fx-max-height: 5;
-    -fx-background-color: #2E7D32; /* Indigo 600 */
+    -fx-background-color: linear-gradient(to right, #2D5A3D, #4A7C59, #87A96B);
 }
 
 .form-scroll {

@@ -12,36 +12,45 @@
 <?import javafx.scene.layout.VBox?>
 
 <StackPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.esprit.controllers.RegisterController" stylesheets="@style.css">
-    <VBox styleClass="page-card" spacing="12" maxWidth="740">
-        <Label text="Create Account" styleClass="title"/>
-        <Label text="Formulaire harmonise pour la creation de comptes avec validation en direct" styleClass="subtitle" wrapText="true"/>
+    <VBox spacing="12">
+        <!-- Appearance Control Bar -->
+        <HBox fx:id="appearanceBar" spacing="12" alignment="TOP_RIGHT">
+            <padding>
+                <Insets top="12" right="12" bottom="12" left="12"/>
+            </padding>
+        </HBox>
+        
+        <VBox styleClass="page-card" spacing="12" maxWidth="740">
+        <Label text="%register.title" styleClass="title"/>
+        <Label text="%register.subtitle" styleClass="subtitle" wrapText="true"/>
 
         <GridPane styleClass="form-grid">
-            <Label text="First name" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-            <TextField fx:id="firstNameField" promptText="First name" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-            <Label fx:id="firstNameHintLabel" text="First name must be at least 3 characters." styleClass="validation-hint" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            <Label text="%register.firstname" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <TextField fx:id="firstNameField" promptText="%register.firstname" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+            <Label fx:id="firstNameHintLabel" text="%register.hint.firstname" styleClass="validation-hint" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
-            <Label text="Last name" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-            <TextField fx:id="lastNameField" promptText="Last name" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-            <Label fx:id="lastNameHintLabel" text="Last name must be at least 3 characters." styleClass="validation-hint" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+            <Label text="%register.lastname" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <TextField fx:id="lastNameField" promptText="%register.lastname" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            <Label fx:id="lastNameHintLabel" text="%register.hint.lastname" styleClass="validation-hint" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 
-            <Label text="Email" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-            <TextField fx:id="emailField" promptText="Email" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+            <Label text="%login.email" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+            <TextField fx:id="emailField" promptText="%login.email" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
 
-            <Label text="Password" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-            <PasswordField fx:id="passwordField" promptText="Password" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
-            <Label fx:id="passwordHintLabel" text="Password must be at least 8 characters." styleClass="validation-hint" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+            <Label text="%login.password" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+            <PasswordField fx:id="passwordField" promptText="%login.password" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+            <Label fx:id="passwordHintLabel" text="%register.hint.password" styleClass="validation-hint" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
 
-            <Label text="Role" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
-            <ComboBox fx:id="adminTypeBox" promptText="Admin type" GridPane.columnIndex="1" GridPane.rowIndex="7"/>
+            <Label text="%register.role" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
+            <ComboBox fx:id="adminTypeBox" promptText="%register.role" GridPane.columnIndex="1" GridPane.rowIndex="7"/>
         </GridPane>
 
         <HBox spacing="10">
-            <Button fx:id="registerButton" text="Register" onAction="#handleRegister" styleClass="primary-button"/>
-            <Button text="Go to Login" onAction="#goToLogin" styleClass="secondary-button"/>
+            <Button fx:id="registerButton" text="%register.btn.register" onAction="#handleRegister" styleClass="primary-button"/>
+            <Button text="%register.btn.back" onAction="#goToLogin" styleClass="secondary-button"/>
         </HBox>
 
         <Label fx:id="messageLabel" styleClass="status-message" wrapText="true" visible="false" managed="false"/>
+        </VBox>
     </VBox>
     <padding>
         <Insets top="26" right="26" bottom="26" left="26"/>

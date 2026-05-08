@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="740.0" prefWidth="1200.0" style="-fx-background-color: linear-gradient(to bottom, #f0fdf4, #dcfce7);" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.TransactionController">
+<BorderPane prefHeight="740.0" prefWidth="1200.0" style="-fx-background-color: linear-gradient(to bottom, #f0fdf4, #dcfce7);" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.esprit.controllers.TransactionController">
     <top>
         <VBox spacing="10.0" style="-fx-background-color: linear-gradient(to right, #14532d, #166534); -fx-border-color: #064e3b; -fx-border-width: 0 0 1 0;">
             <children>

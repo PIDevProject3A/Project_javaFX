@@ -12,84 +12,84 @@
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml" stylesheets="@bledna-theme.css" fx:controller="com.esprit.controllers.EventAddController" prefWidth="1000" prefHeight="700">
     <children>
-        <VBox layoutX="150" layoutY="50" prefWidth="700" spacing="20" style="-fx-padding: 30;">
+        <VBox layoutX="100" layoutY="30" prefWidth="800" spacing="25" style="-fx-padding: 20;">
             <children>
-                <!-- Titre -->
-                <Label text="➕ Ajouter un nouvel événement" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #333;" />
+                <!-- Title -->
+                <Label text="➕ Add New Event" styleClass="label-title" style="-fx-font-size: 28;" />
 
-                <!-- Formulaire -->
-                <VBox spacing="15" style="-fx-border-color: #ddd; -fx-border-radius: 5; -fx-padding: 20; -fx-background-color: #f9f9f9;">
+                <!-- Form in a premium card -->
+                <VBox spacing="20" styleClass="bledna-card">
                     <children>
-                        <!-- Nom -->
-                        <VBox spacing="5">
+                        <!-- Name -->
+                        <VBox spacing="8">
                             <children>
-                                <Label text="Nom de l'événement *" style="-fx-font-weight: bold;" />
-                                <TextField fx:id="nameField" promptText="Entrez le nom" style="-fx-padding: 10; -fx-font-size: 12;" />
+                                <Label text="Event Name *" styleClass="label-subtitle" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+                                <TextField fx:id="nameField" promptText="Enter event name" styleClass="text-field" />
                             </children>
                         </VBox>
 
                         <!-- Description -->
-                        <VBox spacing="5">
+                        <VBox spacing="8">
                             <children>
-                                <Label text="Description *" style="-fx-font-weight: bold;" />
-                                <TextArea fx:id="descriptionField" promptText="Entrez la description" wrapText="true" prefRowCount="3" prefWidth="660" style="-fx-font-size: 12;" />
+                                <Label text="Description *" styleClass="label-subtitle" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+                                <TextArea fx:id="descriptionField" promptText="Enter event description" wrapText="true" prefRowCount="3" styleClass="text-area" />
                             </children>
                         </VBox>
 
-                        <!-- Date et Lieu en ligne -->
-                        <HBox spacing="15">
+                        <!-- Date and Location -->
+                        <HBox spacing="20">
                             <children>
-                                <VBox spacing="5" prefWidth="350">
+                                <VBox spacing="8" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label text="Date de l'événement *" style="-fx-font-weight: bold;" />
-                                        <DatePicker fx:id="eventDatePicker" style="-fx-padding: 10; -fx-font-size: 12;" />
+                                        <Label text="Event Date *" styleClass="label-subtitle" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+                                        <DatePicker fx:id="eventDatePicker" maxWidth="Infinity" styleClass="date-picker" />
                                     </children>
                                 </VBox>
-                                <VBox spacing="5" prefWidth="300">
+                                <VBox spacing="8" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label text="Lieu *" style="-fx-font-weight: bold;" />
-                                        <TextField fx:id="locationField" promptText="Entrez le lieu" style="-fx-padding: 10; -fx-font-size: 12;" />
+                                        <Label text="Location *" styleClass="label-subtitle" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+                                        <TextField fx:id="locationField" promptText="Enter location" styleClass="text-field" />
                                     </children>
                                 </VBox>
                             </children>
                         </HBox>
 
-                        <!-- Prix et Type en ligne -->
-                        <HBox spacing="15">
+                        <!-- Price and Type -->
+                        <HBox spacing="20">
                             <children>
-                                <VBox spacing="5" prefWidth="350">
+                                <VBox spacing="8" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label text="Prix *" style="-fx-font-weight: bold;" />
-                                        <TextField fx:id="priceField" promptText="Entrez le prix" style="-fx-padding: 10; -fx-font-size: 12;" />
+                                        <Label text="Price (TND) *" styleClass="label-subtitle" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+                                        <TextField fx:id="priceField" promptText="Ex: 50.0" styleClass="text-field" />
                                     </children>
                                 </VBox>
-                                <VBox spacing="5" prefWidth="300">
+                                <VBox spacing="8" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label text="Type d'événement *" style="-fx-font-weight: bold;" />
-                                        <ComboBox fx:id="typeCombo" promptText="Choisir..." style="-fx-padding: 10; -fx-font-size: 12;" />
+                                        <Label text="Event Type *" styleClass="label-subtitle" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+                                        <ComboBox fx:id="typeCombo" promptText="Choose..." maxWidth="Infinity" styleClass="combo-box" />
                                     </children>
                                 </VBox>
                             </children>
                         </HBox>
 
-                        <!-- Places -->
-                        <VBox spacing="5">
+                        <!-- Capacity -->
+                        <VBox spacing="8">
                             <children>
-                                <Label text="Max de places *" style="-fx-font-weight: bold;" />
-                                <TextField fx:id="maxPlacesField" promptText="100" style="-fx-padding: 10; -fx-font-size: 12;" />
+                                <Label text="Max Capacity *" styleClass="label-subtitle" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+                                <TextField fx:id="maxPlacesField" promptText="100" styleClass="text-field" />
                             </children>
                         </VBox>
 
-                        <!-- Message d'erreur/validation -->
-                        <Label fx:id="inputMessageLabel" text="" style="-fx-text-alignment: CENTER;" />
+                        <!-- Validation Message -->
+                        <Label fx:id="inputMessageLabel" text="" style="-fx-text-fill: #e53935; -fx-font-weight: bold;" />
                     </children>
                 </VBox>
 
-                <!-- Boutons -->
-                <HBox spacing="15" style="-fx-alignment: CENTER;">
+                <!-- Action Buttons -->
+                <HBox spacing="20" style="-fx-alignment: CENTER_RIGHT;">
                     <children>
-                        <Button text="✅ Créer l'événement" fx:id="createBtn" onAction="#handleCreate" style="-fx-padding: 12 30; -fx-font-size: 14; -fx-background-color: #4CAF50; -fx-text-fill: white; -fx-cursor: hand;" />
-                        <Button text="❌ Annuler" fx:id="cancelBtn" onAction="#handleCancel" style="-fx-padding: 12 30; -fx-font-size: 14; -fx-background-color: #757575; -fx-text-fill: white; -fx-cursor: hand;" />
+                        <Button text="❌ Cancel" fx:id="cancelBtn" onAction="#handleCancel" styleClass="btn-secondary" />
+                        <Button text="✅ Create Event" fx:id="createBtn" onAction="#handleCreate" styleClass="btn-primary" />
                     </children>
                 </HBox>
             </children>

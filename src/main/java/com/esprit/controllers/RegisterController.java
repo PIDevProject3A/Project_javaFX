@@ -1,6 +1,7 @@
 package com.esprit.controllers;
 
 import com.esprit.entities.User;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -8,9 +9,13 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import com.esprit.services.UserService;
 import com.esprit.utils.SceneNavigator;
 import com.esprit.utils.UserSession;
+import com.esprit.utils.LanguageManager;
+import com.esprit.utils.ThemeManager;
+import com.esprit.utils.AppearanceControlBar;
 
 public class RegisterController {
     private static final int MIN_NAME_LENGTH = 3;
@@ -45,8 +50,13 @@ public class RegisterController {
 
     @FXML
     private Label messageLabel;
+    
+    @FXML
+    private HBox appearanceBar;
 
     private final UserService userService = new UserService();
+    @FXML
+    private java.util.ResourceBundle resources;
 
     @FXML
     public void initialize() {
@@ -54,9 +64,29 @@ public class RegisterController {
         messageLabel.managedProperty().bind(messageLabel.visibleProperty());
         adminTypeBox.setItems(FXCollections.observableArrayList(User.AdminType.values()));
         adminTypeBox.setValue(User.AdminType.EVENT_MANAGER);
-        setMessage("Public registration is disabled. Login with an existing account.", false);
+        setMessage(resources.getString("generic.loading"), false);
         setupLiveValidation();
         updateValidationState();
+        
+        // Initialize appearance controls after scene is set
+        Platform.runLater(this::initializeAppearanceBar);
+    }
+    
+    private void initializeAppearanceBar() {
+        try {
+            if (appearanceBar != null && emailField != null) {
+                javafx.scene.Scene scene = emailField.getScene();
+                if (scene != null) {
+                    javafx.stage.Stage stage = (javafx.stage.Stage) scene.getWindow();
+                    if (stage != null) {
+                        HBox bar = AppearanceControlBar.createAppearanceBar(stage, scene);
+                        appearanceBar.getChildren().setAll(bar);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -64,12 +94,12 @@ public class RegisterController {
         String currentEmail = UserSession.getCurrentUserEmail();
         User.AdminType currentRole = UserSession.getCurrentUserRole();
         if (currentEmail == null || currentRole == null) {
-            setMessage("Login as admin to create accounts.", false);
+            setMessage(resources.getString("generic.error") + ": Access denied.", false);
             return;
         }
 
         if (!isFormValid()) {
-            setMessage("Please fix invalid fields before submitting.", false);
+            setMessage(resources.getString("generic.error") + ": Invalid fields.", false);
             return;
         }
 
@@ -83,7 +113,7 @@ public class RegisterController {
         );
 
         if ("SUCCESS".equals(result)) {
-            setMessage("Account created successfully.", true);
+            setMessage(resources.getString("generic.success"), true);
             clearFields();
             return;
         }

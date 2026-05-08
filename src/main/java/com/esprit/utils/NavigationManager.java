@@ -19,7 +19,8 @@ public class NavigationManager {
         if (url == null) {
             throw new IOException("FXML introuvable: /com/esprit/" + fxmlFile);
         }
-        FXMLLoader loader = new FXMLLoader(url);
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("messages", new java.util.Locale(UserSession.getCurrentLocale()));
+        FXMLLoader loader = new FXMLLoader(url, bundle);
         Parent root = loader.load();
         Scene scene = new Scene(root, 1100, 680);
         StyleHelper.apply(scene);

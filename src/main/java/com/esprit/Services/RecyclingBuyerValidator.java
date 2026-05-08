@@ -1,10 +1,10 @@
-package services;
+package com.esprit.services;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
-import entities.RecyclingBuyer;
+import com.esprit.entities.RecyclingBuyer;
 
 public final class RecyclingBuyerValidator {
     private static final List<String> RECYCLING_TYPES = List.of(

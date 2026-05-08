@@ -1,4 +1,4 @@
-package services;
+package com.esprit.services;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,7 +8,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import entities.RecyclingBuyer;
+import com.esprit.entities.RecyclingBuyer;
 import com.esprit.utils.MyDataBase;
 
 public class RecyclingBuyerDao {

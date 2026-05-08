@@ -13,32 +13,32 @@
     <children>
         <VBox layoutX="28" layoutY="20" spacing="14" prefWidth="464">
             <children>
-                <Label text="🌿 Inscription (bledna)" styleClass="label-title"/>
-                <Label text="Inscription à l'événement" styleClass="label-subtitle"/>
+                <Label text="🌿 Registration (bledna)" styleClass="label-title"/>
+                <Label text="Register for event" styleClass="label-subtitle"/>
                 <Label fx:id="eventTitleLabel" wrapText="true" style="-fx-font-size: 15; -fx-font-weight: bold;"/>
                 <Label fx:id="eventDetailsLabel" wrapText="true" style="-fx-font-size: 13;"/>
                 <Separator/>
-                <Label text="Vos coordonnées" style="-fx-font-weight: bold; -fx-text-fill: #1b5e20;"/>
+                <Label text="Your details" style="-fx-font-weight: bold; -fx-text-fill: #1b5e20;"/>
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <children>
-                        <Label text="Prénom *" prefWidth="100"/>
-                        <TextField fx:id="firstNameField" promptText="Prénom" prefWidth="300"/>
+                        <Label text="First Name *" prefWidth="100"/>
+                        <TextField fx:id="firstNameField" promptText="First Name" prefWidth="300"/>
                     </children>
                 </HBox>
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <children>
-                        <Label text="Nom *" prefWidth="100"/>
-                        <TextField fx:id="lastNameField" promptText="Nom" prefWidth="300"/>
+                        <Label text="Last Name *" prefWidth="100"/>
+                        <TextField fx:id="lastNameField" promptText="Last Name" prefWidth="300"/>
                     </children>
                 </HBox>
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <children>
                         <Label text="Email *" prefWidth="100"/>
-                        <TextField fx:id="emailField" promptText="ex. utilisateur@email.com" prefWidth="300"/>
+                        <TextField fx:id="emailField" promptText="e.g. user@email.com" prefWidth="300"/>
                     </children>
                 </HBox>
                 <Separator/>
-                <Label text="Date et heure d'inscription" style="-fx-font-weight: bold; -fx-text-fill: #1b5e20;"/>
+                <Label text="Registration date and time" style="-fx-font-weight: bold; -fx-text-fill: #1b5e20;"/>
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <children>
                         <Label text="Date *" prefWidth="100"/>
@@ -47,18 +47,18 @@
                 </HBox>
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <children>
-                        <Label text="Heure *" prefWidth="100"/>
-                        <TextField fx:id="registrationTimeField" promptText="ex. 14:30" prefWidth="120"/>
+                        <Label text="Time *" prefWidth="100"/>
+                        <TextField fx:id="registrationTimeField" promptText="e.g. 14:30" prefWidth="120"/>
                     </children>
                 </HBox>
                 <Separator/>
-                <Label text="Tarification (fixe, organisateur)" style="-fx-font-weight: bold; -fx-text-fill: #1b5e20;"/>
+                <Label text="Pricing (fixed, organizer)" style="-fx-font-weight: bold; -fx-text-fill: #1b5e20;"/>
                 <Label fx:id="fixedAmountLabel" wrapText="true" style="-fx-font-size: 14; -fx-text-fill: #2e7d32; -fx-font-weight: bold;"/>
                 <Label fx:id="fixedPaymentLabel" wrapText="true" style="-fx-text-fill: #37474f;"/>
                 <HBox spacing="12" style="-fx-padding: 18 0 0 0;">
                     <children>
-                        <Button fx:id="submitBtn" text="✓ Confirmer l'inscription" onAction="#handleSubmit" styleClass="btn-primary"/>
-                        <Button fx:id="cancelBtn" text="Annuler" onAction="#handleCancel" styleClass="btn-secondary"/>
+                        <Button fx:id="submitBtn" text="✓ Confirm Registration" onAction="#handleSubmit" styleClass="btn-primary"/>
+                        <Button fx:id="cancelBtn" text="Cancel" onAction="#handleCancel" styleClass="btn-secondary"/>
                     </children>
                 </HBox>
             </children>

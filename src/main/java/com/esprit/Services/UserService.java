@@ -175,10 +175,10 @@ public class UserService {
             return "Target email is required.";
         }
         if (imagePath == null) {
-            return "Image requise.";
+            return "Image required.";
         }
         if (!faceIdService.isConfigured()) {
-            return "CompreFace n'est pas configure.";
+            return "CompreFace is not configured.";
         }
 
         // Check both admin and app user tables
@@ -192,7 +192,7 @@ public class UserService {
         boolean hadFaceId = hasFaceId(email);
         String subject = getOrCreateFaceSubject(email);
         if (isBlank(subject)) {
-            return "Impossible de preparer le subject Face ID.";
+            return "Unable to prepare Face ID subject.";
         }
 
         CompreFaceFaceIdService.EnrollResult enrollResult = faceIdService.enrollFace(subject, imagePath);
@@ -201,8 +201,8 @@ public class UserService {
         }
 
         return hadFaceId
-                ? "Face ID mis a jour avec succes pour " + email + "."
-                : "Face ID ajoute avec succes pour " + email + ".";
+                ? "Face ID updated successfully for " + email + "."
+                : "Face ID added successfully for " + email + ".";
     }
 
     public String deleteFaceIdByAdmin(User.AdminType currentRole, String targetEmail) {
@@ -222,9 +222,9 @@ public class UserService {
 
         boolean removed = dataBase.removeFaceProfileByEmail(email);
         if (!removed) {
-            return "Aucun Face ID actif a supprimer pour cet utilisateur.";
+            return "No active Face ID to remove for this user.";
         }
-        return "Face ID supprime pour " + email + ".";
+        return "Face ID deleted for " + email + ".";
     }
 
     public User login(String email, String password) {

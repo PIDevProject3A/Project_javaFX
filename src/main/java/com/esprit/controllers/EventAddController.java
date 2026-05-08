@@ -52,13 +52,13 @@ public class EventAddController {
             }
         });
 
-        nameField.setTooltip(new Tooltip("Exemple : Beach Cleanup"));
-        descriptionField.setTooltip(new Tooltip("Décrivez brièvement l'événement."));
-        locationField.setTooltip(new Tooltip("Exemple : La Marsa, Tunis..."));
-        priceField.setTooltip(new Tooltip("Nombre décimal : 0, 10, 49.99..."));
-        typeCombo.setTooltip(new Tooltip("Choisir : FREE ou PAID"));
-        maxPlacesField.setTooltip(new Tooltip("Nombre entier positif : 10, 100..."));
-        eventDatePicker.setTooltip(new Tooltip("Sélectionnez la date de l'événement"));
+        nameField.setTooltip(new Tooltip("Example: Beach Cleanup"));
+        descriptionField.setTooltip(new Tooltip("Briefly describe the event."));
+        locationField.setTooltip(new Tooltip("Example: Tunis, etc."));
+        priceField.setTooltip(new Tooltip("Decimal number: 0, 10, 49.99..."));
+        typeCombo.setTooltip(new Tooltip("Choose: FREE or PAID"));
+        maxPlacesField.setTooltip(new Tooltip("Positive integer: 10, 100..."));
+        eventDatePicker.setTooltip(new Tooltip("Select the event date"));
     }
 
     @FXML
@@ -89,10 +89,10 @@ public class EventAddController {
                 event.setStatus("OPEN");
 
                 eventService.ajouter(event);
-                showInfo("✅ Événement créé avec succès !");
+                showInfo("✅ Event created successfully!");
                 closeWindow();
             } catch (SQLException e) {
-                showError("Erreur lors de la création: " + e.getMessage());
+                showError("Error during creation: " + e.getMessage());
             }
         }
     }
@@ -103,8 +103,9 @@ public class EventAddController {
     }
 
     private void closeWindow() {
-        Stage stage = (Stage) createBtn.getScene().getWindow();
-        stage.close();
+        com.esprit.utils.SceneNavigator.navigate(createBtn, "/com/esprit/EventAdmin.fxml", err -> {
+            System.err.println("Navigation error: " + err);
+        });
     }
 
     private boolean validateFields() {
@@ -118,13 +119,13 @@ public class EventAddController {
 
         if (name.isEmpty() || desc.isEmpty() || location.isEmpty()
                 || typeRaw == null || typeRaw.isEmpty() || maxRaw.isEmpty() || date == null) {
-            setInputMessage("Tous les champs sont obligatoires.");
+            setInputMessage("All fields are required.");
             return false;
         }
 
         // Validation du prix : optionnel si FREE, obligatoire si PAID
         if ("PAID".equals(typeRaw) && priceRaw.isEmpty()) {
-            setInputMessage("Le prix est obligatoire pour un événement payant.");
+            setInputMessage("Price is required for paid events.");
             return false;
         }
 
@@ -133,18 +134,18 @@ public class EventAddController {
             int maxPlaces = Integer.parseInt(maxRaw);
 
             if (price < 0) {
-                setInputMessage("Le prix ne peut pas être négatif.");
+                setInputMessage("Price cannot be negative.");
                 return false;
             }
             if (maxPlaces <= 0) {
-                setInputMessage("Max de places doit être supérieur à 0.");
+                setInputMessage("Max places must be greater than 0.");
                 return false;
             }
         } catch (NumberFormatException e) {
-            setInputMessage("Prix et Max de places doivent être des nombres valides.");
+            setInputMessage("Price and Max Places must be valid numbers.");
             return false;
         }
-        setInputMessage("Saisie valide. Vous pouvez créer l'événement.");
+        setInputMessage("Valid input. You can create the event.");
         return true;
     }
 
@@ -157,14 +158,14 @@ public class EventAddController {
 
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Erreur");
+        alert.setTitle("Error");
         alert.setContentText(message);
         alert.showAndWait();
     }
 
     private void showInfo(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Succès");
+        alert.setTitle("Success");
         alert.setContentText(message);
         alert.showAndWait();
     }

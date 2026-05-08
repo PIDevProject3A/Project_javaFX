@@ -57,6 +57,7 @@ import java.util.stream.Collectors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.nio.charset.StandardCharsets;
+import com.esprit.utils.SceneNavigator;
 
 public class AfficherTopic implements Initializable {
 
@@ -110,9 +111,9 @@ public class AfficherTopic implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Erreur");
+            alert.setTitle("Error");
             alert.setHeaderText(null);
-            alert.setContentText("Impossible de retourner à l'accueil.");
+            alert.setContentText("Could not return to home.");
             alert.showAndWait();
         }
     }
@@ -149,11 +150,11 @@ public class AfficherTopic implements Initializable {
 
     @FXML
     void testNotif() {
-        String message = "🧪 Test notification à " + new SimpleDateFormat("HH:mm:ss").format(new Date());
+        String message = "🧪 Test notification at " + new SimpleDateFormat("HH:mm:ss").format(new Date());
         notificationsGlobal.add(0, new Notification(message));
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Test");
-        alert.setHeaderText("Notification ajoutée");
+        alert.setHeaderText("Notification added");
         alert.setContentText(message);
         alert.showAndWait();
     }
@@ -322,7 +323,7 @@ public class AfficherTopic implements Initializable {
             Parent root = loader.load();
             DetailTopicController ctrl = loader.getController();
             ctrl.setTopic(topic);
-            setSceneOnCurrentStage(root, "Topic details");
+            SceneNavigator.navigateWithRoot(feedScroll, root, null);
         } catch (IOException ex) {
             showIoError(ex);
         }
@@ -360,7 +361,7 @@ public class AfficherTopic implements Initializable {
             Parent root = loader.load();
             AfficherReponseController ctrl = loader.getController();
             ctrl.initForTopic(topic);
-            setSceneOnCurrentStage(root, "Replies - " + (topic.getTitle() != null ? topic.getTitle() : "topic"));
+            SceneNavigator.navigateWithRoot(feedScroll, root, null);
         } catch (IOException ex) {
             showIoError(ex);
         }
@@ -373,7 +374,7 @@ public class AfficherTopic implements Initializable {
             SupprimerTopicController ctrl = loader.getController();
             ctrl.setTopic(topic);
             ctrl.setOnDeleted(this::chargerListe);
-            setSceneOnCurrentStage(root, "Delete topic");
+            SceneNavigator.navigateWithRoot(feedScroll, root, null);
         } catch (IOException ex) {
             showIoError(ex);
         }
@@ -410,13 +411,7 @@ public class AfficherTopic implements Initializable {
 
     @FXML
     void goToAdd(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/AjouterTopic.fxml")));
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setMinWidth(520);
-        stage.setMinHeight(560);
-        stage.setTitle("New topic");
+        SceneNavigator.navigate((Node) event.getSource(), "/AjouterTopic.fxml", null);
     }
 
     @FXML
@@ -619,19 +614,19 @@ public class AfficherTopic implements Initializable {
         javafx.scene.control.MenuButton btnOptions = new javafx.scene.control.MenuButton("⚙ Options");
         btnOptions.getStyleClass().add("topic-menu-button");
         
-        javafx.scene.control.MenuItem viewItem = new javafx.scene.control.MenuItem("👁 Voir les détails");
+        javafx.scene.control.MenuItem viewItem = new javafx.scene.control.MenuItem("👁 See details");
         viewItem.setOnAction(e -> openDetailsWindow(topic));
         
-        javafx.scene.control.MenuItem editItem = new javafx.scene.control.MenuItem("✏ Modifier");
+        javafx.scene.control.MenuItem editItem = new javafx.scene.control.MenuItem("✏ Edit");
         editItem.setOnAction(e -> openEditWindow(topic));
         
-        javafx.scene.control.MenuItem saveItem = new javafx.scene.control.MenuItem(savedTopicIds.contains(topic.getId()) ? "⭐ Retirer des favoris" : "⭐ Sauvegarder");
+        javafx.scene.control.MenuItem saveItem = new javafx.scene.control.MenuItem(savedTopicIds.contains(topic.getId()) ? "⭐ Remove from saved" : "⭐ Save");
         saveItem.setOnAction(e -> {
             toggleSavedTopic(topic.getId());
             appliquerFiltres();
         });
         
-        javafx.scene.control.MenuItem deleteItem = new javafx.scene.control.MenuItem("🗑 Supprimer");
+        javafx.scene.control.MenuItem deleteItem = new javafx.scene.control.MenuItem("🗑 Delete");
         deleteItem.getStyleClass().add("menu-item-delete");
         deleteItem.setOnAction(e -> openDeleteWindow(topic));
         
@@ -682,7 +677,7 @@ public class AfficherTopic implements Initializable {
         Region bottomSpacer = new Region();
         HBox.setHgrow(bottomSpacer, javafx.scene.layout.Priority.ALWAYS);
 
-        Button btnTranslate = new Button("🌍 Traduire");
+        Button btnTranslate = new Button("🌍 Translate");
         btnTranslate.getStyleClass().add("btn-action-view");
         btnTranslate.setOnAction(e -> {
             btnTranslate.setDisable(true);
@@ -698,7 +693,7 @@ public class AfficherTopic implements Initializable {
             }).start();
         });
 
-        Button btnShare = new Button("🔗 Partager");
+        Button btnShare = new Button("🔗 Share");
         btnShare.getStyleClass().add("btn-action-view");
         btnShare.setOnAction(e -> shareTopic(topic));
 

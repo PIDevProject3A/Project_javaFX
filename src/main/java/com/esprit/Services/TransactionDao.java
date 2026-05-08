@@ -1,4 +1,4 @@
-package services;
+package com.esprit.services;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -10,7 +10,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import entities.EcoTransaction;
+import com.esprit.entities.EcoTransaction;
 import com.esprit.utils.MyDataBase;
 
 public class TransactionDao {

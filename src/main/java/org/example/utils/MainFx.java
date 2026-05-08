@@ -14,7 +14,8 @@ public class MainFx extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         NotificationService.getInstance().startRestApi();
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherTopic.fxml"));
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("messages", java.util.Locale.ENGLISH);
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherTopic.fxml"), bundle);
         Parent root = loader.load();
         Scene scene = new Scene(root);
         stage.setTitle("Community topics");

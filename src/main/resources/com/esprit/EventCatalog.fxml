@@ -12,11 +12,16 @@
             <children>
                 <HBox spacing="12" alignment="CENTER_LEFT">
                     <children>
-                        <Label text="🌿 bledna — Catalogue" styleClass="label-title"/>
-                        <Button text="🏠 Accueil" onAction="#handleHome" styleClass="btn-outline"/>
-                        <Button text="📋 Mes inscriptions" onAction="#handleOpenRegistrations" styleClass="btn-secondary"/>
+                        <Label text="%catalog.title" styleClass="label-title"/>
+                        <Button text="🏠 %nav.dashboard" onAction="#handleHome" styleClass="btn-outline"/>
+                        <Button text="📋 %reglist.title" onAction="#handleOpenRegistrations" styleClass="btn-secondary"/>
                         <javafx.scene.layout.Region HBox.hgrow="ALWAYS" />
-                        <Button text="🚪 Déconnexion" onAction="#handleLogout" styleClass="btn-outline"/>
+                        <HBox styleClass="impact-globe-container">
+                            <children>
+                                <Label text="🌍" styleClass="impact-globe-icon"/>
+                                <Label text="GLOBAL IMPACT" styleClass="impact-globe-text"/>
+                            </children>
+                        </HBox>
                     </children>
                 </HBox>
                 <Label fx:id="tomorrowReminderLabel" managed="false" visible="false" wrapText="true" maxWidth="1080"/>

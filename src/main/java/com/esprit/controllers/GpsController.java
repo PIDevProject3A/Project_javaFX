@@ -1,4 +1,4 @@
-package controllers;
+package com.esprit.controllers;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,10 +15,11 @@ import java.util.concurrent.CompletableFuture;
 
 import com.esprit.utils.MyDataBase;
 import com.esprit.utils.SceneNavigator;
-import services.RecyclingBuyerDao;
-import entities.RecyclingBuyer;
-import entities.WeatherData;
-import services.WeatherService;
+import com.esprit.services.RecyclingBuyerDao;
+import com.esprit.entities.RecyclingBuyer;
+import com.esprit.entities.WeatherData;
+import com.esprit.services.WeatherService;
+import io.github.cdimascio.dotenv.Dotenv;
 
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -882,7 +883,8 @@ public class GpsController {
     }
 
     private String resolveAzureMapsApiKey() {
-        String envKey = normalizeOptional(System.getenv("AZURE_MAPS_KEY"));
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+        String envKey = normalizeOptional(dotenv.get("AZURE_MAPS_KEY"));
         if (envKey != null) {
             return envKey;
         }

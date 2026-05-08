@@ -13,11 +13,9 @@
             <children>
                 <HBox spacing="12" alignment="CENTER_LEFT">
                     <children>
-                        <Label text="🌿 bledna — Administration" styleClass="label-title"/>
-                        <Button text="🏠 Accueil" onAction="#handleHome" styleClass="btn-outline"/>
-                        <Button text="➕ Nouvel événement" fx:id="addBtn" onAction="#handleAddEvent" styleClass="btn-primary"/>
+                        <Label text="%admin.event.title" styleClass="label-title"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Button text="🚪 Déconnexion" onAction="#logout" styleClass="btn-outline"/>
+                        <Button text="%admin.event.btn.new" fx:id="addBtn" onAction="#handleAddEvent" styleClass="btn-primary"/>
                     </children>
                 </HBox>
                 <ListView fx:id="eventList" prefWidth="1118" prefHeight="640" styleClass="list-view-registration"/>

@@ -1,4 +1,4 @@
-package controllers;
+package com.esprit.controllers;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -11,8 +11,8 @@ import java.util.Map;
 
 import com.esprit.utils.MyDataBase;
 import com.esprit.utils.SceneNavigator;
-import services.DonationDao;
-import entities.Donation;
+import com.esprit.services.DonationDao;
+import com.esprit.entities.Donation;
 
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;

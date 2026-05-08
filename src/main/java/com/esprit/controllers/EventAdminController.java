@@ -4,6 +4,7 @@ import com.esprit.entities.Event;
 import com.esprit.services.EventService;
 import com.esprit.services.RegistrationService;
 import com.esprit.utils.NavigationManager;
+import com.esprit.utils.SceneNavigator;
 import com.esprit.utils.StyleHelper;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
@@ -57,6 +58,8 @@ public class EventAdminController {
     private ListView<Event> eventList;
     @FXML
     private Button addBtn;
+    @FXML
+    private java.util.ResourceBundle resources;
 
     private final EventService eventService = new EventService();
     private final RegistrationService registrationService = new RegistrationService();
@@ -80,7 +83,7 @@ public class EventAdminController {
         }
         com.esprit.utils.UserSession.clear();
         com.esprit.utils.SceneNavigator.navigate(addBtn, "/Login.fxml", msg -> {
-            showError("Erreur lors de la déconnexion : " + msg);
+            showError("Logout error: " + msg);
         });
     }
 
@@ -91,9 +94,9 @@ public class EventAdminController {
             private final Label desc = new Label();
             private final Button registrantsBtn = new Button();
             private final VBox textCol = new VBox(4, title, meta, desc, registrantsBtn);
-            private final Button viewBtn = new Button("👁 Voir");
-            private final Button editBtn = new Button("✏ Modifier");
-            private final Button delBtn = new Button("🗑 Supprimer");
+            private final Button viewBtn = new Button(resources.getString("admin.event.btn.view"));
+            private final Button editBtn = new Button(resources.getString("admin.event.btn.edit"));
+            private final Button delBtn = new Button(resources.getString("admin.event.btn.delete"));
             private final HBox actions = new HBox(8, viewBtn, editBtn, delBtn);
             private final Region spacer = new Region();
             private final HBox row = new HBox(12, textCol, spacer, actions);
@@ -156,12 +159,12 @@ public class EventAdminController {
                     meta.setText(String.join("  ·  ",
                             d == null ? "—" : d.format(DT),
                             item.getLocation() != null ? item.getLocation() : "—",
-                            String.format(Locale.FRANCE, "%.2f TND", item.getPrice()),
+                            String.format(Locale.US, "%.2f TND", item.getPrice()),
                             item.getEventType() != null ? item.getEventType() : "—",
-                            "Places : " + places));
+                            "Slots: " + places));
                     desc.setText(shortDesc(item.getDescription()));
                     int count = item.getCurrentParticipants();
-                    registrantsBtn.setText("👥 Inscrits (" + count + ")");
+                    registrantsBtn.setText("👥 " + resources.getString("admin.event.registrants") + " (" + count + ")");
                     registrantsBtn.setOnAction(ev -> exportRegistrantsExcel(item));
                     setText(null);
                     setGraphic(card);
@@ -189,7 +192,7 @@ public class EventAdminController {
             }
             eventList.setItems(FXCollections.observableArrayList(events));
         } catch (SQLException e) {
-            showError("Erreur : " + e.getMessage());
+            showError("Error: " + e.getMessage());
         }
     }
 
@@ -197,12 +200,12 @@ public class EventAdminController {
         try {
             List<RegistrationService.RegistrantExportRow> rows = registrationService.listRegistrantsForEvent(event.getId());
             if (rows.isEmpty()) {
-                showError("Aucun inscrit pour cet événement.");
+                showError("No registrants for this event.");
                 return;
             }
             showRegistrantsDialog(event, rows);
         } catch (Exception e) {
-            showError("Affichage impossible : " + e.getMessage());
+            showError("Display impossible: " + e.getMessage());
         }
     }
 
@@ -210,17 +213,17 @@ public class EventAdminController {
         TableView<RegistrationService.RegistrantExportRow> table = new TableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        TableColumn<RegistrationService.RegistrantExportRow, String> colFirst = new TableColumn<>("Prénom");
+        TableColumn<RegistrationService.RegistrantExportRow, String> colFirst = new TableColumn<>("First Name");
         colFirst.setCellValueFactory(v -> new SimpleStringProperty(v.getValue().firstName()));
 
-        TableColumn<RegistrationService.RegistrantExportRow, String> colLast = new TableColumn<>("Nom");
+        TableColumn<RegistrationService.RegistrantExportRow, String> colLast = new TableColumn<>("Last Name");
         colLast.setCellValueFactory(v -> new SimpleStringProperty(v.getValue().lastName()));
 
         TableColumn<RegistrationService.RegistrantExportRow, String> colEmail = new TableColumn<>("Email");
         colEmail.setCellValueFactory(v -> new SimpleStringProperty(v.getValue().email()));
 
         TableColumn<RegistrationService.RegistrantExportRow, String> colCheck = new TableColumn<>("Check-in");
-        colCheck.setCellValueFactory(v -> new SimpleStringProperty(v.getValue().checkedIn() ? "✔ Présent" : "✖ Absent"));
+        colCheck.setCellValueFactory(v -> new SimpleStringProperty(v.getValue().checkedIn() ? "✔ Present" : "✖ Absent"));
         colCheck.setCellFactory(col -> new TableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -244,14 +247,14 @@ public class EventAdminController {
         Label count = new Label(rows.size() + " inscrit(s)");
         count.setStyle("-fx-text-fill:#455a64;");
 
-        Button scanBtn = new Button("Scanner QR code");
+        Button scanBtn = new Button("Scan QR code");
         scanBtn.getStyleClass().add("btn-primary");
         scanBtn.setOnAction(e -> {
             Scene dialogScene = scanBtn.getScene();
             Window chooserOwner = dialogScene != null ? dialogScene.getWindow() : null;
             handleScanQrFile(chooserOwner, event, table, count);
         });
-        Button closeBtn = new Button("Fermer");
+        Button closeBtn = new Button("Close");
         closeBtn.getStyleClass().add("btn-outline");
         HBox actions = new HBox(8, scanBtn, closeBtn);
         actions.setAlignment(Pos.CENTER_RIGHT);
@@ -260,7 +263,7 @@ public class EventAdminController {
         root.setPadding(new Insets(14));
 
         Stage st = new Stage();
-        st.setTitle("bledna — liste des inscrits");
+        st.setTitle("bledna — list of registrants");
         Scene sc = new Scene(root, 720, 460);
         StyleHelper.apply(sc);
         st.setScene(sc);
@@ -282,22 +285,22 @@ public class EventAdminController {
     private void handleScanQrFile(Window fileChooserOwner, Event event, TableView<RegistrationService.RegistrantExportRow> table, Label count) {
         try {
             FileChooser chooser = new FileChooser();
-            chooser.setTitle("Choisir le reçu (PDF ou image)");
+            chooser.setTitle("Choose receipt (PDF or image)");
             chooser.getExtensionFilters().add(
-                    new FileChooser.ExtensionFilter("Fichiers QR", "*.pdf", "*.png", "*.jpg", "*.jpeg", "*.bmp", "*.gif", "*.webp"));
+                    new FileChooser.ExtensionFilter("QR Files", "*.pdf", "*.png", "*.jpg", "*.jpeg", "*.bmp", "*.gif", "*.webp"));
             File file = chooser.showOpenDialog(fileChooserOwner);
             if (file == null) {
                 return;
             }
             String raw = decodeQrFromFile(file);
             if (raw == null || raw.isBlank()) {
-                showQrError("Aucun QR valide détecté dans ce fichier (image floue, PDF sans QR lisible, ou mauvais fichier).");
+                showQrError("No valid QR detected in this file (blurry image, PDF without readable QR, or wrong file).");
                 return;
             }
 
             boolean ok = registrationService.markCheckedInFromReceiptCode(event.getId(), raw);
             if (!ok) {
-                showQrError("QR détecté, mais code non valide pour cet événement.");
+                showQrError("QR detected, but code not valid for this event.");
                 return;
             }
             refreshRegistrantsTable(event, table, count);
@@ -306,7 +309,7 @@ public class EventAdminController {
             if (detail == null || detail.isBlank()) {
                 detail = ex.getClass().getSimpleName();
             }
-            showError("Scan QR impossible : " + detail);
+            showError("QR scan impossible: " + detail);
         }
     }
 
@@ -394,13 +397,13 @@ public class EventAdminController {
     private void refreshRegistrantsTable(Event event, TableView<RegistrationService.RegistrantExportRow> table, Label count) throws SQLException {
         List<RegistrationService.RegistrantExportRow> refreshed = registrationService.listRegistrantsForEvent(event.getId());
         table.getItems().setAll(refreshed);
-        count.setText(refreshed.size() + " inscrit(s)");
+        count.setText(refreshed.size() + " registrant(s)");
     }
 
     private void showQrError(String message) {
         Alert a = new Alert(Alert.AlertType.ERROR);
         a.setTitle("bledna");
-        a.setHeaderText("QR incorrect");
+        a.setHeaderText("Invalid QR");
         a.setContentText(message);
         if (a.getDialogPane() != null) {
             a.getDialogPane().setStyle("-fx-background-color:#fff5f5;");
@@ -419,16 +422,16 @@ public class EventAdminController {
     private void showDetails(Event event) {
         LocalDateTime d = event.getEventDate();
         String body = String.join("\n",
-                "Nom : " + event.getName(),
-                "Description : " + (event.getDescription() != null ? event.getDescription() : "—"),
-                "Date : " + (d == null ? "—" : d.format(DT)),
-                "Lieu : " + (event.getLocation() != null ? event.getLocation() : "—"),
-                String.format(Locale.FRANCE, "Prix : %.2f TND", event.getPrice()),
-                "Type : " + (event.getEventType() != null ? event.getEventType() : "—"),
-                "Paiement (événement) : " + (event.getPaymentType() != null ? event.getPaymentType() : "—"),
-                "Places : " + event.getCurrentParticipants() + " / " + (event.getMaxPlaces() > 0 ? event.getMaxPlaces() : "∞"),
-                "Statut : " + (event.getStatus() != null ? event.getStatus() : "—"),
-                "Inscrits : " + (event.getRegistrantsSummary() != null ? event.getRegistrantsSummary() : "—")
+                "Name: " + event.getName(),
+                "Description: " + (event.getDescription() != null ? event.getDescription() : "—"),
+                "Date: " + (d == null ? "—" : d.format(DT)),
+                "Location: " + (event.getLocation() != null ? event.getLocation() : "—"),
+                String.format(Locale.US, "Price: %.2f TND", event.getPrice()),
+                "Type: " + (event.getEventType() != null ? event.getEventType() : "—"),
+                "Payment (event): " + (event.getPaymentType() != null ? event.getPaymentType() : "—"),
+                "Slots: " + event.getCurrentParticipants() + " / " + (event.getMaxPlaces() > 0 ? event.getMaxPlaces() : "∞"),
+                "Status: " + (event.getStatus() != null ? event.getStatus() : "—"),
+                "Registrants: " + (event.getRegistrantsSummary() != null ? event.getRegistrantsSummary() : "—")
         );
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         a.setHeaderText(event.getName());
@@ -437,36 +440,15 @@ public class EventAdminController {
     }
 
     private void openEdit(Event event) {
-        try {
-            Stage owner = eventList.getScene() != null && eventList.getScene().getWindow() instanceof Stage s ? s : null;
-            if (owner != null) {
-                owner.hide();
-            }
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/esprit/EventEdit.fxml"));
-            Stage st = new Stage();
-            st.setTitle("bledna — modifier l'événement");
-            Scene sc = new Scene(loader.load(), 820, 620);
-            StyleHelper.apply(sc);
-            st.setScene(sc);
-            if (owner != null) {
-                st.initOwner(owner);
-            }
-            loader.<EventEditController>getController().setEventToEdit(event);
-            st.showAndWait();
-            loadEvents();
-        } catch (Exception e) {
-            showError(e.getMessage());
-        } finally {
-            Stage owner = eventList.getScene() != null && eventList.getScene().getWindow() instanceof Stage s ? s : null;
-            if (owner != null) {
-                owner.show();
-            }
-        }
+        EventEditController.setStaticEventToEdit(event);
+        SceneNavigator.navigate(eventList, "/com/esprit/EventEdit.fxml", err -> {
+            showError("Navigation error: " + err);
+        });
     }
 
     private void confirmDelete(Event event) {
         Alert c = new Alert(Alert.AlertType.CONFIRMATION);
-        c.setContentText("Supprimer « " + event.getName() + " » ?");
+        c.setContentText("Delete \"" + event.getName() + "\"?");
         Optional<ButtonType> r = c.showAndWait();
         if (r.isPresent() && r.get() == ButtonType.OK) {
             try {
@@ -480,30 +462,9 @@ public class EventAdminController {
 
     @FXML
     private void handleAddEvent() {
-        try {
-            Stage owner = eventList.getScene() != null && eventList.getScene().getWindow() instanceof Stage s ? s : null;
-            if (owner != null) {
-                owner.hide();
-            }
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/esprit/EventAdd.fxml"));
-            Stage st = new Stage();
-            st.setTitle("bledna — nouvel événement");
-            Scene sc = new Scene(loader.load(), 820, 620);
-            StyleHelper.apply(sc);
-            st.setScene(sc);
-            if (owner != null) {
-                st.initOwner(owner);
-            }
-            st.showAndWait();
-            loadEvents();
-        } catch (Exception e) {
-            showError(e.getMessage());
-        } finally {
-            Stage owner = eventList.getScene() != null && eventList.getScene().getWindow() instanceof Stage s ? s : null;
-            if (owner != null) {
-                owner.show();
-            }
-        }
+        SceneNavigator.navigate(addBtn, "/com/esprit/EventAdd.fxml", err -> {
+            showError("Navigation error: " + err);
+        });
     }
 
     private void showError(String m) {

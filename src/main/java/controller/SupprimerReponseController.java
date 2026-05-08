@@ -15,6 +15,7 @@ import org.example.services.ReponseServices;
 
 import java.sql.SQLException;
 import java.util.Objects;
+import com.esprit.utils.SceneNavigator;
 
 public class SupprimerReponseController {
 
@@ -76,13 +77,11 @@ public class SupprimerReponseController {
             FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource("/AfficherReponse.fxml")));
             Parent root = loader.load();
             AfficherReponseController ctrl = loader.getController();
-            Topic topic = new Topic();
+            org.example.entities.Topic topic = new org.example.entities.Topic();
             topic.setId(topicId);
             topic.setTitle(topicTitle);
             ctrl.initForTopic(topic);
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Replies - " + (topicTitle == null || topicTitle.isBlank() ? "topic" : topicTitle));
+            SceneNavigator.navigateWithRoot((Node) event.getSource(), root, null);
         } catch (Exception ex) {
             closeStage(event);
         }

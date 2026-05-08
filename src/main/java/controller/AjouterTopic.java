@@ -25,6 +25,7 @@ import org.example.services.NotificationService;
 import org.example.utils.ModerationApiClient;
 import org.example.utils.TopicStatusComboHelper;
 import org.example.utils.ValidationSaisie;
+import com.esprit.utils.SceneNavigator;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -147,10 +148,7 @@ public class AjouterTopic implements Initializable {
 
     @FXML
     void goToList(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/AfficherTopic.fxml")));
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root));
-        stage.setTitle("Community topics");
+        SceneNavigator.navigate((Node) event.getSource(), "/AfficherTopic.fxml", null);
     }
 
     @FXML

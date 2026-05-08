@@ -10,21 +10,21 @@
 
 <StackPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.esprit.controllers.FaceIdEnrollController" stylesheets="@style.css">
     <VBox styleClass="page-card" spacing="12" maxWidth="420" minWidth="360">
-        <Label text="Enrollement Face ID" styleClass="title"/>
-        <Label text="Confirmez votre compte puis capturez votre visage via la camera." styleClass="subtitle" wrapText="true"/>
+        <Label text="Face ID Enrollment" styleClass="title"/>
+        <Label text="Confirm your account then capture your face via the camera." styleClass="subtitle" wrapText="true"/>
 
         <Label text="Email" styleClass="form-label"/>
         <TextField fx:id="emailField" promptText="name@domain.com"/>
 
-        <Label text="Mot de passe" styleClass="form-label"/>
-        <PasswordField fx:id="passwordField" promptText="Votre mot de passe"/>
+        <Label text="Password" styleClass="form-label"/>
+        <PasswordField fx:id="passwordField" promptText="Your password"/>
 
-        <Label text="Photo capturee" styleClass="form-label"/>
-        <Label fx:id="selectedImageLabel" text="Aucune capture" styleClass="subtitle"/>
+        <Label text="Captured photo" styleClass="form-label"/>
+        <Label fx:id="selectedImageLabel" text="No capture" styleClass="subtitle"/>
 
-        <Button text="📸 Ouvrir la camera" onAction="#handlePickImage" styleClass="secondary-button" maxWidth="Infinity"/>
-        <Button text="Enregistrer Face ID" onAction="#handleEnrollFaceId" styleClass="primary-button" maxWidth="Infinity"/>
-        <Button text="Retour login" onAction="#goBackToLogin" styleClass="secondary-button" maxWidth="Infinity"/>
+        <Button text="📸 Open Camera" onAction="#handlePickImage" styleClass="secondary-button" maxWidth="Infinity"/>
+        <Button text="Register Face ID" onAction="#handleEnrollFaceId" styleClass="primary-button" maxWidth="Infinity"/>
+        <Button text="Back to Login" onAction="#goBackToLogin" styleClass="secondary-button" maxWidth="Infinity"/>
 
         <Label fx:id="messageLabel" styleClass="status-message" wrapText="true" visible="false" managed="false"/>
     </VBox>

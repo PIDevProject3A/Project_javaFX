@@ -4,6 +4,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.example.services.NotificationService;
+import com.esprit.utils.LanguageManager;
+import com.esprit.utils.ThemeManager;
 
 public class Main extends Application {
     private static final double APP_WIDTH = 900;
@@ -21,8 +23,22 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
+        // Initialize language and theme managers
+        LanguageManager languageManager = LanguageManager.getInstance();
+        ThemeManager themeManager = ThemeManager.getInstance();
+        
+        FXMLLoader loader = new FXMLLoader(
+            getClass().getResource("/Login.fxml"), 
+            languageManager.getBundle()
+        );
+        Parent root = loader.load();
+        
         Scene scene = new Scene(root, APP_WIDTH, APP_HEIGHT);
+        scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+        
+        // Apply theme
+        themeManager.applyTheme(scene);
+        
         stage.setTitle("BLADNA");
         stage.setMinWidth(700);
         stage.setMinHeight(500);

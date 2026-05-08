@@ -8,6 +8,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.Node;
 import javafx.fxml.FXMLLoader;
 import com.esprit.services.DashboardService;
@@ -18,7 +19,9 @@ import com.esprit.entities.User;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 public class DashboardController {
 
@@ -45,13 +48,20 @@ public class DashboardController {
     private Button eventRegistrationButton;
     @FXML
     private Button settingsButton;
+    @FXML
+    private Button donationButton, gpsButton, transactionButton;
 
     @FXML
     private LineChart<String, Number> loginEvolutionChart;
     @FXML
     private PieChart roleDistributionChart;
     @FXML
-    private BarChart<String, Number> dailyActivityChart;
+    private BarChart<String, Number> dailyActivityChart, eventActivityChart;
+    @FXML
+    private VBox eventManagerDashboard;
+
+    @FXML
+    private StackPane mainContentStack;
 
     @FXML
     private VBox mainDashboardContent;
@@ -61,46 +71,200 @@ public class DashboardController {
     
     @FXML
     private Button dashboardNavButton;
-    
     @FXML
     private Button communityNavButton;
+    @FXML
+    private Button logoutButton;
+
+    @FXML
+    private Label sidebarTitle, sidebarSubtitle, contentTitle;
+    @FXML
+    private Label totalUsersTitle, activeUsersTitle, todayLoginsTitle, emailsSentTitle;
+    @FXML
+    private Label loginChartTitle, rolesChartTitle, activityChartTitle, eventActivityTitle;
+    @FXML
+    private Label totalEventsTitle, totalEventsLabel, totalRegistrationsTitle, totalRegistrationsLabel;
+    @FXML
+    private Button btnEn, btnFr, themeToggleButton;
+    @FXML
+    private Label themeIcon;
+
+    private boolean isDark = false;
+    private ResourceBundle bundle;
+    private Locale currentLocale = Locale.ENGLISH;
 
     private boolean isForumLoaded = false;
 
     private final DashboardService dashboardService = new DashboardService();
+    private String currentFxmlPath = null;
+    private Button currentActiveBtn = null;
 
     @FXML
     public void initialize() {
+        // Initialize locale from session
+        String sessionLocale = UserSession.getCurrentLocale();
+        currentLocale = new Locale(sessionLocale);
+        bundle = ResourceBundle.getBundle("messages", currentLocale);
+        
+        // Sync Dark Mode from Session
+        isDark = UserSession.isDarkMode();
+        
         User.AdminType role = UserSession.getCurrentUserRole();
         boolean isAdmin = (role == User.AdminType.ADMIN_ACCOUNT);
 
+        // UI Setup...
         // Sidebar visibility
+        boolean isEventManager = (role == User.AdminType.EVENT_MANAGER);
+        
         manageAccountsButton.setVisible(isAdmin);
         manageAccountsButton.setManaged(isAdmin);
+        
         if (eventRegistrationButton != null) {
-            eventRegistrationButton.setVisible(isAdmin);
-            eventRegistrationButton.setManaged(isAdmin);
+            eventRegistrationButton.setVisible(isAdmin || isEventManager);
+            eventRegistrationButton.setManaged(isAdmin || isEventManager);
         }
-        // User said "don't show settings for other roles than admin"
+        
         settingsButton.setVisible(isAdmin);
         settingsButton.setManaged(isAdmin);
+
+        // Show for everyone (Admin & Event Manager)
+        dashboardNavButton.setVisible(true);
+        dashboardNavButton.setManaged(true);
+        
+        donationButton.setVisible(isAdmin);
+        donationButton.setManaged(isAdmin);
+        gpsButton.setVisible(isAdmin);
+        gpsButton.setManaged(isAdmin);
+        transactionButton.setVisible(isAdmin);
+        transactionButton.setManaged(isAdmin);
 
         // Main content visibility
         statsCardsContainer.setVisible(isAdmin);
         statsCardsContainer.setManaged(isAdmin);
         chartsContainer.setVisible(isAdmin);
         chartsContainer.setManaged(isAdmin);
-        nonAdminContainer.setVisible(!isAdmin);
-        nonAdminContainer.setManaged(!isAdmin);
+        
+        eventManagerDashboard.setVisible(isEventManager);
+        eventManagerDashboard.setManaged(isEventManager);
+
+        nonAdminContainer.setVisible(!isAdmin && !isEventManager);
+        nonAdminContainer.setManaged(!isAdmin && !isEventManager);
 
         if (isAdmin) {
-            welcomeLabel.setText("Real-time monitoring of application activity and user engagement.");
+            loadStatistics();
+            setupCharts();
+        } else if (isEventManager) {
+            loadEventStatistics();
+            setupEventCharts();
+        }
+
+        updateTexts();
+        updateLangButtonStyles();
+        
+        // Wait for scene to apply initial theme if already dark
+        javafx.application.Platform.runLater(() -> {
+            if (isDark && welcomeLabel.getScene() != null) {
+                welcomeLabel.getScene().getRoot().getStyleClass().add("dark-mode");
+                themeIcon.setText("\uD83C\uDF1E");
+            }
+        });
+
+        if (isAdmin) {
             loadStatistics();
             setupLineChart();
             setupPieChart();
             setupBarChart();
+            currentActiveBtn = dashboardNavButton;
+        } else if (isEventManager) {
+            // Default view for Event Manager is now the specialized dashboard
+            javafx.application.Platform.runLater(() -> {
+                showDashboardView();
+                currentActiveBtn = dashboardNavButton;
+                updateNavButtons(dashboardNavButton);
+            });
+        }
+    }
+
+    private void updateLangButtonStyles() {
+        if (currentLocale.getLanguage().equals("fr")) {
+            btnFr.getStyleClass().add("lang-button-active");
+            btnEn.getStyleClass().remove("lang-button-active");
         } else {
-            welcomeLabel.setText("Welcome to your personal dashboard.");
+            btnEn.getStyleClass().add("lang-button-active");
+            btnFr.getStyleClass().remove("lang-button-active");
+        }
+    }
+
+    private void updateTexts() {
+        // Sidebar
+        sidebarTitle.setText(bundle.getString("sidebar.title"));
+        sidebarSubtitle.setText(bundle.getString("sidebar.subtitle"));
+        dashboardNavButton.setText(bundle.getString("nav.dashboard"));
+        communityNavButton.setText(bundle.getString("nav.community"));
+        manageAccountsButton.setText(bundle.getString("nav.accounts"));
+        if (eventRegistrationButton != null) eventRegistrationButton.setText(bundle.getString("nav.events"));
+        settingsButton.setText(bundle.getString("nav.settings"));
+        if (donationButton != null) donationButton.setText(bundle.getString("nav.donation"));
+        if (gpsButton != null) gpsButton.setText(bundle.getString("nav.gps"));
+        if (transactionButton != null) transactionButton.setText(bundle.getString("nav.transaction"));
+        logoutButton.setText(bundle.getString("nav.logout"));
+
+        // Main Content
+        contentTitle.setText(bundle.getString("content.title"));
+        welcomeLabel.setText(bundle.getString("content.subtitle"));
+        
+        // Stats
+        totalUsersTitle.setText(bundle.getString("stats.total_users"));
+        activeUsersTitle.setText(bundle.getString("stats.active_users"));
+        todayLoginsTitle.setText(bundle.getString("stats.today_logins"));
+        emailsSentTitle.setText(bundle.getString("stats.emails_sent"));
+
+        // Charts
+        loginChartTitle.setText(bundle.getString("chart.evolution"));
+        rolesChartTitle.setText(bundle.getString("chart.roles"));
+        activityChartTitle.setText(bundle.getString("chart.activity"));
+
+        // Event Manager Dashboard
+        if (totalEventsTitle != null) totalEventsTitle.setText(bundle.getString("stats.total_events"));
+        if (totalRegistrationsTitle != null) totalRegistrationsTitle.setText(bundle.getString("stats.total_registrations"));
+        if (eventActivityTitle != null) eventActivityTitle.setText(bundle.getString("chart.event_activity"));
+    }
+
+    @FXML
+    private void setEnglish() {
+        UserSession.setCurrentLocale("en");
+        currentLocale = Locale.ENGLISH;
+        bundle = ResourceBundle.getBundle("messages", currentLocale);
+        updateLangButtonStyles();
+        updateTexts();
+        if (currentFxmlPath != null) {
+            loadIntoContent(currentFxmlPath);
+        }
+    }
+
+    @FXML
+    private void setFrench() {
+        UserSession.setCurrentLocale("fr");
+        currentLocale = Locale.FRENCH;
+        bundle = ResourceBundle.getBundle("messages", currentLocale);
+        updateLangButtonStyles();
+        updateTexts();
+        if (currentFxmlPath != null) {
+            loadIntoContent(currentFxmlPath);
+        }
+    }
+
+    @FXML
+    private void toggleTheme() {
+        isDark = !isDark;
+        UserSession.setDarkMode(isDark);
+        Node root = welcomeLabel.getScene().getRoot();
+        if (isDark) {
+            root.getStyleClass().add("dark-mode");
+            themeIcon.setText("\uD83C\uDF1E"); // Sun icon
+        } else {
+            root.getStyleClass().remove("dark-mode");
+            themeIcon.setText("\uD83C\uDF19"); // Moon icon
         }
     }
 
@@ -111,9 +275,36 @@ public class DashboardController {
         emailsSentLabel.setText(String.valueOf(dashboardService.getEmailCount()));
     }
 
-    private void setupLineChart() {
+    private void loadEventStatistics() {
+        totalEventsLabel.setText(String.valueOf(dashboardService.getTotalEvents()));
+        totalRegistrationsLabel.setText(String.valueOf(dashboardService.getTotalRegistrations()));
+    }
+
+    private void setupCharts() {
+        setupLineChart();
+        setupPieChart();
+        setupBarChart();
+    }
+
+    private void setupEventCharts() {
+        eventActivityChart.getData().clear();
         XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Connexions");
+        series.setName("Event Activity");
+
+        Map<LocalDate, Integer> data = dashboardService.getDailyActivity();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
+
+        data.forEach((date, count) -> {
+            series.getData().add(new XYChart.Data<>(date.format(formatter), count));
+        });
+
+        eventActivityChart.getData().add(series);
+    }
+
+    private void setupLineChart() {
+        loginEvolutionChart.getData().clear();
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Logins");
         
         Map<LocalDate, Integer> data = dashboardService.getLoginActivityEvolution();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
@@ -126,6 +317,7 @@ public class DashboardController {
     }
 
     private void setupPieChart() {
+        roleDistributionChart.getData().clear();
         Map<String, Integer> data = dashboardService.getRoleDistribution();
         data.forEach((role, count) -> {
             roleDistributionChart.getData().add(new PieChart.Data(role, count));
@@ -133,8 +325,9 @@ public class DashboardController {
     }
 
     private void setupBarChart() {
+        dailyActivityChart.getData().clear();
         XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Activite Totale");
+        series.setName("Total Activity");
 
         Map<LocalDate, Integer> data = dashboardService.getDailyActivity();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
@@ -147,57 +340,117 @@ public class DashboardController {
     }
 
     @FXML
+    private void showDashboardView() {
+        currentFxmlPath = null;
+        mainContentStack.getChildren().clear();
+        mainContentStack.getChildren().add(mainDashboardContent);
+        mainDashboardContent.setVisible(true);
+        mainDashboardContent.setManaged(true);
+        
+        currentActiveBtn = dashboardNavButton;
+        updateNavButtons(dashboardNavButton);
+    }
+
+    @FXML
+    private void showCommunityView() {
+        loadIntoContent("/AfficherTopic.fxml");
+        updateNavButtons(communityNavButton);
+    }
+
+    @FXML
     private void goToManageAccounts() {
         if (UserSession.getCurrentUserRole() != User.AdminType.ADMIN_ACCOUNT) {
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
-            alert.setTitle("Accès refusé");
-            alert.setHeaderText(null);
-            alert.setContentText("Seul l'administrateur principal (ADMIN_ACCOUNT) peut gérer les comptes.");
-            alert.showAndWait();
+            showAccessDenied();
             return;
         }
-        try {
-            switchScene("/AdminDashboard.fxml");
-        } catch (Exception e) {
-            e.printStackTrace();
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-            alert.setTitle("Erreur");
-            alert.setContentText("Erreur lors du chargement de la page: " + e.getMessage());
-            alert.showAndWait();
-        }
+        loadIntoContent("/AdminDashboard.fxml");
+        updateNavButtons(manageAccountsButton);
     }
 
     @FXML
     private void goToEventRegistrations() {
-        if (UserSession.getCurrentUserRole() != User.AdminType.ADMIN_ACCOUNT) {
-            return;
+        User.AdminType role = UserSession.getCurrentUserRole();
+        if (role != User.AdminType.ADMIN_ACCOUNT && role != User.AdminType.EVENT_MANAGER) return;
+        
+        // For Event Manager, this button goes to administration
+        if (role == User.AdminType.EVENT_MANAGER) {
+            loadIntoContent("/com/esprit/EventAdmin.fxml");
+        } else {
+            loadIntoContent("/com/esprit/EventCatalog.fxml");
         }
-        switchScene("/com/esprit/EventCatalog.fxml");
+        updateNavButtons(eventRegistrationButton);
     }
 
     @FXML
     private void goToSettings() {
-        switchScene("/AdminSettings.fxml");
+        loadIntoContent("/AdminSettings.fxml");
+        updateNavButtons(settingsButton);
     }
 
     @FXML
     private void goToDonation() {
-        switchScene("/donation.fxml");
+        loadIntoContent("/donation.fxml");
     }
 
     @FXML
     private void goToGps() {
-        switchScene("/gps.fxml");
+        loadIntoContent("/gps.fxml");
     }
 
     @FXML
     private void goToTransaction() {
-        switchScene("/transaction.fxml");
+        loadIntoContent("/transaction.fxml");
+    }
+
+    private void updateNavButtons(Button activeBtn) {
+        dashboardNavButton.getStyleClass().remove("nav-button-active");
+        communityNavButton.getStyleClass().remove("nav-button-active");
+        manageAccountsButton.getStyleClass().remove("nav-button-active");
+        if (eventRegistrationButton != null) eventRegistrationButton.getStyleClass().remove("nav-button-active");
+        settingsButton.getStyleClass().remove("nav-button-active");
+        
+        if (activeBtn != null) {
+            activeBtn.getStyleClass().add("nav-button-active");
+        }
+    }
+
+    private void showAccessDenied() {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+        alert.setTitle("Access Denied");
+        alert.setContentText("Only the main administrator can access this section.");
+        alert.showAndWait();
+    }
+
+    private void loadIntoContent(String fxml) {
+        try {
+            currentFxmlPath = fxml;
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
+            loader.setResources(bundle);
+            Node node = loader.load();
+            
+            // Extract center if it's a shell FXML
+            if (node instanceof BorderPane) {
+                node = ((BorderPane) node).getCenter();
+            }
+            
+            mainContentStack.getChildren().clear();
+            mainContentStack.getChildren().add(node);
+            
+            // Animation
+            node.setOpacity(0);
+            javafx.animation.FadeTransition ft = new javafx.animation.FadeTransition(javafx.util.Duration.millis(300), node);
+            ft.setFromValue(0);
+            ft.setToValue(1);
+            ft.play();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
     private void goToDeleteAccount() {
-        switchScene("/DeleteAccount.fxml");
+        loadIntoContent("/DeleteAccount.fxml");
     }
 
     @FXML
@@ -207,57 +460,7 @@ public class DashboardController {
             MyDataBase.getInstance().updateLogoutTime(logId);
         }
         UserSession.clear();
-        switchScene("/Login.fxml");
-    }
-
-    @FXML
-    private void showDashboardView() {
-        mainDashboardContent.setVisible(true);
-        mainDashboardContent.setManaged(true);
-        forumContainer.setVisible(false);
-        forumContainer.setManaged(false);
-
-        if (!dashboardNavButton.getStyleClass().contains("nav-button-active")) {
-            dashboardNavButton.getStyleClass().add("nav-button-active");
-        }
-        communityNavButton.getStyleClass().remove("nav-button-active");
-    }
-
-    @FXML
-    private void showCommunityView() {
-        mainDashboardContent.setVisible(false);
-        mainDashboardContent.setManaged(false);
-        forumContainer.setVisible(true);
-        forumContainer.setManaged(true);
-
-        dashboardNavButton.getStyleClass().remove("nav-button-active");
-        if (!communityNavButton.getStyleClass().contains("nav-button-active")) {
-            communityNavButton.getStyleClass().add("nav-button-active");
-        }
-
-        if (!isForumLoaded) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherTopic.fxml"));
-                Node forumNode = loader.load();
-                
-                // Allow it to grow
-                VBox.setVgrow(forumNode, javafx.scene.layout.Priority.ALWAYS);
-                
-                forumContainer.getChildren().add(forumNode);
-                isForumLoaded = true;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void switchScene(String fxml) {
-        SceneNavigator.navigate(manageAccountsButton, fxml, msg -> {
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-            alert.setTitle("Erreur");
-            alert.setContentText(msg);
-            alert.showAndWait();
-        });
+        SceneNavigator.navigate(logoutButton, "/Login.fxml", msg -> {});
     }
 }
 

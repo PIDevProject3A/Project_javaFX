@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
+import com.esprit.utils.SceneNavigator;
 
 public class DetailTopicController {
 
@@ -110,14 +111,6 @@ public class DetailTopicController {
 
     @FXML
     void close(ActionEvent event) {
-        try {
-            Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/AfficherTopic.fxml")));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Community topics");
-        } catch (Exception e) {
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.close();
-        }
+        SceneNavigator.navigate((Node) event.getSource(), "/AfficherTopic.fxml", null);
     }
 }

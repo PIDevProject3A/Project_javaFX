@@ -14,10 +14,10 @@
     <top>
         <HBox styleClass="top-bar-page" alignment="CENTER_LEFT" spacing="14">
             <children>
-                <Label text="🌿 Mes inscriptions" styleClass="top-bar-page-title"/>
+                <Label text="🌿 %reglist.title" styleClass="top-bar-page-title"/>
                 <Label text="bledna" style="-fx-text-fill: rgba(255,255,255,0.9); -fx-font-size: 13px;"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="🏠 Catalogue" onAction="#handleBack" styleClass="btn-outline"/>
+                <Button text="🏠 %catalog.title" onAction="#handleBack" styleClass="btn-outline"/>
             </children>
         </HBox>
     </top>
@@ -27,17 +27,17 @@
                 <Label fx:id="participantBanner" styleClass="hint-banner"/>
                 <VBox styleClass="filter-card">
                     <children>
-                        <Label text="🔎 Recherche &amp; filtres" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1b5e20;"/>
+                        <Label text="🔎 %catalog.search_placeholder" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1b5e20;"/>
                         <HBox spacing="12" alignment="CENTER_LEFT">
                             <children>
-                                <Label text="Événement"/>
-                                <TextField fx:id="filterEventField" promptText="ex. Beach, nettoyage…" prefWidth="220"/>
-                                <Label text="Paiement"/>
+                                <Label text="%nav.events"/>
+                                <TextField fx:id="filterEventField" promptText="%reglist.search_placeholder" prefWidth="220"/>
+                                <Label text="%reglist.filter_payment"/>
                                 <ComboBox fx:id="filterPaymentCombo" prefWidth="150"/>
-                                <Button text="🔍 Rechercher" onAction="#handleSearch" styleClass="btn-primary"/>
+                                <Button text="🔍 %generic.confirm" onAction="#handleSearch" styleClass="btn-primary"/>
                             </children>
                         </HBox>
-                        <Label fx:id="searchMessageLabel" text="Saisissez un nom d'événement ou choisissez un paiement puis cliquez sur Rechercher."
+                        <Label fx:id="searchMessageLabel" text="%reglist.no_results"
                                style="-fx-text-fill: #546e7a; -fx-font-size: 12px;"/>
                     </children>
                 </VBox>

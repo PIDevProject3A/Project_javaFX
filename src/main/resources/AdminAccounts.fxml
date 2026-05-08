@@ -16,28 +16,28 @@
 <BorderPane styleClass="app-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.esprit.controllers.AdminAccountsController" stylesheets="@style.css">
     <left>
         <VBox styleClass="sidebar">
-            <Label text="BLADNA" styleClass="sidebar-title"/>
-            <Label text="Administration" styleClass="sidebar-subtitle"/>
+            <Label text="%sidebar.title" styleClass="sidebar-title"/>
+            <Label text="%nav.accounts" styleClass="sidebar-subtitle"/>
             
             <Region prefHeight="20"/>
 
-            <Button text="Dashboard" onAction="#goToDashboard" styleClass="nav-button">
+            <Button text="%nav.dashboard" onAction="#goToDashboard" styleClass="nav-button">
                 <graphic>
                     <Label text="&#x1F3E0;" styleClass="icon-label"/>
                 </graphic>
             </Button>
-            <Button text="Manage Accounts" onAction="#goBack" styleClass="nav-button, nav-button-active">
+            <Button text="%nav.accounts" onAction="#goBack" styleClass="nav-button, nav-button-active">
                 <graphic>
                     <Label text="&#x1F465;" styleClass="icon-label"/>
                 </graphic>
             </Button>
-            <Button text="Manage Face ID" onAction="#goToFaceIdManagement" styleClass="nav-button">
+            <Button text="%admin.account.btn.faceid" onAction="#goToFaceIdManagement" styleClass="nav-button">
                 <graphic>
                     <Label text="&#x1F4F7;" styleClass="icon-label"/>
                 </graphic>
             </Button>
             <Region VBox.vgrow="ALWAYS"/>
-            <Button text="Logout" onAction="#logout" styleClass="nav-button, nav-button-logout">
+            <Button text="%nav.logout" onAction="#logout" styleClass="nav-button, nav-button-logout">
                 <graphic>
                     <Label text="&#x2B05;" styleClass="icon-label"/>
                 </graphic>
@@ -48,29 +48,29 @@
     <center>
         <StackPane styleClass="content-area">
             <VBox styleClass="page-card" maxWidth="760">
-                <Label text="Create Account" styleClass="title"/>
-                <Label text="Admins can provision accounts and assign roles with a consistent workflow." styleClass="subtitle" wrapText="true"/>
+                <Label text="%admin.account.title" styleClass="title"/>
+                <Label text="%admin.account.subtitle" styleClass="subtitle" wrapText="true"/>
 
                 <GridPane styleClass="form-grid">
-                    <Label text="First name" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                    <TextField fx:id="firstNameField" promptText="First name" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <Label text="%admin.account.firstname" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <TextField fx:id="firstNameField" promptText="%admin.account.firstname" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
 
-                    <Label text="Last name" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                    <TextField fx:id="lastNameField" promptText="Last name" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                    <Label text="%admin.account.lastname" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                    <TextField fx:id="lastNameField" promptText="%admin.account.lastname" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
-                    <Label text="Email" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                    <TextField fx:id="emailField" promptText="Email" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                    <Label text="%admin.account.email" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                    <TextField fx:id="emailField" promptText="%admin.account.email" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
-                    <Label text="Password" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                    <PasswordField fx:id="passwordField" promptText="Password" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                    <Label text="%admin.account.password" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                    <PasswordField fx:id="passwordField" promptText="%admin.account.password" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 
-                    <Label text="Role" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-                    <ComboBox fx:id="roleBox" promptText="Role" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                    <Label text="%admin.account.role" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                    <ComboBox fx:id="roleBox" promptText="%admin.account.role" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
                 </GridPane>
 
                 <HBox spacing="10">
-                    <Button text="Create Account" onAction="#handleCreateAccount" styleClass="primary-button"/>
-                    <Button text="Back" onAction="#goBack" styleClass="secondary-button"/>
+                    <Button text="%admin.account.btn.create" onAction="#handleCreateAccount" styleClass="primary-button"/>
+                    <Button text="%generic.cancel" onAction="#goBack" styleClass="secondary-button"/>
                 </HBox>
 
                 <Label fx:id="messageLabel" styleClass="status-message" wrapText="true" visible="false" managed="false"/>

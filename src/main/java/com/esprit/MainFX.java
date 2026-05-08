@@ -12,7 +12,9 @@ public class MainFX extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("messages", java.util.Locale.ENGLISH);
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Login.fxml"), bundle);
+        Parent root = loader.load();
         Scene scene = new Scene(root, APP_WIDTH, APP_HEIGHT);
         stage.setTitle("BLADNA");
         stage.setMinWidth(700);

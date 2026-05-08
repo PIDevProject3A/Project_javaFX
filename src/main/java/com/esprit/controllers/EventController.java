@@ -82,7 +82,7 @@ public class EventController {
             ObservableList<Event> observableList = FXCollections.observableArrayList(events);
             eventList.setItems(observableList);
         } catch (SQLException e) {
-            showError("Erreur lors du chargement des événements: " + e.getMessage());
+            showError("Error loading events: " + e.getMessage());
         }
     }
 
@@ -101,11 +101,11 @@ public class EventController {
                 event.setMaxPlaces(100);
 
                 eventService.ajouter(event);
-                showInfo("✅ Événement ajouté avec succès !");
+                showInfo("✅ Event added successfully!");
                 handleClear();
                 loadEvents();
             } catch (SQLException e) {
-                showError("Erreur lors de l'ajout: " + e.getMessage());
+                showError("Error adding event: " + e.getMessage());
             }
         }
     }
@@ -113,7 +113,7 @@ public class EventController {
     @FXML
     private void handleUpdate() {
         if (selectedEvent == null) {
-            showError("Veuillez sélectionner un événement à modifier!");
+            showError("Please select an event to edit!");
             return;
         }
         if (validateFields()) {
@@ -125,12 +125,12 @@ public class EventController {
                 selectedEvent.setEventType(typeField.getText());
 
                 eventService.modifier(selectedEvent);
-                showInfo("✅ Événement modifié avec succès !");
+                showInfo("✅ Event updated successfully!");
                 handleClear();
                 loadEvents();
                 selectedEvent = null;
             } catch (SQLException e) {
-                showError("Erreur lors de la modification: " + e.getMessage());
+                showError("Error during update: " + e.getMessage());
             }
         }
     }
@@ -138,24 +138,24 @@ public class EventController {
     @FXML
     private void handleDelete() {
         if (selectedEvent == null) {
-            showError("Veuillez sélectionner un événement à supprimer!");
+            showError("Please select an event to delete!");
             return;
         }
         try {
             eventService.supprimer(selectedEvent.getId());
-            showInfo("✅ Événement supprimé avec succès !");
+            showInfo("✅ Event deleted successfully!");
             handleClear();
             loadEvents();
             selectedEvent = null;
         } catch (SQLException e) {
-            showError("Erreur lors de la suppression: " + e.getMessage());
+            showError("Error during deletion: " + e.getMessage());
         }
     }
 
     @FXML
     private void handleRefresh() {
         loadEvents();
-        showInfo("✅ Liste actualisée !");
+        showInfo("✅ List refreshed!");
     }
 
     @FXML
@@ -173,13 +173,13 @@ public class EventController {
         if (nameField.getText().isEmpty() || descriptionField.getText().isEmpty() ||
             locationField.getText().isEmpty() || priceField.getText().isEmpty() ||
             typeField.getText().isEmpty()) {
-            showError("Tous les champs sont obligatoires !");
+            showError("All fields are required!");
             return false;
         }
         try {
             Double.parseDouble(priceField.getText());
         } catch (NumberFormatException e) {
-            showError("Le prix doit être un nombre !");
+            showError("Price must be a number!");
             return false;
         }
         return true;
@@ -187,14 +187,14 @@ public class EventController {
 
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Erreur");
+        alert.setTitle("Error");
         alert.setContentText(message);
         alert.showAndWait();
     }
 
     private void showInfo(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Succès");
+        alert.setTitle("Success");
         alert.setContentText(message);
         alert.showAndWait();
     }

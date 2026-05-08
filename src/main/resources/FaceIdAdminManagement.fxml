@@ -30,22 +30,22 @@
     <center>
         <StackPane styleClass="content-area">
             <VBox styleClass="page-card" maxWidth="760" spacing="12">
-                <Label text="Gestion Face ID" styleClass="title"/>
-                <Label text="Selectionnez un utilisateur puis ajoutez, modifiez ou supprimez son Face ID." styleClass="subtitle" wrapText="true"/>
+                <Label text="Face ID Management" styleClass="title"/>
+                <Label text="Select a user to add, modify, or delete their Face ID." styleClass="subtitle" wrapText="true"/>
 
-                <Label text="Utilisateur" styleClass="form-label"/>
-                <ComboBox fx:id="userBox" promptText="Selectionner un utilisateur" maxWidth="Infinity"/>
+                <Label text="User" styleClass="form-label"/>
+                <ComboBox fx:id="userBox" promptText="Select a user" maxWidth="Infinity"/>
 
-                <Label text="Statut" styleClass="form-label"/>
-                <Label fx:id="faceIdStatusLabel" styleClass="subtitle" text="Aucun utilisateur selectionne."/>
+                <Label text="Status" styleClass="form-label"/>
+                <Label fx:id="faceIdStatusLabel" styleClass="subtitle" text="No user selected."/>
 
                 <HBox spacing="10">
-                    <Button fx:id="addFaceIdBtn" text="Ajouter Face ID" onAction="#handleAddFaceId" styleClass="primary-button">
+                    <Button fx:id="addFaceIdBtn" text="Add Face ID" onAction="#handleAddFaceId" styleClass="primary-button">
                         <graphic>
                             <Label text="&#x1F4F7;" styleClass="icon-label"/>
                         </graphic>
                     </Button>
-                    <Button fx:id="deleteFaceIdBtn" text="Supprimer Face ID" onAction="#handleDeleteFaceId" styleClass="danger-button">
+                    <Button fx:id="deleteFaceIdBtn" text="Delete Face ID" onAction="#handleDeleteFaceId" styleClass="danger-button">
                         <graphic>
                             <Label text="&#x1F5D1;" styleClass="icon-label"/>
                         </graphic>

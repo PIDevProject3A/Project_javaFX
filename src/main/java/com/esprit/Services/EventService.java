@@ -10,22 +10,20 @@ import java.util.List;
 
 public class EventService implements ICrud<Event> {
 
-    private final Connection conn;
-
     public EventService() {
-        this(MyDataBase.getInstance().getConnection());
     }
 
-    /** Connexion explicite (tests H2, etc.). */
-    public EventService(Connection connection) {
-        this.conn = connection;
+    private Connection getConn() {
+        return MyDataBase.getInstance().getSharedConnection();
     }
+
+    /** Explicit connection (H2 tests, etc.). */
 
     private RegistrationTableSchema registrationSchema;
 
     private RegistrationTableSchema registrationSchema() throws SQLException {
         if (registrationSchema == null) {
-            registrationSchema = new RegistrationTableSchema(conn);
+            registrationSchema = new RegistrationTableSchema(getConn());
         }
         return registrationSchema;
     }
@@ -51,7 +49,7 @@ public class EventService implements ICrud<Event> {
 
         String sql = "INSERT INTO events (name, description, eventDate, location, price, payment_type, event_type, maxPlaces) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConn().prepareStatement(sql)) {
             ps.setString(1, e.getName());
             ps.setString(2, e.getDescription());
             ps.setTimestamp(3, Timestamp.valueOf(e.getEventDate()));
@@ -62,16 +60,16 @@ public class EventService implements ICrud<Event> {
             ps.setInt(8, e.getMaxPlaces());
             ps.executeUpdate();
         }
-        System.out.println("✅ Event ajouté !");
+        System.out.println("✅ Event added!");
     }
 
     @Override
     public void supprimer(int id) throws SQLException {
-        try (PreparedStatement ps1 = conn.prepareStatement("DELETE FROM registrations WHERE event_id=?")) {
+        try (PreparedStatement ps1 = getConn().prepareStatement("DELETE FROM registrations WHERE event_id=?")) {
             ps1.setInt(1, id);
             ps1.executeUpdate();
         }
-        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM events WHERE id=?")) {
+        try (PreparedStatement ps = getConn().prepareStatement("DELETE FROM events WHERE id=?")) {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
@@ -92,7 +90,7 @@ public class EventService implements ICrud<Event> {
                 ) rc ON e.id = rc.event_id
                 """.formatted(registrationCountSubquerySql().trim().replace("\n", " "));
 
-        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+        try (Statement st = getConn().createStatement(); ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 Event e = new Event();
                 e.setId(rs.getInt("id"));
@@ -115,7 +113,7 @@ public class EventService implements ICrud<Event> {
     @Override
     public void modifier(Event e) throws SQLException {
         String sql = "UPDATE events SET name=?, description=?, eventDate=?, location=?, price=?, payment_type=?, event_type=?, maxPlaces=? WHERE id=?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConn().prepareStatement(sql)) {
             ps.setString(1, e.getName());
             ps.setString(2, e.getDescription());
             ps.setTimestamp(3, Timestamp.valueOf(e.getEventDate()));
@@ -127,7 +125,7 @@ public class EventService implements ICrud<Event> {
             ps.setInt(9, e.getId());
             ps.executeUpdate();
         }
-        System.out.println("✅ Event modifié !");
+        System.out.println("✅ Event modified!");
     }
 
     public Event trouverParId(int id) throws SQLException {
@@ -136,7 +134,7 @@ public class EventService implements ICrud<Event> {
                 FROM events
                 WHERE id = ?
                 """;
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConn().prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

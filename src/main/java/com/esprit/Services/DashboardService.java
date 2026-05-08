@@ -34,5 +34,13 @@ public class DashboardService {
     public Map<LocalDate, Integer> getDailyActivity() {
         return dataBase.getDailyActivityData();
     }
+
+    public int getTotalEvents() {
+        return dataBase.getTotalEventsCount();
+    }
+
+    public int getTotalRegistrations() {
+        return dataBase.getTotalRegistrationsCount();
+    }
 }
 

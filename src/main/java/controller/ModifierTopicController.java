@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import com.esprit.utils.SceneNavigator;
 
 public class ModifierTopicController {
 
@@ -202,13 +203,6 @@ public class ModifierTopicController {
     }
 
     private void navigateToList(ActionEvent event) {
-        try {
-            Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/AfficherTopic.fxml")));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Community topics");
-        } catch (Exception e) {
-            closeWindow(event);
-        }
+        SceneNavigator.navigate((Node) event.getSource(), "/AfficherTopic.fxml", null);
     }
 }

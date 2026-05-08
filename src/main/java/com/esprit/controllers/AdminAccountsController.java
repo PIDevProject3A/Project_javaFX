@@ -42,6 +42,8 @@ public class AdminAccountsController {
 
     private final UserService userService = new UserService();
     private final EmailService emailService = new EmailService();
+    @FXML
+    private java.util.ResourceBundle resources;
 
     @FXML
     public void initialize() {
@@ -50,7 +52,7 @@ public class AdminAccountsController {
 
         if (UserSession.getCurrentUserRole() != User.AdminType.ADMIN_ACCOUNT) {
             setEditingEnabled(false);
-            setMessage("Access denied: admin role required.", false);
+            setMessage(resources.getString("generic.error") + ": Access denied.", false);
             return;
         }
 
@@ -66,7 +68,7 @@ public class AdminAccountsController {
         try {
             User.AdminType currentRole = UserSession.getCurrentUserRole();
             if (currentRole != User.AdminType.ADMIN_ACCOUNT) {
-                setMessage("Access denied: admin role required.", false);
+                setMessage(resources.getString("generic.error") + ": Access denied.", false);
                 return;
             }
 
@@ -91,7 +93,7 @@ public class AdminAccountsController {
             }
 
             if ("SUCCESS".equals(result)) {
-                setMessage("Account created successfully. Sending welcome email...", true);
+                setMessage(resources.getString("generic.success"), true);
 
                 // Send welcome email in background
                 String welcomeEmail = email.trim().toLowerCase();
@@ -101,17 +103,17 @@ public class AdminAccountsController {
 
                 new Thread(() -> {
                     try {
-                        String subject = "Bienvenue sur BLADNA - Votre compte a ete cree";
+                        String subject = "Welcome to BLADNA - Your account has been created";
                         String message = String.format(
-                                "Bonjour %s,\n\n" +
-                                "Votre compte BLADNA a ete cree avec succes.\n\n" +
-                                "Vos identifiants de connexion :\n" +
-                                "Email : %s\n" +
-                                "Mot de passe : %s\n" +
-                                "Role : %s\n\n" +
-                                "Veuillez vous connecter et changer votre mot de passe des que possible.\n\n" +
-                                "Cordialement,\n" +
-                                "L'equipe BLADNA",
+                                "Hello %s,\n\n" +
+                                "Your BLADNA account has been created successfully.\n\n" +
+                                "Your login credentials:\n" +
+                                "Email: %s\n" +
+                                "Password: %s\n" +
+                                "Role: %s\n\n" +
+                                "Please log in and change your password as soon as possible.\n\n" +
+                                "Best regards,\n" +
+                                "The BLADNA Team",
                                 welcomeName, welcomeEmail, welcomePassword, welcomeRole
                         );
                         emailService.sendEmail(welcomeEmail, subject, message);

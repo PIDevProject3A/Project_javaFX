@@ -9,27 +9,26 @@
 
 /* ========== HERO HEADER ========== */
 .topics-hero {
-    -fx-background-color: linear-gradient(to right, #2E7D32, #1B5E20);
-    -fx-background-radius: 16;
+    -fx-background-color: linear-gradient(135deg, #2D5A3D 0%, #4A7C59 50%, #87A96B 100%);
+    -fx-background-radius: 12;
     -fx-padding: 24 32;
-    -fx-effect: dropshadow(gaussian, rgba(46, 125, 50, 0.3), 20, 0.2, 0, 8);
+    -fx-effect: dropshadow(gaussian, rgba(45, 90, 61, 0.3), 15, 0, 0, 5);
     -fx-max-width: Infinity;
 }
 
 .topics-hero-emoji {
-    -fx-font-size: 36px;
+    -fx-font-size: 32px;
     -fx-padding: 0 16 0 0;
 }
 
 .topics-hero-title {
     -fx-text-fill: #FFFFFF;
-    -fx-font-size: 28px;
+    -fx-font-size: 26px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: -0.5px;
 }
 
 .topics-hero-sub {
-    -fx-text-fill: #A5D6A7; /* Indigo 300 */
+    -fx-text-fill: #E8F5E9; /* Mint White */
     -fx-font-size: 14px;
     -fx-wrap-text: true;
     -fx-line-spacing: 4px;

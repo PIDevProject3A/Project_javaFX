@@ -3,20 +3,24 @@ package com.esprit.utils;
 import com.esprit.entities.AppUser;
 import com.esprit.entities.User;
 import org.mindrot.jbcrypt.BCrypt;
-
+import io.github.cdimascio.dotenv.Dotenv;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
 public class MyDataBase {
-    private static final MyDataBase INSTANCE = new MyDataBase();
-    private static final String DB_NAME = "pidevjava";
-    private static final String JDBC_OPTIONS = "useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-    private static final String SERVER_URL = "jdbc:mysql://localhost:3306/?"+ JDBC_OPTIONS;
+    private static final Dotenv DOTENV = Dotenv.configure().ignoreIfMissing().load();
+    
+    private static final String DB_NAME = DOTENV.get("DB_NAME", "pidevjava");
+    private static final String JDBC_OPTIONS = DOTENV.get("JDBC_OPTIONS", "useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC");
+    private static final String SERVER_URL = "jdbc:mysql://localhost:3306/?" + JDBC_OPTIONS;
     private static final String URL = "jdbc:mysql://localhost:3306/" + DB_NAME + "?" + JDBC_OPTIONS;
-    private static final String USERNAME = "root";
-    private static final String PASSWORD = "";
+    private static final String USERNAME = DOTENV.get("DB_USER", "root");
+    private static final String PASSWORD = DOTENV.get("DB_PASS", "");
+
+    private static final MyDataBase INSTANCE = new MyDataBase();
+    private Connection sharedConnection;
 
     private static final String DEFAULT_ADMIN_FIRST_NAME = "Default";
     private static final String DEFAULT_ADMIN_LAST_NAME = "Admin";
@@ -42,58 +46,47 @@ public class MyDataBase {
     private void ensureTablesExist() {
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement()) {
-            statement.execute("CREATE TABLE IF NOT EXISTS admin_accounts (" +
-                    "id INT AUTO_INCREMENT PRIMARY KEY," +
-                    "first_name VARCHAR(100) NOT NULL," +
-                    "last_name VARCHAR(100) NOT NULL," +
-                    "email VARCHAR(150) NOT NULL UNIQUE," +
-                    "password VARCHAR(255) NOT NULL," +
-                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
-                    ")");
-
-            statement.execute("CREATE TABLE IF NOT EXISTS event_manager (" +
-                    "id INT AUTO_INCREMENT PRIMARY KEY," +
-                    "first_name VARCHAR(100) NOT NULL," +
-                    "last_name VARCHAR(100) NOT NULL," +
-                    "email VARCHAR(150) NOT NULL UNIQUE," +
-                    "password VARCHAR(255) NOT NULL," +
-                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
-                    ")");
-
-            statement.execute("CREATE TABLE IF NOT EXISTS finance_manager (" +
-                    "id INT AUTO_INCREMENT PRIMARY KEY," +
-                    "first_name VARCHAR(100) NOT NULL," +
-                    "last_name VARCHAR(100) NOT NULL," +
-                    "email VARCHAR(150) NOT NULL UNIQUE," +
-                    "password VARCHAR(255) NOT NULL," +
-                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
-                    ")");
             
+            // 1. Admin/Manager Tables
             statement.execute("CREATE TABLE IF NOT EXISTS admin_accounts (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
-                    "first_name VARCHAR(100)," +
-                    "last_name VARCHAR(100)," +
-                    "email VARCHAR(150) UNIQUE NOT NULL," +
-                    "password VARCHAR(255) NOT NULL" +
+                    "first_name VARCHAR(100) NOT NULL," +
+                    "last_name VARCHAR(100) NOT NULL," +
+                    "email VARCHAR(150) NOT NULL UNIQUE," +
+                    "password VARCHAR(255) NOT NULL," +
+                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                     ")");
 
             statement.execute("CREATE TABLE IF NOT EXISTS event_manager (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
-                    "first_name VARCHAR(100)," +
-                    "last_name VARCHAR(100)," +
-                    "email VARCHAR(150) UNIQUE NOT NULL," +
-                    "password VARCHAR(255) NOT NULL" +
+                    "first_name VARCHAR(100) NOT NULL," +
+                    "last_name VARCHAR(100) NOT NULL," +
+                    "email VARCHAR(150) NOT NULL UNIQUE," +
+                    "password VARCHAR(255) NOT NULL," +
+                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                     ")");
 
             statement.execute("CREATE TABLE IF NOT EXISTS finance_manager (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
-                    "first_name VARCHAR(100)," +
-                    "last_name VARCHAR(100)," +
-                    "email VARCHAR(150) UNIQUE NOT NULL," +
-                    "password VARCHAR(255) NOT NULL" +
+                    "first_name VARCHAR(100) NOT NULL," +
+                    "last_name VARCHAR(100) NOT NULL," +
+                    "email VARCHAR(150) NOT NULL UNIQUE," +
+                    "password VARCHAR(255) NOT NULL," +
+                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                     ")");
 
-            // Login History Table
+            // 2. Core App Tables
+            statement.execute("CREATE TABLE IF NOT EXISTS users (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY," +
+                    "first_name VARCHAR(100) NOT NULL," +
+                    "last_name VARCHAR(100) NOT NULL," +
+                    "email VARCHAR(150) NOT NULL UNIQUE," +
+                    "password VARCHAR(255) NOT NULL," +
+                    "user_type ENUM('Collector', 'Buyer', 'Donator') NOT NULL," +
+                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                    "created_by_admin VARCHAR(150) NULL" +
+                    ")");
+
             statement.execute("CREATE TABLE IF NOT EXISTS login_history (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
                     "user_id INT NOT NULL," +
@@ -102,7 +95,6 @@ public class MyDataBase {
                     "logout_time TIMESTAMP NULL" +
                     ")");
 
-            // Email Logs Table
             statement.execute("CREATE TABLE IF NOT EXISTS email_logs (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
                     "sender VARCHAR(150) NOT NULL," +
@@ -112,7 +104,6 @@ public class MyDataBase {
                     "sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                     ")");
 
-            // Face ID Profiles Table (ensuring it exists as well)
             statement.execute("CREATE TABLE IF NOT EXISTS face_id_profiles (" +
                     "email VARCHAR(150) PRIMARY KEY," +
                     "face_subject VARCHAR(255) NOT NULL," +
@@ -120,7 +111,7 @@ public class MyDataBase {
                     "enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                     ")");
 
-            // Events Table
+            // 3. Events & Registrations
             statement.execute("CREATE TABLE IF NOT EXISTS events (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
                     "name VARCHAR(150) NOT NULL," +
@@ -134,7 +125,6 @@ public class MyDataBase {
                     "status VARCHAR(50) DEFAULT 'OPEN'" +
                     ")");
 
-            // Registrations Table
             statement.execute("CREATE TABLE IF NOT EXISTS registrations (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
                     "user_id INT," +
@@ -153,26 +143,80 @@ public class MyDataBase {
                     "FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE" +
                     ")");
 
-            // Users Table (Collector / Buyer / Donator)
-            statement.execute("CREATE TABLE IF NOT EXISTS users (" +
+            // 4. Forum Tables (Missing from previous version)
+            statement.execute("CREATE TABLE IF NOT EXISTS topic (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
-                    "first_name VARCHAR(100) NOT NULL," +
-                    "last_name VARCHAR(100) NOT NULL," +
-                    "email VARCHAR(150) NOT NULL," +
-                    "password VARCHAR(255) NOT NULL," +
-                    "user_type ENUM('Collector', 'Buyer', 'Donator') NOT NULL," +
+                    "title VARCHAR(200) NOT NULL," +
+                    "content TEXT NOT NULL," +
+                    "status VARCHAR(50) DEFAULT 'PENDING'," +
+                    "category VARCHAR(100)," +
                     "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
-                    "created_by_admin VARCHAR(150) NULL," +
-                    "UNIQUE KEY uq_users_email (email)" +
+                    "updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP," +
+                    "like_count INT DEFAULT 0," +
+                    "dislike_count INT DEFAULT 0," +
+                    "reply_count INT DEFAULT 0," +
+                    "image_path VARCHAR(255) NULL" +
                     ")");
-            // Try to alter the users table to add created_by_admin if it doesn't exist
+
+            statement.execute("CREATE TABLE IF NOT EXISTS forum_reponse (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY," +
+                    "content TEXT NOT NULL," +
+                    "topic_id INT NOT NULL," +
+                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                    "updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP," +
+                    "like_count INT DEFAULT 0," +
+                    "dislike_count INT DEFAULT 0," +
+                    "FOREIGN KEY (topic_id) REFERENCES topic(id) ON DELETE CASCADE" +
+                    ")");
+
+            // 5. Eco-Citizen Specific Tables
+            statement.execute("CREATE TABLE IF NOT EXISTS donations (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY," +
+                    "donor_name VARCHAR(200) NOT NULL," +
+                    "donation_type VARCHAR(100) NOT NULL," +
+                    "amount DOUBLE NOT NULL," +
+                    "payment_method VARCHAR(100) NOT NULL," +
+                    "donation_date DATE NOT NULL," +
+                    "status VARCHAR(50) DEFAULT 'PENDING'," +
+                    "notes TEXT," +
+                    "tree_count INT" +
+                    ")");
+
+            statement.execute("CREATE TABLE IF NOT EXISTS recycling_buyers (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY," +
+                    "buyer_name VARCHAR(200) NOT NULL," +
+                    "recycling_type VARCHAR(100) NOT NULL," +
+                    "address TEXT NOT NULL," +
+                    "city VARCHAR(100) NOT NULL," +
+                    "latitude DOUBLE NOT NULL," +
+                    "longitude DOUBLE NOT NULL," +
+                    "contact_phone VARCHAR(50)," +
+                    "status VARCHAR(50) DEFAULT 'Active'," +
+                    "notes TEXT" +
+                    ")");
+
+            statement.execute("CREATE TABLE IF NOT EXISTS transactions (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY," +
+                    "reference_code VARCHAR(100) NOT NULL UNIQUE," +
+                    "transaction_type VARCHAR(50) NOT NULL," +
+                    "source_type VARCHAR(50) NOT NULL," +
+                    "purpose VARCHAR(200) NOT NULL," +
+                    "amount DOUBLE NOT NULL," +
+                    "impact_unit VARCHAR(50)," +
+                    "impact_quantity INT," +
+                    "transaction_date DATE NOT NULL," +
+                    "status VARCHAR(50) DEFAULT 'SUCCESS'," +
+                    "notes TEXT" +
+                    ")");
+
+            // Migration: Try to add created_by_admin if missing in users
             try {
                 statement.execute("ALTER TABLE users ADD COLUMN created_by_admin VARCHAR(150) NULL");
-            } catch (SQLException ignored) {
-                // Column might already exist, safe to ignore
-            }
+            } catch (SQLException ignored) {}
+
         } catch (SQLException e) {
-            throw new RuntimeException("Unable to ensure tables exist.", e);
+            e.printStackTrace();
+            throw new RuntimeException("Unable to ensure tables exist in database: " + e.getMessage(), e);
         }
     }
 
@@ -624,6 +668,26 @@ public class MyDataBase {
         }
     }
 
+    public synchronized int getTotalEventsCount() {
+        try (Connection connection = getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM events")) {
+            return resultSet.next() ? resultSet.getInt(1) : 0;
+        } catch (SQLException e) {
+            return 0;
+        }
+    }
+
+    public synchronized int getTotalRegistrationsCount() {
+        try (Connection connection = getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM registrations")) {
+            return resultSet.next() ? resultSet.getInt(1) : 0;
+        } catch (SQLException e) {
+            return 0;
+        }
+    }
+
     public synchronized Map<String, Integer> getRoleDistributionData() {
         Map<String, Integer> data = new HashMap<>();
         String[] tables = {"admin_accounts", "event_manager", "finance_manager"};
@@ -793,12 +857,19 @@ public class MyDataBase {
         }
     }
 
-    public Connection getConnection() {
+    public synchronized Connection getSharedConnection() {
         try {
-            return DriverManager.getConnection(URL, USERNAME, PASSWORD);
+            if (sharedConnection == null || sharedConnection.isClosed()) {
+                sharedConnection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+            }
+            return sharedConnection;
         } catch (SQLException e) {
-            throw new RuntimeException("Unable to get database connection.", e);
+            throw new RuntimeException("Unable to get shared database connection.", e);
         }
+    }
+
+    public Connection getConnection() {
+        return getSharedConnection();
     }
 
     private String normalizeEmail(String email) {

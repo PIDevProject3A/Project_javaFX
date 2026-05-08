@@ -16,12 +16,17 @@ public class EventEditController {
     @FXML
     private TextArea descriptionField;
     @FXML
-    private ComboBox<String> typeCombo;  // ===== CHANGÉ: ComboBox au lieu de TextField =====
+    private ComboBox<String> typeCombo;  // ===== CHANGED: ComboBox instead of TextField =====
     @FXML
     private Button saveBtn, cancelBtn;
 
     private EventService eventService;
     private Event eventToEdit;
+    private static Event staticEventToEdit;
+
+    public static void setStaticEventToEdit(Event event) {
+        staticEventToEdit = event;
+    }
 
     public void setEventToEdit(Event event) {
         this.eventToEdit = event;
@@ -32,9 +37,14 @@ public class EventEditController {
     public void initialize() {
         eventService = new EventService();
 
-        // ===== INITIALISER LA COMBOBOX =====
+        // ===== INITIALIZE COMBOBOX =====
         typeCombo.setItems(FXCollections.observableArrayList("FREE", "PAID"));
         typeCombo.getSelectionModel().selectFirst();
+
+        if (staticEventToEdit != null) {
+            setEventToEdit(staticEventToEdit);
+            staticEventToEdit = null; // Clear it
+        }
     }
 
     private void loadEventData() {
@@ -44,7 +54,7 @@ public class EventEditController {
             locationField.setText(eventToEdit.getLocation());
             priceField.setText(String.valueOf(eventToEdit.getPrice()));
 
-            // ===== SÉLECTIONNER LA VALEUR DANS LA COMBOBOX =====
+            // ===== SELECT VALUE IN COMBOBOX =====
             String type = eventToEdit.getEventType();
             if (type != null) {
                 if (typeCombo.getItems().contains(type)) {
@@ -67,16 +77,16 @@ public class EventEditController {
                 eventToEdit.setLocation(locationField.getText());
                 eventToEdit.setPrice(Double.parseDouble(priceField.getText()));
 
-                // ===== RÉCUPÉRER LA VALEUR DE LA COMBOBOX =====
+                // ===== GET VALUE FROM COMBOBOX =====
                 eventToEdit.setEventType(typeCombo.getSelectionModel().getSelectedItem());
 
                 eventToEdit.setMaxPlaces(Integer.parseInt(maxPlacesField.getText()));
 
                 eventService.modifier(eventToEdit);
-                showInfo("✅ Événement modifié avec succès !");
+                showInfo("✅ Event updated successfully!");
                 closeWindow();
             } catch (SQLException e) {
-                showError("Erreur lors de la modification: " + e.getMessage());
+                showError("Error during update: " + e.getMessage());
             }
         }
     }
@@ -87,22 +97,23 @@ public class EventEditController {
     }
 
     private void closeWindow() {
-        Stage stage = (Stage) saveBtn.getScene().getWindow();
-        stage.close();
+        com.esprit.utils.SceneNavigator.navigate(saveBtn, "/com/esprit/EventAdmin.fxml", err -> {
+            System.err.println("Navigation error: " + err);
+        });
     }
 
     private boolean validateFields() {
         if (nameField.getText().isEmpty() || descriptionField.getText().isEmpty() ||
                 locationField.getText().isEmpty() || priceField.getText().isEmpty() ||
                 typeCombo.getSelectionModel().getSelectedItem() == null || maxPlacesField.getText().isEmpty()) {
-            showError("Tous les champs sont obligatoires !");
+            showError("All fields are required!");
             return false;
         }
         try {
             Double.parseDouble(priceField.getText());
             Integer.parseInt(maxPlacesField.getText());
         } catch (NumberFormatException e) {
-            showError("Prix et Max places doivent être des nombres !");
+            showError("Price and Max Places must be numbers!");
             return false;
         }
         return true;
@@ -110,14 +121,14 @@ public class EventEditController {
 
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Erreur");
+        alert.setTitle("Error");
         alert.setContentText(message);
         alert.showAndWait();
     }
 
     private void showInfo(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Succès");
+        alert.setTitle("Success");
         alert.setContentText(message);
         alert.showAndWait();
     }

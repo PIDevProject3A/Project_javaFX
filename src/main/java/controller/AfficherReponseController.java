@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import com.esprit.utils.SceneNavigator;
 
 public class AfficherReponseController {
 
@@ -81,7 +82,7 @@ public class AfficherReponseController {
         dateBox.getChildren().add(dateLabel);
         
         if (r.getUpdated_at() != null) {
-            Label editedBadge = new Label(" (modifié)");
+            Label editedBadge = new Label(" (edited)");
             editedBadge.getStyleClass().add("col-date-muted");
             dateBox.getChildren().add(editedBadge);
         }
@@ -95,13 +96,13 @@ public class AfficherReponseController {
         MenuButton btnOptions = new MenuButton("⚙ Options");
         btnOptions.getStyleClass().add("topic-menu-button");
 
-        MenuItem viewItem = new MenuItem("👁 Voir en détail");
+        MenuItem viewItem = new MenuItem("👁 See detail");
         viewItem.setOnAction(e -> openDetail(r));
 
-        MenuItem editItem = new MenuItem("✏ Modifier");
+        MenuItem editItem = new MenuItem("✏ Edit");
         editItem.setOnAction(e -> openEdit(r));
 
-        MenuItem deleteItem = new MenuItem("🗑 Supprimer");
+        MenuItem deleteItem = new MenuItem("🗑 Delete");
         deleteItem.getStyleClass().add("menu-item-delete");
         deleteItem.setOnAction(e -> openDelete(r));
 
@@ -127,7 +128,7 @@ public class AfficherReponseController {
         btnDislike.getStyleClass().add("btn-reaction-dislike");
         btnDislike.setOnAction(e -> reactToReply(r, false));
 
-        Button btnReply = new Button("💬 Répondre");
+        Button btnReply = new Button("💬 Reply");
         btnReply.getStyleClass().add("btn-reaction-reply");
         btnReply.setOnAction(e -> openAddReplyWithPrefill(r));
 
@@ -189,7 +190,7 @@ public class AfficherReponseController {
             Parent root = loader.load();
             DetailReponseController ctrl = loader.getController();
             ctrl.setReponse(r, topicId, topicTitle);
-            setSceneOnCurrentStage(root, "Reply details");
+            SceneNavigator.navigateWithRoot(commentsFeed, root, null);
         } catch (IOException ex) {
             showError(ex);
         }
@@ -201,7 +202,7 @@ public class AfficherReponseController {
             Parent root = loader.load();
             ModifierReponseController ctrl = loader.getController();
             ctrl.setReponse(cloneReponse(r), topicId, topicTitle);
-            setSceneOnCurrentStage(root, "Edit reply");
+            SceneNavigator.navigateWithRoot(commentsFeed, root, null);
         } catch (IOException ex) {
             showError(ex);
         }
@@ -223,7 +224,7 @@ public class AfficherReponseController {
             Parent root = loader.load();
             SupprimerReponseController ctrl = loader.getController();
             ctrl.setReponse(r, topicId, topicTitle);
-            setSceneOnCurrentStage(root, "Delete reply");
+            SceneNavigator.navigateWithRoot(commentsFeed, root, null);
         } catch (IOException ex) {
             showError(ex);
         }
@@ -236,7 +237,7 @@ public class AfficherReponseController {
             Parent root = loader.load();
             AjouterReponseController ctrl = loader.getController();
             ctrl.initContext(topicId, topicTitle, this);
-            setSceneOnCurrentStage(root, "New reply");
+            SceneNavigator.navigateWithRoot(commentsFeed, root, null);
         } catch (IOException ex) {
             showError(ex);
         }
@@ -249,7 +250,7 @@ public class AfficherReponseController {
             AjouterReponseController ctrl = loader.getController();
             String snippet = preview(targetReply);
             ctrl.initContext(topicId, topicTitle, this, "@reply-" + targetReply.getId() + " " + snippet + System.lineSeparator());
-            setSceneOnCurrentStage(root, "Reply to comment");
+            SceneNavigator.navigateWithRoot(commentsFeed, root, null);
         } catch (IOException ex) {
             showError(ex);
         }
@@ -329,7 +330,7 @@ public class AfficherReponseController {
             List<Reponse> reponses = reponseServices.afficherParTopic(topicId);
             commentsFeed.getChildren().clear();
             if (reponses.isEmpty()) {
-                Label emptyLabel = new Label("Aucun message. Soyez le premier à répondre !");
+                Label emptyLabel = new Label("No messages yet. Be the first to reply!");
                 emptyLabel.setStyle("-fx-text-fill: #94A3B8; -fx-font-style: italic; -fx-padding: 20px;");
                 commentsFeed.getChildren().add(emptyLabel);
             } else {
@@ -352,14 +353,7 @@ public class AfficherReponseController {
 
     @FXML
     void goBackToTopics() {
-        try {
-            Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/AfficherTopic.fxml")));
-            Stage stage = ownerStage();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Community topics");
-        } catch (IOException ex) {
-            showError(ex);
-        }
+        SceneNavigator.navigate(commentsFeed, "/AfficherTopic.fxml", null);
     }
 
     private void showError(Exception ex) {

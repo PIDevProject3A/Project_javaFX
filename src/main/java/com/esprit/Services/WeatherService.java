@@ -1,4 +1,4 @@
-package services;
+package com.esprit.services;
 
 import java.io.IOException;
 import java.net.URI;
@@ -10,8 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Locale;
 
-import entities.WeatherData;
+import com.esprit.entities.WeatherData;
 
 public class WeatherService {
     private static final String BASE_URL = "https://api.open-meteo.com/v1/forecast";
@@ -30,8 +31,8 @@ public class WeatherService {
     }
 
     public WeatherData fetchCurrentWeather(double latitude, double longitude) throws IOException {
-        String lat = URLEncoder.encode(String.format("%.6f", latitude), StandardCharsets.UTF_8);
-        String lon = URLEncoder.encode(String.format("%.6f", longitude), StandardCharsets.UTF_8);
+        String lat = URLEncoder.encode(String.format(Locale.US, "%.6f", latitude), StandardCharsets.UTF_8);
+        String lon = URLEncoder.encode(String.format(Locale.US, "%.6f", longitude), StandardCharsets.UTF_8);
 
         String uri = BASE_URL
             + "?latitude=" + lat

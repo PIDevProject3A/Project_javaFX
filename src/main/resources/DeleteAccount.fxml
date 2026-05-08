@@ -30,8 +30,8 @@
         <StackPane styleClass="content-area">
             <VBox styleClass="page-card" maxWidth="620">
                 <Label text="Delete Account" styleClass="title"/>
-                <Label text="Cette action est irreversible. Verifiez bien avant de confirmer." styleClass="warning-text" wrapText="true"/>
-                <Label text="Vous serez deconnecte immediatement apres suppression." styleClass="subtitle" wrapText="true"/>
+                <Label text="This action is irreversible. Double check before confirming." styleClass="warning-text" wrapText="true"/>
+                <Label text="You will be logged out immediately after deletion." styleClass="subtitle" wrapText="true"/>
 
                 <HBox spacing="10">
                     <Button text="Delete My Account" onAction="#handleDeleteAccount" styleClass="danger-button">

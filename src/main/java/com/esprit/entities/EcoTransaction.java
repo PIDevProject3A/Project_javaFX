@@ -1,4 +1,4 @@
-package entities;
+package com.esprit.entities;
 
 import java.time.LocalDate;
 

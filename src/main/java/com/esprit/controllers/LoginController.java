@@ -33,6 +33,9 @@ import com.esprit.utils.SceneNavigator;
 import com.esprit.utils.UserSession;
 import com.esprit.services.EmailService;
 import com.esprit.utils.MyDataBase;
+import com.esprit.utils.LanguageManager;
+import com.esprit.utils.ThemeManager;
+import com.esprit.utils.AppearanceControlBar;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -56,42 +59,68 @@ public class LoginController {
 
     @FXML
     private WebView recaptchaView;
+    
+    @FXML
+    private HBox appearanceBar;
 
     private final UserService userService = new UserService();
     private final RecaptchaService recaptchaService = new RecaptchaService();
     private final LocalRecaptchaPageServer recaptchaPageServer = new LocalRecaptchaPageServer();
     private final CompreFaceFaceIdService faceIdService = new CompreFaceFaceIdService();
     private final EmailService emailService = new EmailService();
+    @FXML
+    private java.util.ResourceBundle resources;
 
     @FXML
     private void initialize() {
         messageLabel.visibleProperty().bind(messageLabel.textProperty().isNotEmpty());
         messageLabel.managedProperty().bind(messageLabel.visibleProperty());
+        
+        // Initialize appearance controls after scene is set
+        Platform.runLater(this::initializeAppearanceBar);
+        
         loadRecaptchaWidget();
+    }
+    
+    private void initializeAppearanceBar() {
+        try {
+            if (appearanceBar != null && emailField != null) {
+                javafx.scene.Scene scene = emailField.getScene();
+                if (scene != null) {
+                    javafx.stage.Stage stage = (javafx.stage.Stage) scene.getWindow();
+                    if (stage != null) {
+                        HBox bar = AppearanceControlBar.createAppearanceBar(stage, scene);
+                        appearanceBar.getChildren().setAll(bar);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
     private void handleLogin() {
         if (emailField.getText() == null || emailField.getText().trim().isEmpty() ||
             passwordField.getText() == null || passwordField.getText().trim().isEmpty()) {
-            showError("Veuillez remplir tous les champs avant de vous connecter.");
+            showError(resources.getString("generic.error") + ": Empty fields.");
             return;
         }
 
         if (!RecaptchaConfig.isConfigured()) {
-            showError("reCAPTCHA n'est pas configure.");
+            showError("reCAPTCHA is not configured.");
             return;
         }
 
         /* TEMPORARY BYPASS FOR DEV:
         String recaptchaToken = readTokenFromWidget();
         if (recaptchaToken.isBlank()) {
-            showError("Veuillez valider le reCAPTCHA avant de vous connecter.");
+            showError("Please validate the reCAPTCHA before logging in.");
             return;
         }
 
         if (!recaptchaService.verifyToken(recaptchaToken)) {
-            showError("Verification reCAPTCHA echouee. Reessayez.");
+            showError("reCAPTCHA verification failed. Please try again.");
             resetCaptcha();
             return;
         }
@@ -99,7 +128,7 @@ public class LoginController {
 
         UserService.LoginResult result = userService.loginUnified(emailField.getText(), passwordField.getText());
         if (result == null) {
-            showError("Invalid email or password.");
+            showError(resources.getString("generic.error") + ": Invalid credentials.");
             return;
         }
 
@@ -114,12 +143,8 @@ public class LoginController {
             int logId = MyDataBase.getInstance().insertLoginLog(user.getId(), user.getAdminType().name());
             UserSession.setCurrentLoginLogId(logId);
 
-            notifyAdminsForAdmin(user, "Connexion");
-            if (user.getAdminType() == User.AdminType.EVENT_MANAGER) {
-                switchScene("/com/esprit/EventAdmin.fxml");
-            } else {
-                switchScene("/Dashboard.fxml");
-            }
+            notifyAdminsForAdmin(user, "Login");
+            switchScene("/Dashboard.fxml");
         } else {
             AppUser appUser = result.getAppUser();
             UserSession.setCurrentUserId(appUser.getId());
@@ -131,7 +156,7 @@ public class LoginController {
             int logId = MyDataBase.getInstance().insertLoginLog(appUser.getId(), appUser.getUserType().name());
             UserSession.setCurrentLoginLogId(logId);
 
-            notifyAdminsForAppUser(appUser, "Connexion");
+            notifyAdminsForAppUser(appUser, "Login");
             
             if (appUser.getUserType() == AppUser.UserType.Collector) {
                 switchScene("/com/bledna/CollectorMain.fxml");
@@ -144,7 +169,7 @@ public class LoginController {
     @FXML
     private void handleFaceLogin() {
         if (!faceIdService.isConfigured()) {
-            showError("CompreFace n'est pas configure.");
+            showError("CompreFace is not configured.");
             return;
         }
 
@@ -157,7 +182,7 @@ public class LoginController {
         }
 
         if (capturedImage == null) {
-            // L'utilisateur a annule la capture.
+            // User canceled capture.
             return;
         }
 
@@ -167,7 +192,7 @@ public class LoginController {
         try {
             Files.deleteIfExists(capturedImage);
         } catch (IOException ignored) {
-            // Nettoyage best effort du fichier temporaire.
+            // Best effort cleanup of temporary file.
         }
 
         if (recognitionResult.status() != CompreFaceFaceIdService.RecognitionStatus.MATCH) {
@@ -186,7 +211,7 @@ public class LoginController {
             int logId = MyDataBase.getInstance().insertLoginLog(adminUser.getId(), adminUser.getAdminType().name());
             UserSession.setCurrentLoginLogId(logId);
 
-            notifyAdminsForAdmin(adminUser, "Connexion (Face ID)");
+            notifyAdminsForAdmin(adminUser, "Login (Face ID)");
             switchScene("/Dashboard.fxml");
             return;
         }
@@ -203,7 +228,7 @@ public class LoginController {
             int logId = MyDataBase.getInstance().insertLoginLog(appUser.getId(), appUser.getUserType().name());
             UserSession.setCurrentLoginLogId(logId);
 
-            notifyAdminsForAppUser(appUser, "Connexion (Face ID)");
+            notifyAdminsForAppUser(appUser, "Login (Face ID)");
             
             if (appUser.getUserType() == AppUser.UserType.Collector) {
                 switchScene("/com/bledna/CollectorMain.fxml");
@@ -213,7 +238,7 @@ public class LoginController {
             return;
         }
 
-        showError("Visage reconnu, mais aucun compte local n'est associe.");
+        showError("Face recognized, but no local account is associated.");
     }
 
     private void switchScene(String fxml) {
@@ -221,15 +246,15 @@ public class LoginController {
     }
 
     private void notifyAdminsForAdmin(User user, String actionType) {
-        String subject = actionType + " utilisateur";
+        String subject = actionType + " user";
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         
         String message = String.format(
-            "Un utilisateur s'est connecte.\n\n" +
-            "Nom : %s %s\n" +
-            "Email : %s\n" +
-            "Date et heure : %s\n" +
-            "Type d'action : %s",
+            "A user has logged in.\n\n" +
+            "Name: %s %s\n" +
+            "Email: %s\n" +
+            "Date and time: %s\n" +
+            "Action type: %s",
             user.getFirstName(), user.getLastName(), user.getEmail(), now, actionType
         );
 
@@ -238,16 +263,16 @@ public class LoginController {
     }
 
     private void notifyAdminsForAppUser(AppUser appUser, String actionType) {
-        String subject = actionType + " utilisateur";
+        String subject = actionType + " user";
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         String message = String.format(
-            "Un utilisateur s'est connecte.\n\n" +
-            "Nom : %s %s\n" +
-            "Email : %s\n" +
-            "Role : %s\n" +
-            "Date et heure : %s\n" +
-            "Type d'action : %s",
+            "A user has logged in.\n\n" +
+            "Name: %s %s\n" +
+            "Email: %s\n" +
+            "Role: %s\n" +
+            "Date and time: %s\n" +
+            "Action type: %s",
             appUser.getFirstName(), appUser.getLastName(), appUser.getEmail(),
             appUser.getUserType().name(), now, actionType
         );
@@ -269,7 +294,7 @@ public class LoginController {
     private Path captureFaceImageFromCamera() throws IOException {
         Webcam webcam = Webcam.getDefault();
         if (webcam == null) {
-            throw new IllegalStateException("Aucune camera detectee sur ce PC.");
+            throw new IllegalStateException("No camera detected on this PC.");
         }
 
         webcam.setViewSize(WebcamResolution.VGA.getSize());
@@ -282,7 +307,7 @@ public class LoginController {
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.initOwner(emailField.getScene().getWindow());
-        dialog.setTitle("Face ID - Preview Camera");
+        dialog.setTitle("Face ID - Camera Preview");
         dialog.setResizable(false);
 
         ImageView imageView = new ImageView();
@@ -291,16 +316,16 @@ public class LoginController {
         imageView.setPreserveRatio(true);
         imageView.setStyle("-fx-effect: dropshadow(gaussian, rgba(46, 125, 50, 0.25), 16, 0.2, 0, 4);");
 
-        Label instructionLabel = new Label("Positionnez votre visage face a la camera");
+        Label instructionLabel = new Label("Position your face towards the camera");
         instructionLabel.setStyle(
                 "-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2E7D32;");
 
-        Button captureBtn = new Button("📸  Capturer");
+        Button captureBtn = new Button("📸  Capture");
         captureBtn.setStyle(
                 "-fx-background-color: #2E7D32; -fx-text-fill: white; -fx-font-size: 14px; " +
                 "-fx-font-weight: 700; -fx-background-radius: 10; -fx-padding: 10 28; -fx-cursor: hand;");
 
-        Button cancelBtn = new Button("Annuler");
+        Button cancelBtn = new Button("Cancel");
         cancelBtn.setStyle(
                 "-fx-background-color: #e4f3df; -fx-text-fill: #245126; -fx-font-size: 13px; " +
                 "-fx-font-weight: 700; -fx-background-radius: 10; -fx-padding: 10 22; -fx-cursor: hand;");
@@ -393,7 +418,7 @@ public class LoginController {
             String recaptchaUrl = recaptchaPageServer.start(RecaptchaConfig.siteKey());
             webEngine.load(recaptchaUrl);
         } catch (IOException exception) {
-            showError("Impossible de charger reCAPTCHA localement.");
+            showError("Unable to load reCAPTCHA locally.");
         }
     }
 

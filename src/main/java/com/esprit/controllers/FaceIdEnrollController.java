@@ -64,7 +64,7 @@ public class FaceIdEnrollController {
                     try { Files.deleteIfExists(capturedImagePath); } catch (IOException ignored) {}
                 }
                 capturedImagePath = captured;
-                selectedImageLabel.setText("📸 Photo capturee avec succes");
+                selectedImageLabel.setText("📸 Photo captured successfully");
                 selectedImageLabel.setStyle("-fx-text-fill: #2E7D32;");
             }
         } catch (IllegalStateException ex) {
@@ -75,12 +75,12 @@ public class FaceIdEnrollController {
     @FXML
     private void handleEnrollFaceId() {
         if (!faceIdService.isConfigured()) {
-            showError("CompreFace n'est pas configure.");
+            showError("CompreFace is not configured.");
             return;
         }
 
         if (capturedImagePath == null || !Files.exists(capturedImagePath)) {
-            showError("Veuillez capturer une photo avant l'enrollement.");
+            showError("Please capture a photo before enrolling.");
             return;
         }
 
@@ -89,13 +89,13 @@ public class FaceIdEnrollController {
 
         User user = userService.login(email, password);
         if (user == null) {
-            showError("Email ou mot de passe invalide.");
+            showError("Invalid email or password.");
             return;
         }
 
         String faceSubject = userService.getOrCreateFaceSubject(user.getEmail());
         if (faceSubject == null || faceSubject.isBlank()) {
-            showError("Impossible de preparer le profil Face ID.");
+            showError("Unable to prepare Face ID profile.");
             return;
         }
 
@@ -109,7 +109,7 @@ public class FaceIdEnrollController {
         try { Files.deleteIfExists(capturedImagePath); } catch (IOException ignored) {}
         capturedImagePath = null;
 
-        showSuccess("Face ID enregistre. Vous pouvez vous connecter sans email.");
+        showSuccess("Face ID registered. You can now login without an email.");
     }
 
     @FXML
@@ -129,7 +129,7 @@ public class FaceIdEnrollController {
     private Path openCameraPreviewDialog() {
         Webcam webcam = Webcam.getDefault();
         if (webcam == null) {
-            throw new IllegalStateException("Aucune camera detectee sur ce PC.");
+            throw new IllegalStateException("No camera detected on this PC.");
         }
 
         webcam.setViewSize(WebcamResolution.VGA.getSize());
@@ -141,7 +141,7 @@ public class FaceIdEnrollController {
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.initOwner(emailField.getScene().getWindow());
-        dialog.setTitle("Face ID - Capture visage");
+        dialog.setTitle("Face ID - Face Capture");
         dialog.setResizable(false);
 
         ImageView imageView = new ImageView();
@@ -150,16 +150,16 @@ public class FaceIdEnrollController {
         imageView.setPreserveRatio(true);
         imageView.setStyle("-fx-effect: dropshadow(gaussian, rgba(46, 125, 50, 0.25), 16, 0.2, 0, 4);");
 
-        Label instructionLabel = new Label("Positionnez votre visage face a la camera");
+        Label instructionLabel = new Label("Position your face in front of the camera");
         instructionLabel.setStyle(
                 "-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2E7D32;");
 
-        Button captureBtn = new Button("\uD83D\uDCF8  Capturer");
+        Button captureBtn = new Button("\uD83D\uDCF8  Capture");
         captureBtn.setStyle(
                 "-fx-background-color: #2E7D32; -fx-text-fill: white; -fx-font-size: 14px; " +
                 "-fx-font-weight: 700; -fx-background-radius: 10; -fx-padding: 10 28; -fx-cursor: hand;");
 
-        Button cancelBtn = new Button("Annuler");
+        Button cancelBtn = new Button("Cancel");
         cancelBtn.setStyle(
                 "-fx-background-color: #e4f3df; -fx-text-fill: #245126; -fx-font-size: 13px; " +
                 "-fx-font-weight: 700; -fx-background-radius: 10; -fx-padding: 10 22; -fx-cursor: hand;");

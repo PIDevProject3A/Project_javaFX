@@ -15,23 +15,30 @@
         <padding>
             <Insets top="40" right="40" bottom="40" left="40"/>
         </padding>
+        
+        <!-- Appearance Control Bar -->
+        <HBox fx:id="appearanceBar" spacing="12" alignment="TOP_RIGHT">
+            <padding>
+                <Insets bottom="20"/>
+            </padding>
+        </HBox>
 
         <VBox alignment="CENTER" spacing="8">
             <Label text="BLADNA" styleClass="brand-title"/>
-            <Label text="Une interface plus claire, sécurisée et rapide pour gérer vos comptes." styleClass="brand-subtitle" wrapText="true" alignment="CENTER" textAlignment="CENTER" maxWidth="500"/>
+            <Label text="%login.brand.subtitle" styleClass="brand-subtitle" wrapText="true" alignment="CENTER" textAlignment="CENTER" maxWidth="500"/>
         </VBox>
 
         <VBox styleClass="login-card" spacing="20" maxWidth="420" minWidth="380">
             <VBox spacing="8">
-                <Label text="Connexion" styleClass="title"/>
-                <Label text="Connectez-vous pour accéder au tableau de bord" styleClass="subtitle" wrapText="true"/>
+                <Label text="%login.title" styleClass="title"/>
+                <Label text="%login.subtitle" styleClass="subtitle" wrapText="true"/>
             </VBox>
 
             <VBox spacing="10">
                 <VBox spacing="6">
                     <HBox alignment="CENTER_LEFT" spacing="8">
                         <Label text="✉" styleClass="icon-label"/>
-                        <Label text="Email" styleClass="form-label"/>
+                        <Label text="%login.email" styleClass="form-label"/>
                     </HBox>
                     <TextField fx:id="emailField" promptText="name@domain.com"/>
                 </VBox>
@@ -39,26 +46,26 @@
                 <VBox spacing="6">
                     <HBox alignment="CENTER_LEFT" spacing="8">
                         <Label text="🔒" styleClass="icon-label"/>
-                        <Label text="Mot de passe" styleClass="form-label"/>
+                        <Label text="%login.password" styleClass="form-label"/>
                     </HBox>
-                    <PasswordField fx:id="passwordField" promptText="Votre mot de passe"/>
+                    <PasswordField fx:id="passwordField" promptText="Your password"/>
                 </VBox>
 
                 <VBox spacing="6">
                     <HBox alignment="CENTER_LEFT" spacing="8">
                         <Label text="🛡" styleClass="icon-label"/>
-                        <Label text="Vérification" styleClass="form-label"/>
+                        <Label text="%login.verification" styleClass="form-label"/>
                     </HBox>
                     <WebView fx:id="recaptchaView" prefHeight="112" minHeight="112" maxHeight="112"/>
                 </VBox>
             </VBox>
 
             <VBox spacing="12">
-                <Button text="Se connecter" onAction="#handleLogin" styleClass="primary-button" maxWidth="Infinity"/>
+                <Button text="%login.btn.signin" onAction="#handleLogin" styleClass="primary-button" maxWidth="Infinity"/>
                 <HBox alignment="CENTER" spacing="10">
-                    <Label text="ou" styleClass="subtitle"/>
+                    <Label text="%login.or" styleClass="subtitle"/>
                 </HBox>
-                <Button text="Connexion avec Face ID" onAction="#handleFaceLogin" styleClass="secondary-button" maxWidth="Infinity">
+                <Button text="%login.btn.faceid" onAction="#handleFaceLogin" styleClass="secondary-button" maxWidth="Infinity">
                     <graphic>
                         <Label text="📷" styleClass="icon-label"/>
                     </graphic>

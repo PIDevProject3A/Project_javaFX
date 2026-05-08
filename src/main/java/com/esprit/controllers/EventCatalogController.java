@@ -42,6 +42,8 @@ public class EventCatalogController {
     private ListView<Event> eventList;
     @FXML
     private Label tomorrowReminderLabel;
+    @FXML
+    private java.util.ResourceBundle resources;
 
     private final EventService eventService = new EventService();
     private final RegistrationService registrationService = new RegistrationService();
@@ -65,7 +67,7 @@ public class EventCatalogController {
             stage.setScene(scene);
         } catch (IOException e) {
             e.printStackTrace();
-            showError("Erreur de navigation : " + e.getMessage());
+            showError("Navigation error: " + e.getMessage());
         }
     }
 
@@ -95,8 +97,8 @@ public class EventCatalogController {
             private final Label title = new Label();
             private final Label meta = new Label();
             private final VBox textCol = new VBox(6, title, meta);
-            private final Button viewBtn = new Button("👁 Voir");
-            private final Button regBtn = new Button("✓ S'inscrire");
+            private final Button viewBtn = new Button(resources.getString("catalog.btn.view"));
+            private final Button regBtn = new Button();
             private final HBox actions = new HBox(8, viewBtn, regBtn);
             private final Region spacer = new Region();
             private final HBox row = new HBox(12, textCol, spacer, actions);
@@ -146,8 +148,8 @@ public class EventCatalogController {
                     meta.setText(String.join("  ·  ",
                             d == null ? "—" : d.format(DT),
                             item.getLocation() != null ? item.getLocation() : "—",
-                            String.format(Locale.FRANCE, "%.2f TND", item.getPrice()),
-                            "Places : " + places,
+                            String.format(Locale.US, "%.2f TND", item.getPrice()),
+                            resources.getString("catalog.label.slots") + ": " + places,
                             typeLabel(item.getEventType())));
                     boolean full = isFull(item);
                     boolean paid = isPaid(item);
@@ -155,17 +157,17 @@ public class EventCatalogController {
                     
                     regBtn.getStyleClass().removeAll("btn-register", "btn-register-alt", "btn-register-muted");
                     if (registered) {
-                        regBtn.setText("✅ Déjà inscrit(e)");
+                        regBtn.setText(resources.getString("catalog.btn.already_registered"));
                         regBtn.setDisable(true);
                         regBtn.getStyleClass().add("btn-register-muted");
                     } else if (full) {
-                        regBtn.setText("⛔ Complet");
+                        regBtn.setText(resources.getString("catalog.btn.full"));
                         regBtn.setDisable(true);
                         regBtn.getStyleClass().add("btn-register-muted");
                     } else {
                         regBtn.setDisable(false);
                         regBtn.getStyleClass().add(paid ? "btn-register" : "btn-register-alt");
-                        regBtn.setText(paid ? "💳 Payer / S'inscrire" : "✓ S'inscrire");
+                        regBtn.setText(paid ? resources.getString("catalog.btn.pay_register") : resources.getString("catalog.btn.register"));
                     }
                     setText(null);
                     setGraphic(card);
@@ -174,13 +176,13 @@ public class EventCatalogController {
         });
     }
 
-    private static String typeLabel(String t) {
+    private String typeLabel(String t) {
         if (t == null) {
             return "—";
         }
         return switch (t.trim().toUpperCase(Locale.ROOT)) {
-            case "FREE" -> "Gratuit";
-            case "PAID" -> "Payant";
+            case "FREE" -> resources.getString("catalog.label.free");
+            case "PAID" -> resources.getString("catalog.label.paid");
             default -> t;
         };
     }
@@ -208,7 +210,7 @@ public class EventCatalogController {
             List<Event> events = eventService.afficher();
             eventList.setItems(FXCollections.observableArrayList(events));
         } catch (SQLException e) {
-            showError("Erreur : " + e.getMessage());
+            showError("Error: " + e.getMessage());
         }
     }
 
@@ -226,8 +228,8 @@ public class EventCatalogController {
                 return;
             }
             String message = reminders.size() == 1
-                    ? "Rappel : votre événement aura lieu demain : " + reminders.get(0)
-                    : "Rappel : vos événements de demain : " + reminders.stream().collect(Collectors.joining("  |  "));
+                    ? resources.getString("catalog.reminder_tomorrow") + " " + reminders.get(0)
+                    : resources.getString("catalog.reminder_tomorrow_multiple") + " " + reminders.stream().collect(Collectors.joining("  |  "));
             tomorrowReminderLabel.setText("🔔 " + message);
             tomorrowReminderLabel.setManaged(true);
             tomorrowReminderLabel.setVisible(true);
@@ -269,7 +271,7 @@ public class EventCatalogController {
 
     private void openRegisterForm(Event event) {
         if (isFull(event)) {
-            showError("Cet événement est complet.");
+            showError("This event is full.");
             return;
         }
         try {
@@ -279,7 +281,7 @@ public class EventCatalogController {
             }
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/esprit/RegisterEventForm.fxml"));
             Stage st = new Stage();
-            st.setTitle("bledna — inscription : " + event.getName());
+            st.setTitle("bledna — registration: " + event.getName());
             Scene sc = new Scene(loader.load(), 560, formHeight(event));
             StyleHelper.apply(sc);
             st.setScene(sc);
@@ -291,7 +293,7 @@ public class EventCatalogController {
             st.showAndWait();
             loadEvents();
         } catch (Exception e) {
-            showError("Impossible d'ouvrir le formulaire : " + e.getMessage());
+            showError("Unable to open form: " + e.getMessage());
         } finally {
             Stage owner = eventList.getScene() != null && eventList.getScene().getWindow() instanceof Stage s ? s : null;
             if (owner != null) {
@@ -308,13 +310,13 @@ public class EventCatalogController {
     private void showEventDetails(Event event) {
         LocalDateTime d = event.getEventDate();
         String body = String.join("\n",
-                "Nom : " + event.getName(),
-                "Description : " + (event.getDescription() != null ? event.getDescription() : "—"),
-                "Date : " + (d == null ? "—" : d.format(DT)),
-                "Lieu : " + (event.getLocation() != null ? event.getLocation() : "—"),
-                String.format(Locale.FRANCE, "Prix : %.2f TND", event.getPrice()),
-                "Type : " + typeLabel(event.getEventType()),
-                "Places : " + event.getCurrentParticipants() + " / " + (event.getMaxPlaces() > 0 ? event.getMaxPlaces() : "∞")
+                "Name: " + event.getName(),
+                "Description: " + (event.getDescription() != null ? event.getDescription() : "—"),
+                "Date: " + (d == null ? "—" : d.format(DT)),
+                "Location: " + (event.getLocation() != null ? event.getLocation() : "—"),
+                String.format(Locale.US, "Price: %.2f TND", event.getPrice()),
+                "Type: " + typeLabel(event.getEventType()),
+                "Slots: " + event.getCurrentParticipants() + " / " + (event.getMaxPlaces() > 0 ? event.getMaxPlaces() : "∞")
         );
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         a.setHeaderText(event.getName());

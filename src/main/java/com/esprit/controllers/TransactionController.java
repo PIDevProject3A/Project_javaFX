@@ -1,4 +1,4 @@
-package controllers;
+package com.esprit.controllers;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -10,8 +10,8 @@ import java.util.Map;
 
 import com.esprit.utils.MyDataBase;
 import com.esprit.utils.SceneNavigator;
-import services.TransactionDao;
-import entities.EcoTransaction;
+import com.esprit.services.TransactionDao;
+import com.esprit.entities.EcoTransaction;
 
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;

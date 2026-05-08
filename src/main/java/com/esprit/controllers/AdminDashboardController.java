@@ -234,7 +234,7 @@ public class AdminDashboardController {
         if (email != null) {
             User user = userService.findByEmail(email);
             if (user != null) {
-                notifyAdmins(user, "Deconnexion");
+                notifyAdmins(user, "Logout");
             }
         }
         UserSession.clear();
@@ -247,15 +247,15 @@ public class AdminDashboardController {
     }
 
     private void notifyAdmins(User user, String actionType) {
-        String subject = actionType + " utilisateur";
+        String subject = actionType + " - User activity";
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         String message = String.format(
-                "Un utilisateur s'est deconnecte.\n\n" +
-                "Nom : %s %s\n" +
-                "Email : %s\n" +
-                "Date et heure : %s\n" +
-                "Type d'action : %s",
+                "A user has performed a logout.\n\n" +
+                "Name: %s %s\n" +
+                "Email: %s\n" +
+                "Date and time: %s\n" +
+                "Action type: %s",
                 user.getFirstName(), user.getLastName(), user.getEmail(), now, actionType
         );
 

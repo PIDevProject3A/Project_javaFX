@@ -56,7 +56,7 @@ public class EmailController {
         String message = messageArea.getText().trim();
 
         if (to.isEmpty() || subject.isEmpty() || message.isEmpty()) {
-            showStatusMessage("Veuillez remplir tous les champs.", false);
+            showStatusMessage("Please fill in all fields.", false);
             return;
         }
 
@@ -76,16 +76,16 @@ public class EmailController {
             boolean success = sendTask.getValue();
             resetUI(success);
             if (success) {
-                showStatusMessage("Email envoye avec succes !", true);
+                showStatusMessage("Email sent successfully!", true);
                 clearFields();
             } else {
-                showStatusMessage("Erreur lors de l'envoi de l'email.", false);
+                showStatusMessage("Error sending email.", false);
             }
         });
 
         sendTask.setOnFailed(e -> {
             resetUI(false);
-            showStatusMessage("Erreur critique lors de l'envoi.", false);
+            showStatusMessage("Critical error during sending.", false);
             sendTask.getException().printStackTrace();
         });
 

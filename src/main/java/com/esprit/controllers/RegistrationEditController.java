@@ -45,9 +45,9 @@ public class RegistrationEditController {
         if (registration == null || eventTitleLabel == null) {
             return;
         }
-        eventTitleLabel.setText("Événement : " + (registration.getEventName() != null ? registration.getEventName() : "—"));
-        readOnlyAmountLabel.setText(String.format(Locale.FRANCE, "Montant : %.2f TND", registration.getAmount()));
-        readOnlyPaymentLabel.setText("Paiement : " + labelPayment(registration.getPaymentMethod()));
+        eventTitleLabel.setText("Event: " + (registration.getEventName() != null ? registration.getEventName() : "—"));
+        readOnlyAmountLabel.setText(String.format(Locale.US, "Amount: %.2f TND", registration.getAmount()));
+        readOnlyPaymentLabel.setText("Payment: " + labelPayment(registration.getPaymentMethod()));
 
         firstNameField.setText(registration.getFirstName() != null ? registration.getFirstName() : "");
         lastNameField.setText(registration.getLastName() != null ? registration.getLastName() : "");
@@ -74,7 +74,7 @@ public class RegistrationEditController {
         String fn = firstNameField.getText() != null ? firstNameField.getText().trim() : "";
         String ln = lastNameField.getText() != null ? lastNameField.getText().trim() : "";
         if (fn.isEmpty() || ln.isEmpty()) {
-            showError("Le prénom et le nom sont obligatoires.");
+            showError("First name and last name are required.");
             return;
         }
         LocalDateTime regDt;
@@ -90,7 +90,7 @@ public class RegistrationEditController {
             registration.setRegistrationDate(regDt);
             registration.setStatus("REGISTERED");
             registrationService.modifier(registration);
-            showInfo("Inscription mise à jour (bledna).");
+            showInfo("Registration updated successfully (bledna).");
             close();
         } catch (SQLException e) {
             showError(e.getMessage());
@@ -99,7 +99,7 @@ public class RegistrationEditController {
 
     private LocalDateTime parseRegistrationDateTime() {
         if (registrationDatePicker.getValue() == null) {
-            throw new IllegalArgumentException("Choisissez la date d'inscription.");
+            throw new IllegalArgumentException("Choose the registration date.");
         }
         LocalTime time = parseTimeFlexible(registrationTimeField.getText());
         return LocalDateTime.of(registrationDatePicker.getValue(), time);
@@ -115,11 +115,11 @@ public class RegistrationEditController {
             int h = Integer.parseInt(p[0].trim());
             int m = p.length > 1 ? Integer.parseInt(p[1].trim()) : 0;
             if (h < 0 || h > 23 || m < 0 || m > 59) {
-                throw new IllegalArgumentException("Heure invalide (0–23 pour les heures, 0–59 pour les minutes).");
+                throw new IllegalArgumentException("Invalid time (0–23 for hours, 0–59 for minutes).");
             }
             return LocalTime.of(h, m);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Heure invalide. Utilisez le format HH:mm (ex. 14:30).");
+            throw new IllegalArgumentException("Invalid time. Use HH:mm format (e.g., 14:30).");
         }
     }
 
@@ -138,8 +138,8 @@ public class RegistrationEditController {
             return "—";
         }
         return switch (code.toUpperCase(Locale.ROOT)) {
-            case "CASH" -> "Espèces";
-            case "CARD" -> "Carte bancaire";
+            case "CASH" -> "Cash";
+            case "CARD" -> "Credit Card";
             default -> code;
         };
     }

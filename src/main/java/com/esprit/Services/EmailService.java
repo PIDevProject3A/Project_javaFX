@@ -23,15 +23,16 @@ public class EmailService {
         String accessKey = dotenv.get("AZURE_COMMUNICATION_ACCESS_KEY");
         this.senderAddress = dotenv.get("AZURE_COMMUNICATION_SENDER");
 
-        if (endpoint == null || accessKey == null || senderAddress == null) {
+        if (endpoint == null || accessKey == null || senderAddress == null || endpoint.isBlank() || accessKey.isBlank()) {
             System.err.println("ERREUR : Les variables d'environnement Azure Communication Services ne sont pas definies dans le fichier .env.");
+            this.emailClient = null;
+        } else {
+            // Initialisation du client Azure
+            String connectionString = "endpoint=" + endpoint + ";accesskey=" + accessKey;
+            this.emailClient = new EmailClientBuilder()
+                .connectionString(connectionString)
+                .buildClient();
         }
-
-        // Initialisation du client Azure
-        String connectionString = "endpoint=" + endpoint + ";accesskey=" + accessKey;
-        this.emailClient = new EmailClientBuilder()
-            .connectionString(connectionString)
-            .buildClient();
     }
 
     /**
@@ -42,6 +43,10 @@ public class EmailService {
      * @return true si l'envoi a reussi, false sinon.
      */
     public boolean sendEmail(String to, String subject, String message) {
+        if (this.emailClient == null) {
+            System.err.println("Abandon de l'envoi : EmailClient n'est pas initialise (cles manquantes).");
+            return false;
+        }
         try {
             EmailMessage emailMessage = new EmailMessage()
                 .setSenderAddress(this.senderAddress)

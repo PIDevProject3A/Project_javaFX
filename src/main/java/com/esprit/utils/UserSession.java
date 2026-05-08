@@ -80,6 +80,25 @@ public final class UserSession {
         currentAppUserType = type;
     }
 
+    private static boolean isDarkMode = false;
+    private static String currentLocale = "en";
+
+    public static boolean isDarkMode() {
+        return isDarkMode;
+    }
+
+    public static void setDarkMode(boolean dark) {
+        isDarkMode = dark;
+    }
+
+    public static String getCurrentLocale() {
+        return currentLocale;
+    }
+
+    public static void setCurrentLocale(String locale) {
+        currentLocale = locale;
+    }
+
     public static void clear() {
         currentUserId = -1;
         currentUserEmail = null;
@@ -89,6 +108,7 @@ public final class UserSession {
         currentLoginLogId = -1;
         isAppUser = false;
         currentAppUserType = null;
+        // Note: we don't clear isDarkMode and currentLocale on logout to maintain UI preference
     }
 }
 

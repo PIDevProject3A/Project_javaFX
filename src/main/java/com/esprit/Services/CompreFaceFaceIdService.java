@@ -35,13 +35,13 @@ public class CompreFaceFaceIdService {
 
     public VerificationResult verifyByEmailAndImage(String email, Path imagePath) {
         if (!isConfigured()) {
-            return VerificationResult.error("CompreFace n'est pas configure.");
+            return VerificationResult.error("CompreFace is not configured.");
         }
         if (isBlank(email)) {
-            return VerificationResult.error("Email requis pour la verification Face ID.");
+            return VerificationResult.error("Email required for Face ID verification.");
         }
         if (imagePath == null || !Files.exists(imagePath)) {
-            return VerificationResult.error("Image introuvable.");
+            return VerificationResult.error("Image not found.");
         }
 
         try {
@@ -55,27 +55,27 @@ public class CompreFaceFaceIdService {
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                return VerificationResult.error("CompreFace a repondu avec HTTP " + response.statusCode() + ".");
+                return VerificationResult.error("CompreFace responded with HTTP " + response.statusCode() + ".");
             }
 
             return parseVerifyResponse(email.trim().toLowerCase(), response.body());
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            return VerificationResult.error("Impossible de contacter CompreFace.");
+            return VerificationResult.error("Unable to contact CompreFace.");
         } catch (IOException exception) {
-            return VerificationResult.error("Impossible de contacter CompreFace.");
+            return VerificationResult.error("Unable to contact CompreFace.");
         }
     }
 
     public EnrollResult enrollFace(String subject, Path imagePath) {
         if (!isConfigured()) {
-            return EnrollResult.error("CompreFace n'est pas configure.");
+            return EnrollResult.error("CompreFace is not configured.");
         }
         if (isBlank(subject)) {
-            return EnrollResult.error("Subject Face ID invalide.");
+            return EnrollResult.error("Invalid Face ID subject.");
         }
         if (imagePath == null || !Files.exists(imagePath)) {
-            return EnrollResult.error("Image introuvable.");
+            return EnrollResult.error("Image not found.");
         }
 
         try {
@@ -89,26 +89,26 @@ public class CompreFaceFaceIdService {
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                return EnrollResult.error("Enrollement echoue, HTTP " + response.statusCode() + ".");
+                return EnrollResult.error("Enrollment failed, HTTP " + response.statusCode() + ".");
             }
             if (response.body() == null || response.body().contains("\"result\":[]")) {
-                return EnrollResult.error("Aucun visage detecte pour l'enrollement.");
+                return EnrollResult.error("No face detected for enrollment.");
             }
             return EnrollResult.successResult();
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            return EnrollResult.error("Impossible de contacter CompreFace.");
+            return EnrollResult.error("Unable to contact CompreFace.");
         } catch (IOException exception) {
-            return EnrollResult.error("Impossible de contacter CompreFace.");
+            return EnrollResult.error("Unable to contact CompreFace.");
         }
     }
 
     public RecognitionResult recognizeByImage(Path imagePath) {
         if (!isConfigured()) {
-            return RecognitionResult.error("CompreFace n'est pas configure.");
+            return RecognitionResult.error("CompreFace is not configured.");
         }
         if (imagePath == null || !Files.exists(imagePath)) {
-            return RecognitionResult.error("Image introuvable.");
+            return RecognitionResult.error("Image not found.");
         }
 
         try {
@@ -122,24 +122,24 @@ public class CompreFaceFaceIdService {
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                return RecognitionResult.error("Reconnaissance echouee, HTTP " + response.statusCode() + ".");
+                return RecognitionResult.error("Recognition failed, HTTP " + response.statusCode() + ".");
             }
             return parseRecognizeResponse(response.body());
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            return RecognitionResult.error("Impossible de contacter CompreFace.");
+            return RecognitionResult.error("Unable to contact CompreFace.");
         } catch (IOException exception) {
-            return RecognitionResult.error("Impossible de contacter CompreFace.");
+            return RecognitionResult.error("Unable to contact CompreFace.");
         }
     }
 
     static VerificationResult parseVerifyResponse(String email, String responseBody) {
         if (responseBody == null || responseBody.isBlank()) {
-            return VerificationResult.error("Reponse vide de CompreFace.");
+            return VerificationResult.error("Empty response from CompreFace.");
         }
 
         if (responseBody.contains("\"result\":[]")) {
-            return VerificationResult.noFace("Aucun visage detecte sur l'image.");
+            return VerificationResult.noFace("No face detected in the image.");
         }
 
         boolean hasSubject = responseBody.contains("\"subject\":\"" + escapeJson(email) + "\"");
@@ -150,14 +150,14 @@ public class CompreFaceFaceIdService {
         }
 
         if (responseBody.contains("\"subjects\":[]")) {
-            return VerificationResult.noMatch("Visage detecte mais non reconnu pour cet email.");
+            return VerificationResult.noMatch("Face detected but not recognized for this email.");
         }
 
         if (similarity < 0) {
-            return VerificationResult.noMatch("Impossible d'identifier un match valide.");
+            return VerificationResult.noMatch("Unable to identify a valid match.");
         }
 
-        return VerificationResult.noMatch("Correspondance faciale insuffisante.");
+        return VerificationResult.noMatch("Insufficient facial matching.");
     }
 
     static double findBestSimilarity(String responseBody) {
@@ -174,21 +174,21 @@ public class CompreFaceFaceIdService {
 
     static RecognitionResult parseRecognizeResponse(String responseBody) {
         if (responseBody == null || responseBody.isBlank()) {
-            return RecognitionResult.error("Reponse vide de CompreFace.");
+            return RecognitionResult.error("Empty response from CompreFace.");
         }
         if (responseBody.contains("\"result\":[]")) {
-            return RecognitionResult.noFace("Aucun visage detecte sur l'image.");
+            return RecognitionResult.noFace("No face detected in the image.");
         }
 
         Matcher subjectMatcher = SUBJECT_PATTERN.matcher(responseBody);
         if (!subjectMatcher.find()) {
-            return RecognitionResult.noMatch("Aucun visage connu reconnu.");
+            return RecognitionResult.noMatch("No known face recognized.");
         }
 
         String subject = subjectMatcher.group(1);
         double similarity = findBestSimilarity(responseBody);
         if (similarity < CompreFaceConfig.similarityThreshold()) {
-            return RecognitionResult.noMatch("Visage detecte mais confiance insuffisante.");
+            return RecognitionResult.noMatch("Face detected but confidence is too low.");
         }
         return RecognitionResult.match(subject, similarity);
     }
@@ -258,7 +258,7 @@ public class CompreFaceFaceIdService {
         }
 
         public static VerificationResult match(double similarity) {
-            return new VerificationResult(VerificationStatus.MATCH, "Face reconnue.", similarity);
+            return new VerificationResult(VerificationStatus.MATCH, "Face recognized.", similarity);
         }
 
         public static VerificationResult noMatch(String message) {
@@ -307,7 +307,7 @@ public class CompreFaceFaceIdService {
         }
 
         public static RecognitionResult match(String subject, double similarity) {
-            return new RecognitionResult(RecognitionStatus.MATCH, "Face reconnue.", subject, similarity);
+            return new RecognitionResult(RecognitionStatus.MATCH, "Face recognized.", subject, similarity);
         }
 
         public static RecognitionResult noMatch(String message) {
@@ -349,7 +349,7 @@ public class CompreFaceFaceIdService {
         }
 
         public static EnrollResult successResult() {
-            return new EnrollResult(true, "Face ID enregistre avec succes.");
+            return new EnrollResult(true, "Face ID successfully enrolled.");
         }
 
         public static EnrollResult error(String message) {

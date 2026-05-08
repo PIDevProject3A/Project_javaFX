@@ -1,4 +1,4 @@
-package entities;
+package com.esprit.entities;
 
 public class RecyclingBuyer {
     private int id;

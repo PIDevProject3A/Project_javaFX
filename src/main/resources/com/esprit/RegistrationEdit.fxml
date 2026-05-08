@@ -12,20 +12,20 @@
     <children>
         <VBox layoutX="28" layoutY="24" spacing="14" prefWidth="460">
             <children>
-                <Label text="✏ Modifier l'inscription" styleClass="label-title"/>
+                <Label text="✏ Edit Registration" styleClass="label-title"/>
                 <Label fx:id="eventTitleLabel" wrapText="true" styleClass="label-subtitle"/>
-                <Label text="Montant et paiement (fixés avec l'événement, lecture seule)" style="-fx-font-weight: bold;"/>
+                <Label text="Amount and payment (fixed with the event, read-only)" style="-fx-font-weight: bold;"/>
                 <Label fx:id="readOnlyAmountLabel" style="-fx-text-fill: #2e7d32; -fx-font-weight: bold;"/>
                 <Label fx:id="readOnlyPaymentLabel"/>
                 <HBox spacing="8" alignment="CENTER_LEFT">
                     <children>
-                        <Label text="Prénom *" prefWidth="100"/>
+                        <Label text="First Name *" prefWidth="100"/>
                         <TextField fx:id="firstNameField" prefWidth="300"/>
                     </children>
                 </HBox>
                 <HBox spacing="8" alignment="CENTER_LEFT">
                     <children>
-                        <Label text="Nom *" prefWidth="100"/>
+                        <Label text="Last Name *" prefWidth="100"/>
                         <TextField fx:id="lastNameField" prefWidth="300"/>
                     </children>
                 </HBox>
@@ -37,14 +37,14 @@
                 </HBox>
                 <HBox spacing="8" alignment="CENTER_LEFT">
                     <children>
-                        <Label text="Heure *" prefWidth="100"/>
+                        <Label text="Time *" prefWidth="100"/>
                         <TextField fx:id="registrationTimeField" promptText="HH:mm" prefWidth="120"/>
                     </children>
                 </HBox>
                 <HBox spacing="10" style="-fx-padding: 12 0 0 0;">
                     <children>
-                        <Button fx:id="saveBtn" text="✓ Enregistrer" onAction="#handleSave" styleClass="btn-primary"/>
-                        <Button fx:id="cancelBtn" text="Annuler" onAction="#handleCancel" styleClass="btn-secondary"/>
+                        <Button fx:id="saveBtn" text="✓ Save" onAction="#handleSave" styleClass="btn-primary"/>
+                        <Button fx:id="cancelBtn" text="Cancel" onAction="#handleCancel" styleClass="btn-secondary"/>
                     </children>
                 </HBox>
             </children>

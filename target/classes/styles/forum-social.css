@@ -6,10 +6,10 @@
 }
 
 .social-hero {
-    -fx-background-color: linear-gradient(to right, #2E7D32, #1B5E20);
+    -fx-background-color: linear-gradient(to bottom right, #2D5A3D 0%, #4A7C59 50%, #87A96B 100%);
     -fx-background-radius: 12;
     -fx-padding: 24 32;
-    -fx-effect: dropshadow(gaussian, rgba(46, 125, 50, 0.3), 15, 0, 0, 5);
+    -fx-effect: dropshadow(gaussian, rgba(45, 90, 61, 0.3), 15, 0, 0, 5);
 }
 
 .social-hero-emoji {

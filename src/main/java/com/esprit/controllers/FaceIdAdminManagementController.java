@@ -155,7 +155,7 @@ public class FaceIdAdminManagementController {
         } else if (!targets.isEmpty()) {
             userBox.getSelectionModel().selectFirst();
         } else {
-            faceIdStatusLabel.setText("Aucun utilisateur disponible.");
+            faceIdStatusLabel.setText("No users available.");
             setEditingEnabled(false);
         }
     }
@@ -164,7 +164,7 @@ public class FaceIdAdminManagementController {
     private void handleAddFaceId() {
         FaceIdTarget target = userBox.getValue();
         if (target == null) {
-            setMessage("Veuillez selectionner un utilisateur.", false);
+            setMessage("Please select a user.", false);
             return;
         }
 
@@ -176,7 +176,7 @@ public class FaceIdAdminManagementController {
                         target.getEmail(),
                         captured);
                 
-                boolean success = result.startsWith("Face ID ajoute") || result.startsWith("Face ID mis a jour");
+                boolean success = result.toLowerCase().contains("added") || result.toLowerCase().contains("updated");
                 setMessage(result, success);
                 refreshFaceStatus(target);
 
@@ -194,12 +194,12 @@ public class FaceIdAdminManagementController {
     private void handleDeleteFaceId() {
         FaceIdTarget target = userBox.getValue();
         if (target == null) {
-            setMessage("Veuillez selectionner un utilisateur.", false);
+            setMessage("Please select a user.", false);
             return;
         }
 
         String result = userService.deleteFaceIdByAdmin(UserSession.getCurrentUserRole(), target.getEmail());
-        boolean success = result.startsWith("Face ID supprime");
+        boolean success = result.toLowerCase().contains("deleted");
         setMessage(result, success);
         refreshFaceStatus(target);
     }
@@ -217,7 +217,7 @@ public class FaceIdAdminManagementController {
     private Path openCameraPreviewDialog() {
         Webcam webcam = Webcam.getDefault();
         if (webcam == null) {
-            throw new IllegalStateException("Aucune camera detectee sur ce PC.");
+            throw new IllegalStateException("No camera detected on this PC.");
         }
 
         webcam.setViewSize(WebcamResolution.VGA.getSize());
@@ -229,7 +229,7 @@ public class FaceIdAdminManagementController {
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.initOwner(userBox.getScene().getWindow());
-        dialog.setTitle("Face ID - Capture visage");
+        dialog.setTitle("Face ID - Face Capture");
         dialog.setResizable(false);
 
         ImageView imageView = new ImageView();
@@ -238,16 +238,16 @@ public class FaceIdAdminManagementController {
         imageView.setPreserveRatio(true);
         imageView.setStyle("-fx-effect: dropshadow(gaussian, rgba(46, 125, 50, 0.25), 16, 0.2, 0, 4);");
 
-        Label instructionLabel = new Label("Positionnez le visage face a la camera");
+        Label instructionLabel = new Label("Position the face in front of the camera");
         instructionLabel.setStyle(
                 "-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2E7D32;");
 
-        Button captureBtn = new Button("\uD83D\uDCF8  Capturer");
+        Button captureBtn = new Button("\uD83D\uDCF8  Capture");
         captureBtn.setStyle(
                 "-fx-background-color: #2E7D32; -fx-text-fill: white; -fx-font-size: 14px; " +
                         "-fx-font-weight: 700; -fx-background-radius: 10; -fx-padding: 10 28; -fx-cursor: hand;");
 
-        Button cancelBtn = new Button("Annuler");
+        Button cancelBtn = new Button("Cancel");
         cancelBtn.setStyle(
                 "-fx-background-color: #e4f3df; -fx-text-fill: #245126; -fx-font-size: 13px; " +
                         "-fx-font-weight: 700; -fx-background-radius: 10; -fx-padding: 10 22; -fx-cursor: hand;");
@@ -328,7 +328,7 @@ public class FaceIdAdminManagementController {
 
     private void refreshFaceStatus(FaceIdTarget target) {
         if (target == null) {
-            faceIdStatusLabel.setText("Aucun utilisateur selectionne.");
+            faceIdStatusLabel.setText("No user selected.");
             addFaceIdBtn.setVisible(false);
             addFaceIdBtn.setManaged(false);
             deleteFaceIdBtn.setVisible(false);
@@ -337,7 +337,7 @@ public class FaceIdAdminManagementController {
         }
 
         boolean hasFaceId = userService.hasFaceId(target.getEmail());
-        String status = hasFaceId ? "ACTIVE" : "NON CONFIGURE";
+        String status = hasFaceId ? "ACTIVE" : "NOT CONFIGURED";
         faceIdStatusLabel.setText("Face ID: " + status + " | " + target.getDisplayName());
 
         // Toggle buttons visibility

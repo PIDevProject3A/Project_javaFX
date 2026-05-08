@@ -13,17 +13,17 @@
     <children>
         <VBox layoutX="150" layoutY="50" prefWidth="700" spacing="20" style="-fx-padding: 30;">
             <children>
-                <!-- Titre -->
-                <Label text="✏️ Modifier l'événement" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #333;" />
+                <!-- Title -->
+                <Label text="✏️ Edit Event" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #333;" />
 
-                <!-- Formulaire -->
+                <!-- Form -->
                 <VBox spacing="15" style="-fx-border-color: #ddd; -fx-border-radius: 5; -fx-padding: 20; -fx-background-color: #f9f9f9;">
                     <children>
-                        <!-- Nom -->
+                        <!-- Name -->
                         <VBox spacing="5">
                             <children>
-                                <Label text="Nom de l'événement *" style="-fx-font-weight: bold;" />
-                                <TextField fx:id="nameField" promptText="Entrez le nom" style="-fx-padding: 10; -fx-font-size: 12;" />
+                                <Label text="Event Name *" style="-fx-font-weight: bold;" />
+                                <TextField fx:id="nameField" promptText="Enter name" style="-fx-padding: 10; -fx-font-size: 12;" />
                             </children>
                         </VBox>
 
@@ -31,40 +31,40 @@
                         <VBox spacing="5">
                             <children>
                                 <Label text="Description *" style="-fx-font-weight: bold;" />
-                                <TextArea fx:id="descriptionField" promptText="Entrez la description" wrapText="true" prefRowCount="3" prefWidth="660" style="-fx-font-size: 12;" />
+                                <TextArea fx:id="descriptionField" promptText="Enter description" wrapText="true" prefRowCount="3" prefWidth="660" style="-fx-font-size: 12;" />
                             </children>
                         </VBox>
 
-                        <!-- Lieu et Prix en ligne -->
+                        <!-- Location and Price -->
                         <HBox spacing="15">
                             <children>
                                 <VBox spacing="5" prefWidth="350">
                                     <children>
-                                        <Label text="Lieu *" style="-fx-font-weight: bold;" />
-                                        <TextField fx:id="locationField" promptText="Entrez le lieu" style="-fx-padding: 10; -fx-font-size: 12;" />
+                                        <Label text="Location *" style="-fx-font-weight: bold;" />
+                                        <TextField fx:id="locationField" promptText="Enter location" style="-fx-padding: 10; -fx-font-size: 12;" />
                                     </children>
                                 </VBox>
                                 <VBox spacing="5" prefWidth="300">
                                     <children>
-                                        <Label text="Prix *" style="-fx-font-weight: bold;" />
-                                        <TextField fx:id="priceField" promptText="Entrez le prix" style="-fx-padding: 10; -fx-font-size: 12;" />
+                                        <Label text="Price *" style="-fx-font-weight: bold;" />
+                                        <TextField fx:id="priceField" promptText="Enter price" style="-fx-padding: 10; -fx-font-size: 12;" />
                                     </children>
                                 </VBox>
                             </children>
                         </HBox>
 
-                        <!-- Type et Places en ligne -->
+                        <!-- Type and Slots -->
                         <HBox spacing="15">
                             <children>
                                 <VBox spacing="5" prefWidth="350">
                                     <children>
-                                        <Label text="Type d'événement *" style="-fx-font-weight: bold;" />
-                                        <ComboBox fx:id="typeCombo" promptText="Choisir..." style="-fx-padding: 10; -fx-font-size: 12;" />
+                                        <Label text="Event Type *" style="-fx-font-weight: bold;" />
+                                        <ComboBox fx:id="typeCombo" promptText="Choose..." style="-fx-padding: 10; -fx-font-size: 12;" />
                                     </children>
                                 </VBox>
                                 <VBox spacing="5" prefWidth="300">
                                     <children>
-                                        <Label text="Max de places *" style="-fx-font-weight: bold;" />
+                                        <Label text="Max slots *" style="-fx-font-weight: bold;" />
                                         <TextField fx:id="maxPlacesField" promptText="100" style="-fx-padding: 10; -fx-font-size: 12;" />
                                     </children>
                                 </VBox>
@@ -73,11 +73,11 @@
                     </children>
                 </VBox>
 
-                <!-- Boutons -->
+                <!-- Buttons -->
                 <HBox spacing="15" style="-fx-alignment: CENTER;">
                     <children>
-                        <Button text="✅ Enregistrer les modifications" fx:id="saveBtn" onAction="#handleSave" style="-fx-padding: 12 30; -fx-font-size: 14; -fx-background-color: #2196F3; -fx-text-fill: white; -fx-cursor: hand;" />
-                        <Button text="❌ Annuler" fx:id="cancelBtn" onAction="#handleCancel" style="-fx-padding: 12 30; -fx-font-size: 14; -fx-background-color: #757575; -fx-text-fill: white; -fx-cursor: hand;" />
+                        <Button text="✅ Save changes" fx:id="saveBtn" onAction="#handleSave" style="-fx-padding: 12 30; -fx-font-size: 14; -fx-background-color: #2196F3; -fx-text-fill: white; -fx-cursor: hand;" />
+                        <Button text="❌ Cancel" fx:id="cancelBtn" onAction="#handleCancel" style="-fx-padding: 12 30; -fx-font-size: 14; -fx-background-color: #757575; -fx-text-fill: white; -fx-cursor: hand;" />
                     </children>
                 </HBox>
             </children>

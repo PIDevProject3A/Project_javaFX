@@ -21,27 +21,27 @@
         <StackPane styleClass="content-area">
             <VBox styleClass="page-card" maxWidth="600" spacing="15">
                 
-                <Label text="Envoyer un Email" styleClass="title"/>
-                <Label text="Contactez les utilisateurs directement via Azure Communication Services." styleClass="subtitle" wrapText="true"/>
+                <Label text="Send Email" styleClass="title"/>
+                <Label text="Contact users directly via Azure Communication Services." styleClass="subtitle" wrapText="true"/>
 
                 <VBox spacing="8">
-                    <Label text="Destinataire" styleClass="form-label"/>
-                    <TextField fx:id="toField" promptText="email@exemple.com"/>
+                    <Label text="Recipient" styleClass="form-label"/>
+                    <TextField fx:id="toField" promptText="email@example.com"/>
                 </VBox>
 
                 <VBox spacing="8">
-                    <Label text="Objet" styleClass="form-label"/>
-                    <TextField fx:id="subjectField" promptText="Objet du message"/>
+                    <Label text="Subject" styleClass="form-label"/>
+                    <TextField fx:id="subjectField" promptText="Message Subject"/>
                 </VBox>
 
                 <VBox spacing="8">
                     <Label text="Message" styleClass="form-label"/>
-                    <TextArea fx:id="messageArea" promptText="Saisissez votre message ici..." prefRowCount="8" wrapText="true"/>
+                    <TextArea fx:id="messageArea" promptText="Type your message here..." prefRowCount="8" wrapText="true"/>
                 </VBox>
 
                 <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-padding: 10 0 0 0;">
-                    <Button fx:id="sendButton" text="Envoyer" onAction="#handleSendEmail" styleClass="primary-button" prefWidth="120"/>
-                    <Button text="Retour" onAction="#goBack" styleClass="secondary-button" prefWidth="100"/>
+                    <Button fx:id="sendButton" text="Send" onAction="#handleSendEmail" styleClass="primary-button" prefWidth="120"/>
+                    <Button text="Back" onAction="#goBack" styleClass="secondary-button" prefWidth="100"/>
                     <ProgressIndicator fx:id="loadingIndicator" visible="false" prefWidth="24" prefHeight="24"/>
                 </HBox>
 

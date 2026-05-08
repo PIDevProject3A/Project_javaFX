@@ -9,8 +9,10 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("messages", java.util.Locale.ENGLISH);
         FXMLLoader loader = new FXMLLoader(
-            getClass().getResource("/com/bledna/CollectorMain.fxml")
+            getClass().getResource("/com/bledna/CollectorMain.fxml"),
+            bundle
         );
         Scene scene = new Scene(loader.load(), 1500, 720);
         
