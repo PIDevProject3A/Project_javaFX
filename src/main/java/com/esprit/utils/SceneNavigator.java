@@ -38,7 +38,7 @@ public final class SceneNavigator {
                                || fxmlPath.equalsIgnoreCase("/UserDashboard.fxml");
             
             navigateWithRoot(source, newRoot, forceNormal, errorHandler);
-        } catch (IOException e) {
+        } catch (Exception e) {
             handleError(e, errorHandler);
         }
     }

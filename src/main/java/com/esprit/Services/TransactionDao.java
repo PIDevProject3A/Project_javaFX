@@ -15,31 +15,27 @@ import com.esprit.utils.MyDataBase;
 
 public class TransactionDao {
     private static final String SELECT_ALL_SQL = """
-            SELECT id, reference_code, transaction_type, source_type, purpose, amount,
-                   impact_unit, impact_quantity, transaction_date, status, notes
+            SELECT id, amount, transaction_type, transaction_date,
+                   source_user_id, target_user_id, payment_status
             FROM transactions
             ORDER BY transaction_date DESC, id DESC
             """;
 
     private static final String INSERT_SQL = """
             INSERT INTO transactions (
-                reference_code, transaction_type, source_type, purpose, amount,
-                impact_unit, impact_quantity, transaction_date, status, notes
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                amount, transaction_type, transaction_date,
+                source_user_id, target_user_id, payment_status
+            ) VALUES (?, ?, ?, ?, ?, ?)
             """;
 
     private static final String UPDATE_SQL = """
             UPDATE transactions
-            SET reference_code = ?,
+            SET amount = ?,
                 transaction_type = ?,
-                source_type = ?,
-                purpose = ?,
-                amount = ?,
-                impact_unit = ?,
-                impact_quantity = ?,
                 transaction_date = ?,
-                status = ?,
-                notes = ?
+                source_user_id = ?,
+                target_user_id = ?,
+                payment_status = ?
             WHERE id = ?
             """;
 
@@ -85,7 +81,7 @@ public class TransactionDao {
              PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)) {
 
             fillStatement(statement, transaction);
-            statement.setInt(11, transaction.getId());
+            statement.setInt(7, transaction.getId());
             statement.executeUpdate();
         }
     }
@@ -103,19 +99,23 @@ public class TransactionDao {
     }
 
     private EcoTransaction mapRow(ResultSet rs) throws SQLException {
-        return new EcoTransaction(
+        EcoTransaction t = new EcoTransaction(
             rs.getInt("id"),
-            rs.getString("reference_code"),
+            null, // reference_code (no longer in DB)
             rs.getString("transaction_type"),
-            rs.getString("source_type"),
-            rs.getString("purpose"),
+            null, // source_type
+            null, // purpose
             rs.getDouble("amount"),
-            rs.getString("impact_unit"),
-            toNullableInteger(rs, "impact_quantity"),
+            null, // impact_unit
+            null, // impact_quantity
             rs.getDate("transaction_date").toLocalDate(),
-            rs.getString("status"),
-            rs.getString("notes")
+            null, // status (replaced by payment_status)
+            null  // notes
         );
+        t.setSourceUserId(toNullableInteger(rs, "source_user_id"));
+        t.setTargetUserId(toNullableInteger(rs, "target_user_id"));
+        t.setPaymentStatus(rs.getString("payment_status"));
+        return t;
     }
 
     private Integer toNullableInteger(ResultSet rs, String column) throws SQLException {
@@ -123,22 +123,23 @@ public class TransactionDao {
         return rs.wasNull() ? null : value;
     }
 
-    private void fillStatement(PreparedStatement statement, EcoTransaction transaction) throws SQLException {
-        statement.setString(1, transaction.getReferenceCode());
-        statement.setString(2, transaction.getTransactionType());
-        statement.setString(3, transaction.getSourceType());
-        statement.setString(4, transaction.getPurpose());
-        statement.setDouble(5, transaction.getAmount());
-        statement.setString(6, transaction.getImpactUnit());
-
-        if (transaction.getImpactQuantity() == null) {
-            statement.setNull(7, Types.INTEGER);
+    private void fillStatement(PreparedStatement statement, EcoTransaction t) throws SQLException {
+        statement.setDouble(1, t.getAmount());
+        statement.setString(2, t.getTransactionType());
+        statement.setDate(3, Date.valueOf(t.getTransactionDate()));
+        
+        if (t.getSourceUserId() == null) {
+            statement.setNull(4, Types.INTEGER);
         } else {
-            statement.setInt(7, transaction.getImpactQuantity());
+            statement.setInt(4, t.getSourceUserId());
         }
 
-        statement.setDate(8, Date.valueOf(transaction.getTransactionDate()));
-        statement.setString(9, transaction.getStatus());
-        statement.setString(10, transaction.getNotes());
+        if (t.getTargetUserId() == null) {
+            statement.setNull(5, Types.INTEGER);
+        } else {
+            statement.setInt(5, t.getTargetUserId());
+        }
+
+        statement.setString(6, t.getPaymentStatus() != null ? t.getPaymentStatus() : "pending");
     }
 }

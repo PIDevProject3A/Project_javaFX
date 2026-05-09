@@ -12,8 +12,8 @@ import java.util.*;
 public class MyDataBase {
     private static final Dotenv DOTENV = Dotenv.configure().ignoreIfMissing().load();
     
-    private static final String DB_NAME = DOTENV.get("DB_NAME", "pidevjava");
-    private static final String JDBC_OPTIONS = DOTENV.get("JDBC_OPTIONS", "useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC");
+    private static final String DB_NAME = DOTENV.get("DB_NAME", "bladna");
+    private static final String JDBC_OPTIONS = DOTENV.get("JDBC_OPTIONS", "useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&zeroDateTimeBehavior=convertToNull");
     private static final String SERVER_URL = "jdbc:mysql://localhost:3306/?" + JDBC_OPTIONS;
     private static final String URL = "jdbc:mysql://localhost:3306/" + DB_NAME + "?" + JDBC_OPTIONS;
     private static final String USERNAME = DOTENV.get("DB_USER", "root");
@@ -114,15 +114,15 @@ public class MyDataBase {
             // 3. Events & Registrations
             statement.execute("CREATE TABLE IF NOT EXISTS events (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
-                    "name VARCHAR(150) NOT NULL," +
+                    "name VARCHAR(255) NOT NULL," +
                     "description TEXT," +
-                    "eventDate TIMESTAMP," +
-                    "location VARCHAR(150)," +
-                    "price DOUBLE," +
-                    "payment_type VARCHAR(50)," +
-                    "event_type VARCHAR(50)," +
-                    "maxPlaces INT," +
-                    "status VARCHAR(50) DEFAULT 'OPEN'" +
+                    "event_date DATETIME NOT NULL," +
+                    "location VARCHAR(255) NOT NULL," +
+                    "budget DECIMAL(10,2)," +
+                    "status VARCHAR(255) NOT NULL DEFAULT 'PLANNED'," +
+                    "photos LONGTEXT," +
+                    "max_places INT," +
+                    "organizer_id INT" +
                     ")");
 
             statement.execute("CREATE TABLE IF NOT EXISTS registrations (" +
@@ -172,46 +172,54 @@ public class MyDataBase {
             // 5. Eco-Citizen Specific Tables
             statement.execute("CREATE TABLE IF NOT EXISTS donations (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
-                    "donor_name VARCHAR(200) NOT NULL," +
+                    "user_id INT," +
+                    "amount DECIMAL(10,2) NOT NULL," +
                     "donation_type VARCHAR(100) NOT NULL," +
-                    "amount DOUBLE NOT NULL," +
-                    "payment_method VARCHAR(100) NOT NULL," +
-                    "donation_date DATE NOT NULL," +
-                    "status VARCHAR(50) DEFAULT 'PENDING'," +
-                    "notes TEXT," +
-                    "tree_count INT" +
+                    "donation_date DATETIME NOT NULL," +
+                    "transaction_status VARCHAR(50) DEFAULT 'Pending'," +
+                    "goods_type VARCHAR(255) NULL," +
+                    "goods_description TEXT NULL," +
+                    "goods_quantity INT NULL," +
+                    "goods_condition VARCHAR(100) NULL," +
+                    "estimated_value DECIMAL(10,2) NULL," +
+                    "service_type VARCHAR(255) NULL," +
+                    "service_description TEXT NULL," +
+                    "estimated_hours INT NULL," +
+                    "skills VARCHAR(255) NULL," +
+                    "availability_date DATE NULL" +
                     ")");
 
             statement.execute("CREATE TABLE IF NOT EXISTS recycling_buyers (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
-                    "buyer_name VARCHAR(200) NOT NULL," +
-                    "recycling_type VARCHAR(100) NOT NULL," +
-                    "address TEXT NOT NULL," +
-                    "city VARCHAR(100) NOT NULL," +
-                    "latitude DOUBLE NOT NULL," +
-                    "longitude DOUBLE NOT NULL," +
-                    "contact_phone VARCHAR(50)," +
-                    "status VARCHAR(50) DEFAULT 'Active'," +
-                    "notes TEXT" +
+                    "user_id INT," +
+                    "buyer_type VARCHAR(100) NOT NULL," +
+                    "gps_location VARCHAR(255) NULL," +
+                    "conditions VARCHAR(255) NULL," +
+                    "contact_phone VARCHAR(255) NULL," +
+                    "contact_email VARCHAR(255) NULL," +
+                    "website VARCHAR(255) NULL" +
                     ")");
 
             statement.execute("CREATE TABLE IF NOT EXISTS transactions (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
-                    "reference_code VARCHAR(100) NOT NULL UNIQUE," +
+                    "amount DECIMAL(10,2) NOT NULL," +
                     "transaction_type VARCHAR(50) NOT NULL," +
-                    "source_type VARCHAR(50) NOT NULL," +
-                    "purpose VARCHAR(200) NOT NULL," +
-                    "amount DOUBLE NOT NULL," +
-                    "impact_unit VARCHAR(50)," +
-                    "impact_quantity INT," +
-                    "transaction_date DATE NOT NULL," +
-                    "status VARCHAR(50) DEFAULT 'SUCCESS'," +
-                    "notes TEXT" +
+                    "transaction_date DATETIME NOT NULL," +
+                    "payment_status VARCHAR(50) DEFAULT 'pending'," +
+                    "source_user_id INT NULL," +
+                    "target_user_id INT NULL" +
                     ")");
 
-            // Migration: Try to add created_by_admin if missing in users
             try {
                 statement.execute("ALTER TABLE users ADD COLUMN created_by_admin VARCHAR(150) NULL");
+            } catch (SQLException ignored) {}
+
+            // Web Compatibility: Ensure waste_collection has necessary columns
+            try {
+                statement.execute("ALTER TABLE waste_collection ADD COLUMN unit VARCHAR(10) DEFAULT 'kg'");
+            } catch (SQLException ignored) {}
+            try {
+                statement.execute("ALTER TABLE waste_collection ADD COLUMN image_path VARCHAR(255) NULL");
             } catch (SQLException ignored) {}
 
         } catch (SQLException e) {
@@ -255,7 +263,13 @@ public class MyDataBase {
             return user;
         }
 
-        return findByEmailInTable(normalizedEmail, "finance_manager", User.AdminType.FINANCE_MANAGER);
+        user = findByEmailInTable(normalizedEmail, "finance_manager", User.AdminType.FINANCE_MANAGER);
+        if (user != null) {
+            return user;
+        }
+
+        // Web Synchronization: Check the 'users' table (Symfony) if not found in specialized tables
+        return findByEmailInTable(normalizedEmail, "users", User.AdminType.ADMIN_ACCOUNT);
     }
 
     public synchronized AppUser findAppUserByEmail(String email) {
@@ -272,6 +286,54 @@ public class MyDataBase {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Unable to find app user by email.", e);
+        }
+    }
+
+    private User findByEmailInTable(String email, String table, User.AdminType defaultRole) {
+        String sql = "SELECT * FROM " + table + " WHERE email = ?";
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, email);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    User.AdminType role = defaultRole;
+                    
+                    // Web compatibility: Check if admin_type column exists and map it
+                    try {
+                        String adminTypeStr = resultSet.getString("admin_type");
+                        if (adminTypeStr != null) {
+                            if (adminTypeStr.equalsIgnoreCase("Event Manager") || adminTypeStr.equalsIgnoreCase("EVENT_MANAGER")) {
+                                role = User.AdminType.EVENT_MANAGER;
+                            } else if (adminTypeStr.equalsIgnoreCase("Finance Manager") || adminTypeStr.equalsIgnoreCase("FINANCE_MANAGER")) {
+                                role = User.AdminType.FINANCE_MANAGER;
+                            } else if (adminTypeStr.equalsIgnoreCase("Admin") || adminTypeStr.equalsIgnoreCase("User Manager") || adminTypeStr.equalsIgnoreCase("ADMIN")) {
+                                role = User.AdminType.ADMIN_ACCOUNT;
+                            }
+                        }
+                    } catch (SQLException ignored) {}
+                    
+                    // Fallback for Symfony 'user_type' column if admin_type is missing
+                    try {
+                        String utStr = resultSet.getString("user_type");
+                        if (utStr != null && (utStr.equalsIgnoreCase("Collector") || utStr.equalsIgnoreCase("COLLECTOR"))) {
+                            // Map Collector to a role or keep as ADMIN_ACCOUNT for now to allow dashboard access
+                            role = User.AdminType.ADMIN_ACCOUNT; 
+                        }
+                    } catch (SQLException ignored) {}
+
+                    return new User(
+                            resultSet.getInt("id"),
+                            resultSet.getString("first_name"),
+                            resultSet.getString("last_name"),
+                            resultSet.getString("email"),
+                            resultSet.getString("password"),
+                            role
+                    );
+                }
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to fetch user by email.", e);
         }
     }
 
@@ -750,28 +812,6 @@ public class MyDataBase {
         return data;
     }
 
-    private User findByEmailInTable(String email, String table, User.AdminType role) {
-        String sql = "SELECT id, first_name, last_name, email, password FROM " + table + " WHERE email = ?";
-        try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, email);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return new User(
-                            resultSet.getInt("id"),
-                            resultSet.getString("first_name"),
-                            resultSet.getString("last_name"),
-                            resultSet.getString("email"),
-                            resultSet.getString("password"),
-                            role
-                    );
-                }
-                return null;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Unable to fetch user by email.", e);
-        }
-    }
 
     private List<User> findAllUsersInTable(String table, User.AdminType role) {
         String sql = "SELECT id, first_name, last_name, email, password FROM " + table;

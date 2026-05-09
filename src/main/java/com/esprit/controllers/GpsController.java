@@ -722,6 +722,10 @@ public class GpsController {
             statusCombo.getValue(),
             normalizeOptional(notesArea.getText())
         );
+        buyer.setCoordinates(selectedLatitude, selectedLongitude);
+        buyer.setBuyerType(recyclingTypeCombo.getValue());
+        buyer.setContactPhone(normalizeOptional(phoneField.getText()));
+        buyer.setConditions(normalizeOptional(notesArea.getText()));
 
         try {
             RecyclingBuyer inserted = buyerDao.insert(buyer);
@@ -753,11 +757,13 @@ public class GpsController {
         selected.setRecyclingType(recyclingTypeCombo.getValue());
         selected.setAddress(addressField.getText().trim());
         selected.setCity(cityField.getText().trim());
-        selected.setLatitude(selectedLatitude);
-        selected.setLongitude(selectedLongitude);
+        selected.setCoordinates(selectedLatitude, selectedLongitude);
         selected.setContactPhone(normalizeOptional(phoneField.getText()));
         selected.setStatus(statusCombo.getValue());
         selected.setNotes(normalizeOptional(notesArea.getText()));
+        
+        selected.setBuyerType(recyclingTypeCombo.getValue());
+        selected.setConditions(normalizeOptional(notesArea.getText()));
 
         try {
             buyerDao.update(selected);

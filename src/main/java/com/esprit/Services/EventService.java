@@ -47,7 +47,7 @@ public class EventService implements ICrud<Event> {
     @Override
     public void ajouter(Event e) throws SQLException {
 
-        String sql = "INSERT INTO events (name, description, eventDate, location, price, payment_type, event_type, maxPlaces) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO events (name, description, event_date, location, budget, status, max_places, organizer_id, payment_type, event_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = getConn().prepareStatement(sql)) {
             ps.setString(1, e.getName());
@@ -55,9 +55,11 @@ public class EventService implements ICrud<Event> {
             ps.setTimestamp(3, Timestamp.valueOf(e.getEventDate()));
             ps.setString(4, e.getLocation());
             ps.setDouble(5, e.getPrice());
-            ps.setString(6, e.getPaymentType());
-            ps.setString(7, e.getEventType());
-            ps.setInt(8, e.getMaxPlaces());
+            ps.setString(6, e.getStatus() != null ? e.getStatus() : "PLANNED");
+            ps.setInt(7, e.getMaxPlaces());
+            ps.setNull(8, java.sql.Types.INTEGER);
+            ps.setString(9, e.getPaymentType() != null ? e.getPaymentType() : "CASH");
+            ps.setString(10, e.getEventType() != null ? e.getEventType() : "FREE");
             ps.executeUpdate();
         }
         System.out.println("✅ Event added!");
@@ -82,7 +84,8 @@ public class EventService implements ICrud<Event> {
         List<Event> list = new ArrayList<>();
 
         String sql = """
-                SELECT e.id, e.name, e.description, e.eventDate, e.location, e.price, e.payment_type, e.event_type, e.maxPlaces,
+                SELECT e.id, e.name, e.description, e.event_date, e.location, e.budget, e.status, e.max_places,
+                       e.payment_type, e.event_type,
                        COALESCE(rc.cnt, 0) AS registration_count
                 FROM events e
                 LEFT JOIN (
@@ -97,11 +100,13 @@ public class EventService implements ICrud<Event> {
                 e.setName(rs.getString("name"));
                 e.setDescription(rs.getString("description"));
                 e.setLocation(rs.getString("location"));
-                e.setPrice(rs.getDouble("price"));
-                e.setEventType(rs.getString("event_type"));
-                e.setEventDate(rs.getTimestamp("eventDate").toLocalDateTime());
+                e.setPrice(rs.getDouble("budget"));
+                e.setStatus(rs.getString("status"));
+                Timestamp ts = rs.getTimestamp("event_date");
+                if (ts != null) e.setEventDate(ts.toLocalDateTime());
+                e.setMaxPlaces(rs.getInt("max_places"));
                 e.setPaymentType(rs.getString("payment_type"));
-                e.setMaxPlaces(rs.getInt("maxPlaces"));
+                e.setEventType(rs.getString("event_type"));
                 e.setCurrentParticipants(rs.getInt("registration_count"));
                 list.add(e);
             }
@@ -112,17 +117,18 @@ public class EventService implements ICrud<Event> {
 
     @Override
     public void modifier(Event e) throws SQLException {
-        String sql = "UPDATE events SET name=?, description=?, eventDate=?, location=?, price=?, payment_type=?, event_type=?, maxPlaces=? WHERE id=?";
+        String sql = "UPDATE events SET name=?, description=?, event_date=?, location=?, budget=?, status=?, max_places=?, payment_type=?, event_type=? WHERE id=?";
         try (PreparedStatement ps = getConn().prepareStatement(sql)) {
             ps.setString(1, e.getName());
             ps.setString(2, e.getDescription());
             ps.setTimestamp(3, Timestamp.valueOf(e.getEventDate()));
             ps.setString(4, e.getLocation());
             ps.setDouble(5, e.getPrice());
-            ps.setString(6, e.getPaymentType());
-            ps.setString(7, e.getEventType());
-            ps.setInt(8, e.getMaxPlaces());
-            ps.setInt(9, e.getId());
+            ps.setString(6, e.getStatus() != null ? e.getStatus() : "PLANNED");
+            ps.setInt(7, e.getMaxPlaces());
+            ps.setString(8, e.getPaymentType());
+            ps.setString(9, e.getEventType());
+            ps.setInt(10, e.getId());
             ps.executeUpdate();
         }
         System.out.println("✅ Event modified!");
@@ -130,7 +136,7 @@ public class EventService implements ICrud<Event> {
 
     public Event trouverParId(int id) throws SQLException {
         String sql = """
-                SELECT id, name, description, eventDate, location, price, payment_type, event_type, maxPlaces
+                SELECT id, name, description, event_date, location, budget, status, max_places, payment_type, event_type
                 FROM events
                 WHERE id = ?
                 """;
@@ -142,15 +148,16 @@ public class EventService implements ICrud<Event> {
                     e.setId(rs.getInt("id"));
                     e.setName(rs.getString("name"));
                     e.setDescription(rs.getString("description"));
-                    Timestamp ts = rs.getTimestamp("eventDate");
+                    Timestamp ts = rs.getTimestamp("event_date");
                     if (ts != null) {
                         e.setEventDate(ts.toLocalDateTime());
                     }
                     e.setLocation(rs.getString("location"));
-                    e.setPrice(rs.getDouble("price"));
+                    e.setPrice(rs.getDouble("budget"));
+                    e.setStatus(rs.getString("status"));
+                    e.setMaxPlaces(rs.getInt("max_places"));
                     e.setPaymentType(rs.getString("payment_type"));
                     e.setEventType(rs.getString("event_type"));
-                    e.setMaxPlaces(rs.getInt("maxPlaces"));
                     return e;
                 }
             }

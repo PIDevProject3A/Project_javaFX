@@ -124,8 +124,19 @@ public class WasteCollectionDAO {
         Timestamp uat = rs.getTimestamp("updated_at");
         if (uat != null) w.setUpdatedAt(uat.toLocalDateTime());
 
-        w.setUnit(rs.getString("unit"));
-        w.setImagePath(rs.getString("image_path"));
+        // Safe check for columns that might be missing in Symfony schema
+        try {
+            w.setUnit(rs.getString("unit"));
+        } catch (SQLException ignored) {
+            w.setUnit("kg");
+        }
+        
+        try {
+            w.setImagePath(rs.getString("image_path"));
+        } catch (SQLException ignored) {
+            w.setImagePath(null);
+        }
+        
         return w;
     }
 }

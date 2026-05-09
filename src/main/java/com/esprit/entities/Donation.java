@@ -13,6 +13,10 @@ public class Donation {
     private String notes;
     private Integer treeCount;
 
+    // Symfony-aligned fields
+    private Integer userId;
+    private String transactionStatus;
+
     public Donation(int id, String donorName, String donationType, double amount, String paymentMethod,
                     LocalDate donationDate, String status, String notes, Integer treeCount) {
         this.id = id;
@@ -96,5 +100,21 @@ public class Donation {
 
     public void setTreeCount(Integer treeCount) {
         this.treeCount = treeCount;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public String getTransactionStatus() {
+        return transactionStatus;
+    }
+
+    public void setTransactionStatus(String transactionStatus) {
+        this.transactionStatus = transactionStatus;
     }
 }

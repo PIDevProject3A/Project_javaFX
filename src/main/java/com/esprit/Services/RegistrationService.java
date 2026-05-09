@@ -41,7 +41,10 @@ public class RegistrationService implements ICrud<Registration> {
                 "ALTER TABLE registrations ADD COLUMN email VARCHAR(180) NULL",
                 "ALTER TABLE registrations ADD COLUMN registration_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP",
                 "ALTER TABLE registrations ADD COLUMN checked_in TINYINT(1) NOT NULL DEFAULT 0",
-                "ALTER TABLE registrations ADD COLUMN check_in_time DATETIME NULL"
+                "ALTER TABLE registrations ADD COLUMN check_in_time DATETIME NULL",
+                "ALTER TABLE registrations ADD COLUMN status VARCHAR(50) DEFAULT 'REGISTERED'",
+                "ALTER TABLE registrations ADD COLUMN is_paid TINYINT(1) NOT NULL DEFAULT 0",
+                "ALTER TABLE registrations ADD COLUMN budget DOUBLE DEFAULT 0"
         };
         for (String sql : ddl) {
             try (Statement st = getConn().createStatement()) {
@@ -525,12 +528,12 @@ public class RegistrationService implements ICrud<Registration> {
 
     // ========================= VÉRIFIER SI PEUT S'INSCRIRE (PLACES DISPOS) =========================
     public boolean peutSInscrire(int eventId) throws SQLException {
-        String sql = "SELECT maxPlaces FROM events WHERE id = ?";
+        String sql = "SELECT max_places FROM events WHERE id = ?";
         try (PreparedStatement ps = getConn().prepareStatement(sql)) {
             ps.setInt(1, eventId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    int maxPlaces = rs.getInt("maxPlaces");
+                    int maxPlaces = rs.getInt("max_places");
                     if (maxPlaces <= 0) return true; // Unlimited places
 
                     String isPaidCol = schema().isPaidColumn();
@@ -856,10 +859,10 @@ public class RegistrationService implements ICrud<Registration> {
         LocalDateTime end = start.plusDays(1);
 
         StringBuilder sql = new StringBuilder("""
-                SELECT DISTINCT e.name, e.eventDate
+                SELECT DISTINCT e.name, e.event_date
                 FROM registrations r
                 INNER JOIN events e ON e.id = r.event_id
-                WHERE e.eventDate >= ? AND e.eventDate < ?
+                WHERE e.event_date >= ? AND e.event_date < ?
                 """);
 
         List<Object> params = new ArrayList<>();
@@ -876,7 +879,7 @@ public class RegistrationService implements ICrud<Registration> {
             // Old data may have NULL status.
             sql.append(" AND (r.status IN ('REGISTERED', 'PAID', 'PENDING_PAYMENT') OR r.status IS NULL) ");
         }
-        sql.append(" ORDER BY e.eventDate ASC ");
+        sql.append(" ORDER BY e.event_date ASC ");
 
         List<String> out = new ArrayList<>();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -892,7 +895,7 @@ public class RegistrationService implements ICrud<Registration> {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     String name = rs.getString("name");
-                    Timestamp ts = rs.getTimestamp("eventDate");
+                    Timestamp ts = rs.getTimestamp("event_date");
                     if (name == null || name.isBlank() || ts == null) {
                         continue;
                     }

@@ -273,6 +273,11 @@ public class DonationController {
             treeCount
         );
 
+        // Aligned fields mapping
+        donation.setUserId(1); // Placeholder: Default to admin/system user
+        donation.setTransactionStatus(mapUiStatusToTransactionStatus(statusCombo.getValue()));
+        donation.setDonationType(mapUiTypeToDonationType(donationType));
+
         try {
             Donation inserted = donationDao.insert(donation);
             donations.add(0, inserted);
@@ -311,6 +316,9 @@ public class DonationController {
         selected.setStatus(statusCombo.getValue());
         selected.setNotes(notesArea.getText().trim());
         selected.setTreeCount(treeCount);
+
+        selected.setTransactionStatus(mapUiStatusToTransactionStatus(statusCombo.getValue()));
+        selected.setDonationType(mapUiTypeToDonationType(donationType));
 
         try {
             donationDao.update(selected);
@@ -537,6 +545,22 @@ public class DonationController {
     }
 
     private record DonorLeaderboardEntry(String donorName, double totalAmount, int donationCount) {
+    }
+
+    private String mapUiStatusToTransactionStatus(String uiStatus) {
+        if (uiStatus == null) return "Pending";
+        return switch (uiStatus) {
+            case "Confirmed", "Allocated" -> "Completed";
+            default -> "Pending";
+        };
+    }
+
+    private String mapUiTypeToDonationType(String uiType) {
+        if (uiType == null) return "Money";
+        return switch (uiType) {
+            case TYPE_GOODS, TYPE_TREE_SPONSORSHIP -> "Goods";
+            default -> "Money";
+        };
     }
 
     private record ValidationResult(boolean valid, String message) {

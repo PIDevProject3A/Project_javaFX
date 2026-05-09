@@ -15,27 +15,24 @@ import com.esprit.utils.MyDataBase;
 
 public class DonationDao {
     private static final String SELECT_ALL_SQL = """
-            SELECT id, donor_name, donation_type, amount, payment_method, donation_date, status, notes, tree_count
+            SELECT id, user_id, amount, donation_type, donation_date, transaction_status
             FROM donations
             ORDER BY donation_date DESC, id DESC
             """;
 
     private static final String INSERT_SQL = """
             INSERT INTO donations (
-                donor_name, donation_type, amount, payment_method, donation_date, status, notes, tree_count
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                user_id, amount, donation_type, donation_date, transaction_status
+            ) VALUES (?, ?, ?, ?, ?)
             """;
 
     private static final String UPDATE_SQL = """
             UPDATE donations
-            SET donor_name = ?,
-                donation_type = ?,
+            SET user_id = ?,
                 amount = ?,
-                payment_method = ?,
+                donation_type = ?,
                 donation_date = ?,
-                status = ?,
-                notes = ?,
-                tree_count = ?
+                transaction_status = ?
             WHERE id = ?
             """;
 
@@ -81,7 +78,7 @@ public class DonationDao {
              PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)) {
 
             fillStatement(statement, donation);
-            statement.setInt(9, donation.getId());
+            statement.setInt(6, donation.getId());
             statement.executeUpdate();
         }
     }
@@ -99,17 +96,20 @@ public class DonationDao {
     }
 
     private Donation mapRow(ResultSet rs) throws SQLException {
-        return new Donation(
+        Donation d = new Donation(
             rs.getInt("id"),
-            rs.getString("donor_name"),
+            "User #" + rs.getInt("user_id"), // Placeholder for donor name
             rs.getString("donation_type"),
             rs.getDouble("amount"),
-            rs.getString("payment_method"),
-            rs.getDate("donation_date").toLocalDate(),
-            rs.getString("status"),
-            rs.getString("notes"),
-            toNullableInteger(rs, "tree_count")
+            "N/A", // payment_method (no longer in DB)
+            rs.getTimestamp("donation_date").toLocalDateTime().toLocalDate(),
+            rs.getString("transaction_status"), // Map status to transaction_status
+            null, // notes
+            null  // tree_count
         );
+        d.setUserId(rs.getInt("user_id"));
+        d.setTransactionStatus(rs.getString("transaction_status"));
+        return d;
     }
 
     private Integer toNullableInteger(ResultSet rs, String column) throws SQLException {
@@ -117,19 +117,15 @@ public class DonationDao {
         return rs.wasNull() ? null : value;
     }
 
-    private void fillStatement(PreparedStatement statement, Donation donation) throws SQLException {
-        statement.setString(1, donation.getDonorName());
-        statement.setString(2, donation.getDonationType());
-        statement.setDouble(3, donation.getAmount());
-        statement.setString(4, donation.getPaymentMethod());
-        statement.setDate(5, Date.valueOf(donation.getDonationDate()));
-        statement.setString(6, donation.getStatus());
-        statement.setString(7, donation.getNotes());
-
-        if (donation.getTreeCount() == null) {
-            statement.setNull(8, Types.INTEGER);
+    private void fillStatement(PreparedStatement statement, Donation d) throws SQLException {
+        if (d.getUserId() != null) {
+            statement.setInt(1, d.getUserId());
         } else {
-            statement.setInt(8, donation.getTreeCount());
+            statement.setInt(1, 1); // Default to admin user
         }
+        statement.setDouble(2, d.getAmount());
+        statement.setString(3, d.getDonationType());
+        statement.setTimestamp(4, java.sql.Timestamp.valueOf(d.getDonationDate().atStartOfDay()));
+        statement.setString(5, d.getTransactionStatus() != null ? d.getTransactionStatus() : "Pending");
     }
 }

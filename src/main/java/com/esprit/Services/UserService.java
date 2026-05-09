@@ -513,10 +513,20 @@ public class UserService {
         if (isBlank(storedPassword)) {
             return false;
         }
-        if (!isBcryptHash(storedPassword)) {
+        
+        // Handle Symfony/PHP interoperability: replace $2y$ with $2a$
+        // Both use the same algorithm, but Java's jBCrypt library expects $2a$
+        String compatHash = storedPassword;
+        if (storedPassword.startsWith("$2y$")) {
+            compatHash = "$2a$" + storedPassword.substring(4);
+        }
+
+        try {
+            return BCrypt.checkpw(plainPassword, compatHash);
+        } catch (IllegalArgumentException e) {
+            // Log or handle invalid hash format
             return false;
         }
-        return BCrypt.checkpw(plainPassword, storedPassword);
     }
 
     private boolean isBcryptHash(String value) {

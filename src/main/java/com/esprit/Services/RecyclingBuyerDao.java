@@ -13,30 +13,28 @@ import com.esprit.utils.MyDataBase;
 
 public class RecyclingBuyerDao {
     private static final String SELECT_ALL_SQL = """
-            SELECT id, buyer_name, recycling_type, address, city, latitude, longitude,
-                   contact_phone, status, notes
+            SELECT id, user_id, buyer_type, gps_location, conditions,
+                   contact_phone, contact_email, website
             FROM recycling_buyers
-            ORDER BY city ASC, buyer_name ASC, id DESC
+            ORDER BY id DESC
             """;
 
     private static final String INSERT_SQL = """
             INSERT INTO recycling_buyers (
-                buyer_name, recycling_type, address, city, latitude, longitude,
-                contact_phone, status, notes
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                user_id, buyer_type, gps_location, conditions,
+                contact_phone, contact_email, website
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
             """;
 
     private static final String UPDATE_SQL = """
             UPDATE recycling_buyers
-            SET buyer_name = ?,
-                recycling_type = ?,
-                address = ?,
-                city = ?,
-                latitude = ?,
-                longitude = ?,
+            SET user_id = ?,
+                buyer_type = ?,
+                gps_location = ?,
+                conditions = ?,
                 contact_phone = ?,
-                status = ?,
-                notes = ?
+                contact_email = ?,
+                website = ?
             WHERE id = ?
             """;
 
@@ -82,7 +80,7 @@ public class RecyclingBuyerDao {
              PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)) {
 
             fillStatement(statement, buyer);
-            statement.setInt(10, buyer.getId());
+            statement.setInt(8, buyer.getId());
             statement.executeUpdate();
         }
     }
@@ -100,29 +98,37 @@ public class RecyclingBuyerDao {
     }
 
     private RecyclingBuyer mapRow(ResultSet rs) throws SQLException {
-        return new RecyclingBuyer(
+        RecyclingBuyer b = new RecyclingBuyer(
             rs.getInt("id"),
-            rs.getString("buyer_name"),
-            rs.getString("recycling_type"),
-            rs.getString("address"),
-            rs.getString("city"),
-            rs.getDouble("latitude"),
-            rs.getDouble("longitude"),
+            "Buyer #" + rs.getInt("id"), // Default name as it's no longer in DB
+            rs.getString("buyer_type"),
+            "See GPS", // Address placeholder
+            "Unknown", // City placeholder
+            0, 0, // Lat/Long placeholders (will be parsed from gps_location)
             rs.getString("contact_phone"),
-            rs.getString("status"),
-            rs.getString("notes")
+            "Active", // Status placeholder
+            null // Notes
         );
+        b.setUserId(rs.getInt("user_id"));
+        b.setBuyerType(rs.getString("buyer_type"));
+        b.setGpsLocation(rs.getString("gps_location"));
+        b.setConditions(rs.getString("conditions"));
+        b.setContactEmail(rs.getString("contact_email"));
+        b.setWebsite(rs.getString("website"));
+        return b;
     }
 
-    private void fillStatement(PreparedStatement statement, RecyclingBuyer buyer) throws SQLException {
-        statement.setString(1, buyer.getBuyerName());
-        statement.setString(2, buyer.getRecyclingType());
-        statement.setString(3, buyer.getAddress());
-        statement.setString(4, buyer.getCity());
-        statement.setDouble(5, buyer.getLatitude());
-        statement.setDouble(6, buyer.getLongitude());
-        statement.setString(7, buyer.getContactPhone());
-        statement.setString(8, buyer.getStatus());
-        statement.setString(9, buyer.getNotes());
+    private void fillStatement(PreparedStatement statement, RecyclingBuyer b) throws SQLException {
+        if (b.getUserId() != null) {
+            statement.setInt(1, b.getUserId());
+        } else {
+            statement.setNull(1, java.sql.Types.INTEGER);
+        }
+        statement.setString(2, b.getBuyerType());
+        statement.setString(3, b.getGpsLocation());
+        statement.setString(4, b.getConditions());
+        statement.setString(5, b.getContactPhone());
+        statement.setString(6, b.getContactEmail());
+        statement.setString(7, b.getWebsite());
     }
 }

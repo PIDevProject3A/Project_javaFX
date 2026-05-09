@@ -293,6 +293,11 @@ public class TransactionController {
             notesArea.getText().trim()
         );
 
+        // Aligned fields mapping
+        transaction.setSourceUserId(1); // Placeholder: Default to admin/system user
+        transaction.setTargetUserId(1); // Placeholder
+        transaction.setPaymentStatus(mapUiStatusToPaymentStatus(statusCombo.getValue()));
+
         try {
             EcoTransaction inserted = transactionDao.insert(transaction);
             transactions.add(0, inserted);
@@ -328,6 +333,8 @@ public class TransactionController {
         selected.setTransactionDate(transactionDatePicker.getValue());
         selected.setStatus(statusCombo.getValue());
         selected.setNotes(notesArea.getText().trim());
+
+        selected.setPaymentStatus(mapUiStatusToPaymentStatus(statusCombo.getValue()));
 
         try {
             transactionDao.update(selected);
@@ -587,6 +594,15 @@ public class TransactionController {
             .filter(v -> v != null)
             .mapToInt(Integer::intValue)
             .sum();
+    }
+
+    private String mapUiStatusToPaymentStatus(String uiStatus) {
+        if (uiStatus == null) return "pending";
+        return switch (uiStatus) {
+            case "Completed" -> "completed";
+            case "Cancelled" -> "failed";
+            default -> "pending";
+        };
     }
 
     private record ValidationResult(boolean valid, String message) {

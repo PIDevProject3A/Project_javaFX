@@ -6,11 +6,17 @@ public class RecyclingBuyer {
     private String recyclingType;
     private String address;
     private String city;
-    private double latitude;
-    private double longitude;
+    private String gpsLocation; // Format: "lat,lng"
     private String contactPhone;
     private String status;
     private String notes;
+
+    // Symfony-aligned fields
+    private Integer userId;
+    private String buyerType;
+    private String conditions;
+    private String contactEmail;
+    private String website;
 
     public RecyclingBuyer(int id, String buyerName, String recyclingType, String address, String city,
                           double latitude, double longitude, String contactPhone, String status, String notes) {
@@ -66,43 +72,69 @@ public class RecyclingBuyer {
         this.city = city;
     }
 
-    public double getLatitude() {
-        return latitude;
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
+    public String getGpsLocation() {
+        return gpsLocation;
+    }
+
+    public void setGpsLocation(String gpsLocation) {
+        this.gpsLocation = gpsLocation;
+    }
+
+    public double getLatitude() {
+        if (gpsLocation == null || !gpsLocation.contains(",")) return 0;
+        try { return Double.parseDouble(gpsLocation.split(",")[0]); } catch (Exception e) { return 0; }
     }
 
     public double getLongitude() {
-        return longitude;
+        if (gpsLocation == null || !gpsLocation.contains(",")) return 0;
+        try { return Double.parseDouble(gpsLocation.split(",")[1]); } catch (Exception e) { return 0; }
     }
 
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
+    public void setCoordinates(double lat, double lng) {
+        this.gpsLocation = String.format(java.util.Locale.US, "%.6f,%.6f", lat, lng);
     }
 
-    public String getContactPhone() {
-        return contactPhone;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setContactPhone(String contactPhone) {
-        this.contactPhone = contactPhone;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
-    public String getStatus() {
-        return status;
+    public String getBuyerType() {
+        return buyerType;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setBuyerType(String buyerType) {
+        this.buyerType = buyerType;
     }
 
-    public String getNotes() {
-        return notes;
+    public String getConditions() {
+        return conditions;
     }
 
-    public void setNotes(String notes) {
-        this.notes = notes;
+    public void setConditions(String conditions) {
+        this.conditions = conditions;
+    }
+
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public void setContactEmail(String contactEmail) {
+        this.contactEmail = contactEmail;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
     }
 }

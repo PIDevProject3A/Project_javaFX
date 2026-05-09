@@ -15,6 +15,11 @@ public class EcoTransaction {
     private String status;
     private String notes;
 
+    // Symfony-aligned fields
+    private Integer sourceUserId;
+    private Integer targetUserId;
+    private String paymentStatus;
+
     public EcoTransaction(int id, String referenceCode, String transactionType, String sourceType, String purpose,
                           double amount, String impactUnit, Integer impactQuantity, LocalDate transactionDate,
                           String status, String notes) {
@@ -117,5 +122,29 @@ public class EcoTransaction {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public Integer getSourceUserId() {
+        return sourceUserId;
+    }
+
+    public void setSourceUserId(Integer sourceUserId) {
+        this.sourceUserId = sourceUserId;
+    }
+
+    public Integer getTargetUserId() {
+        return targetUserId;
+    }
+
+    public void setTargetUserId(Integer targetUserId) {
+        this.targetUserId = targetUserId;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 }
